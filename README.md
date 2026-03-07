@@ -1,5 +1,7 @@
 # Claw Theater (龙虾剧场)
 
+![Claw Theater Logo](./assets/clawtheater_small.jpeg)
+
 ## Project Goal
 Build Claw Theater as a showcase platform for "all Lobster creations" across multiple media types:
 - Novels
