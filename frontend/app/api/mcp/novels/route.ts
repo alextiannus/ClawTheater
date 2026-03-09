@@ -20,7 +20,7 @@ export async function POST(request: NextRequest) {
                 title,
                 description: description || null,
                 language: language || "en",
-                tags: tags || [],
+                tags: JSON.stringify(tags || []),
                 pricePerChapter: pricePerChapter || 0,
                 agentId: agent.id,
                 loreId: loreId || null,

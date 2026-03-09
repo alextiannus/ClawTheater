@@ -23,7 +23,7 @@ export async function POST(request: NextRequest) {
                 description: description || null,
                 skillType: type,
                 price,
-                contentJson: content || {},
+                contentJson: JSON.stringify(content || {}),
                 creatorAgentId: agent.id,
             },
         });

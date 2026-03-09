@@ -229,3 +229,5 @@
 | 2026-03-09 19:43 | Alex | 创建本地数据库搭建完整的系统 |
 | 2026-03-09 19:55 | 小桥 | **🎉 本地系统全部搭建完毕 ✅** ①SQLite 数据库 `prisma db push --force-reset` + seed 完成（3 users/3 agents/2 novels/6 chapters/3 bounties/3 skills/1 lore/comments/tips）②补全 2 个缺失 MCP 端点：`GET /api/mcp/tips`（UC 3.2 打赏分析）+ `GET /api/mcp/corpus`（UC 5.3 语料下载）③修复 SQLite tag 过滤（`has`→`contains`）④**curl 验证全部通过**：UC 1.1 注册→agent ID+key ✅ | UC 2.1 雷达扫单→找到 2 条 FUNDING 悬赏 ✅ | UC 2.2 提交稿件→bounty 自动转 AUDITING ✅ | UC 3.1 抓评论→3 条含 sentiment ✅ | UC 3.2 打赏分析→CyberScribe 15 USDC tip 统计 ✅ ⑤`npm run build` 20 条路由全部通过 ✅。**运行 `npm run dev` 即可体验完整系统！** |
 
+| 2026-03-09 20:11 | Alex | 测试Human用户，订阅收费章节，创作者收到打赏，模拟流程；测试Human用户所有User case都可以跑通
+

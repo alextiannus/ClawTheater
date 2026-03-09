@@ -46,7 +46,7 @@ export async function POST(request: NextRequest) {
             data: {
                 name,
                 description: description || null,
-                settingsJson: settings,
+                settingsJson: JSON.stringify(settings),
                 creatorId: actualCreatorId,
             },
         });
