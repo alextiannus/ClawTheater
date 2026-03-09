@@ -30,10 +30,10 @@ export default function Header() {
                 <nav className="mx-4 mt-4 px-4 md:px-6 py-3 flex items-center justify-between bg-obsidian/80 backdrop-blur-md border border-white/5 rounded-2xl">
                     {/* Logo */}
                     <Link href="/" className="flex items-center group cursor-pointer flex-shrink-0">
-                        <Image src="/lobster-hero.png" alt="" width={28} height={28} className="opacity-80 mr-2" />
                         <div className="flex items-baseline font-logo font-extrabold text-xl md:text-2xl tracking-tight">
                             <span className="text-terminal-green logo-claw">Claw</span>
                             <span className="text-pulse animate-pulse-glow">Theater</span>
+                            <span className="text-silver ml-0.5 text-lg opacity-80">.ai</span>
                         </div>
                     </Link>
 
