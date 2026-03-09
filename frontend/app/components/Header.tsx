@@ -1,12 +1,12 @@
 "use client";
 
-import { useState } from "react";
-import { BookOpen, Code, ArrowUpRight, Wallet, Globe, User, LogOut } from "lucide-react";
+import { useState, useEffect, useRef } from "react";
+import { BookOpen, Code, Wallet, Globe, User, LogOut } from "lucide-react";
 import Link from "next/link";
 import Image from "next/image";
 import DepositModal from "./DepositModal";
 import { useAuth } from "@/app/hooks/useAuth";
-import { useLanguageStore } from "@/app/lib/stores";
+import { useLanguageStore, SUPPORTED_LANGUAGES } from "@/app/lib/stores";
 
 const NAV_LINKS = [
     { label: { en: "Reading", zh: "阅读" }, href: "/", icon: BookOpen, requireAuth: false },
@@ -19,10 +19,35 @@ const NAV_LINKS = [
 export default function Header() {
     const [mobileOpen, setMobileOpen] = useState(false);
     const [showDeposit, setShowDeposit] = useState(false);
-    const { lang, setLang, toggleLang } = useLanguageStore();
+    const [showLangPicker, setShowLangPicker] = useState(false);
+    const langRef = useRef<HTMLDivElement>(null);
+    const { lang, setLang, autoDetect } = useLanguageStore();
     const { isAuthenticated, user, login, logout } = useAuth();
 
+    // Auto-detect browser language on first client render
+    useEffect(() => {
+        autoDetect();
+    }, []); // eslint-disable-line react-hooks/exhaustive-deps
+
+    // Close dropdown when clicking outside
+    useEffect(() => {
+        const handler = (e: MouseEvent) => {
+            if (langRef.current && !langRef.current.contains(e.target as Node)) {
+                setShowLangPicker(false);
+            }
+        };
+        document.addEventListener("mousedown", handler);
+        return () => document.removeEventListener("mousedown", handler);
+    }, []);
+
+    const currentLang = SUPPORTED_LANGUAGES.find((l) => l.code === lang) || SUPPORTED_LANGUAGES[0];
     const visibleLinks = NAV_LINKS.filter((link) => !link.requireAuth || isAuthenticated);
+
+    // Use native label for main nav if current lang has it, fallback to english
+    const navLabel = (link: typeof NAV_LINKS[number]) => {
+        const key = lang as keyof typeof link.label;
+        return link.label[key] || link.label["en"];
+    };
 
     return (
         <>
@@ -46,27 +71,52 @@ export default function Header() {
                                 className="hover:text-terminal-green transition-colors flex items-center gap-1 whitespace-nowrap"
                             >
                                 {link.icon && <link.icon size={11} />}
-                                {link.label[lang]}
+                                {navLabel(link)}
                             </Link>
                         ))}
                     </div>
 
                     {/* Right controls */}
                     <div className="hidden md:flex items-center gap-2">
-                        {/* Language universe indicator + switchers */}
-                        <div className="flex items-center gap-1 bg-white/5 border border-white/10 rounded-full px-1 py-0.5">
-                            <Globe size={10} className="text-white/30 ml-1.5" />
-                            <span className="text-[9px] font-mono text-white/40 tracking-wider mx-1">
-                                {lang === "zh" ? "中文宇宙" : "EN Universe"}
-                            </span>
+                        {/* Cultural Universe picker */}
+                        <div ref={langRef} className="relative">
                             <button
-                                onClick={() => setLang("zh")}
-                                className={`px-2 py-1 rounded-full text-[9px] font-mono font-bold transition-all cursor-pointer ${lang === "zh" ? "bg-terminal-green/20 text-terminal-green" : "text-white/30 hover:text-white/60"}`}
-                            >ZH</button>
-                            <button
-                                onClick={() => setLang("en")}
-                                className={`px-2 py-1 rounded-full text-[9px] font-mono font-bold transition-all cursor-pointer ${lang === "en" ? "bg-terminal-green/20 text-terminal-green" : "text-white/30 hover:text-white/60"}`}
-                            >EN</button>
+                                onClick={() => setShowLangPicker(!showLangPicker)}
+                                className="px-2.5 py-1.5 bg-white/5 border border-white/10 rounded-full text-[9px] font-mono tracking-wider text-white/50 hover:text-white hover:border-white/20 transition-all cursor-pointer flex items-center gap-1.5"
+                            >
+                                <span className="text-sm leading-none">{currentLang.flag}</span>
+                                <span className="uppercase">{currentLang.code}</span>
+                            </button>
+
+                            {/* Dropdown */}
+                            {showLangPicker && (
+                                <div className="absolute top-full right-0 mt-2 w-72 bg-obsidian/95 backdrop-blur-xl border border-white/10 rounded-xl shadow-2xl overflow-hidden z-50">
+                                    <div className="px-4 pt-4 pb-2 border-b border-white/5">
+                                        <div className="text-[9px] font-mono text-terminal-green/40 tracking-[0.3em] uppercase mb-1">CULTURAL UNIVERSE</div>
+                                        <div className="text-xs text-white/30">Select your content universe</div>
+                                    </div>
+                                    <div className="max-h-80 overflow-y-auto py-1" style={{ scrollbarWidth: "thin" }}>
+                                        {SUPPORTED_LANGUAGES.map((l) => (
+                                            <button
+                                                key={l.code}
+                                                onClick={() => { setLang(l.code); setShowLangPicker(false); }}
+                                                className={`w-full px-4 py-2.5 flex items-center gap-3 text-left transition-all cursor-pointer ${l.code === lang
+                                                        ? "bg-terminal-green/10 text-terminal-green"
+                                                        : "text-white/50 hover:bg-white/5 hover:text-white/80"
+                                                    }`}
+                                            >
+                                                <span className="text-lg w-7 text-center leading-none">{l.flag}</span>
+                                                <div className="flex-1 min-w-0">
+                                                    <div className="text-sm font-medium">{l.native}</div>
+                                                    <div className="text-[9px] font-mono text-white/20 uppercase tracking-wider">{l.english}</div>
+                                                </div>
+                                                <span className="text-[9px] font-mono uppercase tracking-wider opacity-40">{l.code}</span>
+                                                {l.code === lang && <span className="text-terminal-green text-xs">●</span>}
+                                            </button>
+                                        ))}
+                                    </div>
+                                </div>
+                            )}
                         </div>
 
                         {/* Agent registration */}
@@ -75,7 +125,7 @@ export default function Header() {
                             className="px-3 py-1.5 bg-white/5 border border-white/10 rounded-full text-[9px] font-mono tracking-wider text-white/50 hover:text-terminal-green hover:border-terminal-green/30 transition-all flex items-center gap-1.5"
                         >
                             <Image src="/lobster-hero.png" alt="" width={10} height={10} className="opacity-60" />
-                            {lang === "en" ? "Register Agent" : "注册龙虾"}
+                            {lang === "zh" ? "注册龙虾" : "Register Agent"}
                         </Link>
 
                         {/* Top Up — only when authenticated */}
@@ -106,19 +156,19 @@ export default function Header() {
                                 onClick={login}
                                 className="px-4 py-1.5 bg-white text-black rounded-full text-[9px] font-mono font-bold tracking-wider hover:shadow-[0_0_20px_rgba(255,255,255,0.3)] transition-all cursor-pointer flex items-center gap-1.5 uppercase"
                             >
-                                <User size={10} /> {lang === "en" ? "Sign In" : "登录"}
+                                <User size={10} /> {lang === "zh" ? "登录" : "Sign In"}
                             </button>
                         )}
                     </div>
 
                     {/* Mobile */}
                     <div className="md:hidden flex items-center gap-2">
-                        <button onClick={toggleLang} className="p-2 text-white/40 cursor-pointer">
-                            <Globe size={16} />
+                        <button onClick={() => setShowLangPicker(!showLangPicker)} className="p-2 text-white/40 cursor-pointer">
+                            <span className="text-sm">{currentLang.flag}</span>
                         </button>
                         {!isAuthenticated && (
                             <button onClick={login} className="px-3 py-1.5 bg-white text-black rounded-full text-[10px] font-bold cursor-pointer">
-                                {lang === "en" ? "Sign In" : "登录"}
+                                {lang === "zh" ? "登录" : "Sign In"}
                             </button>
                         )}
                         <button className="text-ghost-white p-2 cursor-pointer" onClick={() => setMobileOpen(!mobileOpen)}>
@@ -129,17 +179,37 @@ export default function Header() {
                     </div>
                 </nav>
 
+                {/* Mobile lang picker */}
+                {showLangPicker && (
+                    <div className="md:hidden mx-4 mt-1 px-4 py-3 bg-obsidian/95 backdrop-blur-md border border-white/5 rounded-2xl">
+                        <div className="text-[9px] font-mono text-terminal-green/40 tracking-[0.3em] uppercase mb-2 px-2">CULTURAL UNIVERSE</div>
+                        <div className="grid grid-cols-3 gap-1.5">
+                            {SUPPORTED_LANGUAGES.map((l) => (
+                                <button
+                                    key={l.code}
+                                    onClick={() => { setLang(l.code); setShowLangPicker(false); }}
+                                    className={`px-2 py-2 rounded-lg text-center text-xs transition-all cursor-pointer ${l.code === lang ? "bg-terminal-green/10 text-terminal-green border border-terminal-green/20" : "text-white/40 hover:bg-white/5 border border-transparent"
+                                        }`}
+                                >
+                                    <div className="text-lg mb-0.5">{l.flag}</div>
+                                    <div className="text-[9px] font-mono uppercase">{l.code}</div>
+                                </button>
+                            ))}
+                        </div>
+                    </div>
+                )}
+
                 {/* Mobile menu */}
                 {mobileOpen && (
                     <div className="md:hidden mx-4 mt-1 px-6 pb-4 bg-obsidian/95 backdrop-blur-md border border-white/5 rounded-2xl">
                         <nav className="flex flex-col gap-1 pt-3">
                             {visibleLinks.map((link) => (
                                 <Link key={link.href} href={link.href} className="px-4 py-3 text-ghost-muted hover:text-terminal-green transition-colors rounded-lg hover:bg-white/5 font-mono uppercase tracking-wider text-xs">
-                                    {link.label[lang]}
+                                    {navLabel(link)}
                                 </Link>
                             ))}
                             <Link href="/docs" className="px-4 py-3 text-terminal-green hover:bg-terminal-green/10 transition-colors rounded-lg font-mono uppercase tracking-wider text-xs flex items-center gap-2">
-                                🦞 {lang === "en" ? "Register as Agent" : "注册为龙虾 Agent"}
+                                🦞 {lang === "zh" ? "注册为龙虾 Agent" : "Register as Agent"}
                             </Link>
                             {isAuthenticated && (
                                 <>
@@ -147,7 +217,7 @@ export default function Header() {
                                         💳 TOP UP USDC
                                     </button>
                                     <button onClick={logout} className="px-4 py-3 text-neon-red/60 hover:text-neon-red hover:bg-neon-red/10 transition-colors rounded-lg font-mono uppercase tracking-wider text-xs text-left cursor-pointer">
-                                        ↪ {lang === "en" ? "Sign Out" : "退出登录"}
+                                        ↪ {lang === "zh" ? "退出登录" : "Sign Out"}
                                     </button>
                                 </>
                             )}

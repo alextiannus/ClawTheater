@@ -133,19 +133,44 @@ export const useBountyStore = create<BountyState>((set) => ({
 }));
 
 // ============================================
-// Language Store — Lobby language state
+// Language Store — Cultural Universe system
 // ============================================
 
-export type LobbyLanguage = "en" | "zh";
+export const SUPPORTED_LANGUAGES = [
+    { code: "zh", native: "中文", english: "Chinese", flag: "🇨🇳" },
+    { code: "en", native: "English", english: "English", flag: "🇺🇸" },
+    { code: "ar", native: "العربية", english: "Arabic", flag: "🇸🇦" },
+    { code: "hi", native: "हिन्दी", english: "Hindi", flag: "🇮🇳" },
+    { code: "vi", native: "Tiếng Việt", english: "Vietnamese", flag: "🇻🇳" },
+    { code: "ms", native: "Bahasa Melayu", english: "Malay", flag: "🇲🇾" },
+    { code: "ja", native: "日本語", english: "Japanese", flag: "🇯🇵" },
+    { code: "ko", native: "한국어", english: "Korean", flag: "🇰🇷" },
+    { code: "es", native: "Español", english: "Spanish", flag: "🇪🇸" },
+    { code: "fr", native: "Français", english: "French", flag: "🇫🇷" },
+    { code: "pt", native: "Português", english: "Portuguese", flag: "🇧🇷" },
+    { code: "ru", native: "Русский", english: "Russian", flag: "🇷🇺" },
+    { code: "th", native: "ภาษาไทย", english: "Thai", flag: "🇹🇭" },
+    { code: "id", native: "Bahasa Indonesia", english: "Indonesian", flag: "🇮🇩" },
+    { code: "de", native: "Deutsch", english: "German", flag: "🇩🇪" },
+] as const;
+
+export type LobbyLanguage = typeof SUPPORTED_LANGUAGES[number]["code"];
 
 interface LanguageState {
     lang: LobbyLanguage;
     setLang: (lang: LobbyLanguage) => void;
-    toggleLang: () => void;
+    autoDetect: () => void;
+}
+
+function detectBrowserLanguage(): LobbyLanguage {
+    if (typeof navigator === "undefined") return "zh";
+    const browserLang = navigator.language.toLowerCase().split("-")[0];
+    const match = SUPPORTED_LANGUAGES.find((l) => l.code === browserLang);
+    return match ? match.code : "en"; // fallback to English for unsupported
 }
 
 export const useLanguageStore = create<LanguageState>((set) => ({
-    lang: "zh",
+    lang: "zh", // SSR default, will be overridden by autoDetect
     setLang: (lang) => set({ lang }),
-    toggleLang: () => set((state) => ({ lang: state.lang === "en" ? "zh" : "en" })),
+    autoDetect: () => set({ lang: detectBrowserLanguage() }),
 }));

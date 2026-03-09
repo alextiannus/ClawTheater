@@ -1,11 +1,11 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Header from "@/app/components/Header";
 import Footer from "@/app/components/Footer";
 import Link from "next/link";
 import Image from "next/image";
-import { useLanguageStore } from "@/app/lib/stores";
+import { useLanguageStore, SUPPORTED_LANGUAGES } from "@/app/lib/stores";
 
 /* ═════════════════════════════════════════════════
    DEMO DATA — tagged with lang for lobby filtering
@@ -157,19 +157,29 @@ const T = {
 
 export default function HomePage() {
     const { lang } = useLanguageStore();
-    const t = T[lang];
-    const stats = LIVE_STATS[lang];
+    const tKey = (lang === "zh" || lang === "en") ? lang : "en";
+    const t = T[tKey];
+    const stats = LIVE_STATS[tKey];
 
-    // Filter all content by lobby language
-    const heroSlides = HERO_SLIDES.filter((s) => s.lang === lang);
-    const novels = DEMO_NOVELS.filter((n) => n.lang === lang);
-    const directives = ACTIVE_DIRECTIVES.filter((d) => d.lang === lang);
+    // Filter content by lobby language — fallback to zh+en for unsupported
+    const hasNativeContent = lang === "zh" || lang === "en";
+    const contentLang = hasNativeContent ? lang : "en";
+    const heroSlides = HERO_SLIDES.filter((s) => s.lang === contentLang);
+    const novels = DEMO_NOVELS.filter((n) => n.lang === contentLang);
+    const directives = ACTIVE_DIRECTIVES.filter((d) => d.lang === contentLang);
 
     const [heroIdx, setHeroIdx] = useState(0);
+    const [showFundModal, setShowFundModal] = useState(false);
+    const [fundTarget, setFundTarget] = useState<{ title: string; id: string } | null>(null);
     const slide = heroSlides[heroIdx % heroSlides.length];
+
+    // Reset hero index when language changes
+    useEffect(() => { setHeroIdx(0); }, [lang]);
 
     const prevSlide = () => setHeroIdx((i) => (i - 1 + heroSlides.length) % heroSlides.length);
     const nextSlide = () => setHeroIdx((i) => (i + 1) % heroSlides.length);
+
+    const openFund = (title: string, id: string) => { setFundTarget({ title, id }); setShowFundModal(true); };
 
     const trending = novels.slice(0, 6);
     const newReleases = [...novels].reverse().slice(0, 6);
@@ -265,9 +275,9 @@ export default function HomePage() {
                             <div className="flex items-center gap-4">
                                 {slide?.type === "bounty" ? (
                                     <>
-                                        <Link href={`/bounties/${slide.id}`} className="px-8 py-3.5 rounded-sm bg-terminal-green text-black font-bold text-sm tracking-wider uppercase hover:shadow-[0_0_30px_rgba(5,150,105,0.4)] hover:scale-105 transition-all">
+                                        <button onClick={() => openFund(slide.title, slide.id)} className="px-8 py-3.5 rounded-sm bg-terminal-green text-black font-bold text-sm tracking-wider uppercase hover:shadow-[0_0_30px_rgba(5,150,105,0.4)] hover:scale-105 transition-all cursor-pointer">
                                             {t.fundCta}
-                                        </Link>
+                                        </button>
                                         <Link href={`/read?novelId=${slide.novelId}`} className="px-8 py-3.5 rounded-sm border border-white/20 text-white font-bold text-sm tracking-wider uppercase hover:bg-white/5 hover:scale-105 transition-all">
                                             {t.readPrev}
                                         </Link>
@@ -422,7 +432,38 @@ export default function HomePage() {
                         </div>
                     </div>
                 </section>
+
+                {/* ═══ COMING SOON BANNER for non-ZH/EN languages ═══ */}
+                {!hasNativeContent && (
+                    <section className="py-16 text-center">
+                        <div className="max-w-2xl mx-auto px-6">
+                            <div className="text-5xl mb-4">🌍</div>
+                            <h2 className="text-xl font-bold text-white mb-2">
+                                {SUPPORTED_LANGUAGES.find(l => l.code === lang)?.native} Universe — Coming Soon
+                            </h2>
+                            <p className="text-sm text-white/30 font-mono">
+                                Native content for this language universe is being built by Claw Creators worldwide.
+                                Showing English content as preview.
+                            </p>
+                        </div>
+                    </section>
+                )}
             </main>
+
+            {/* ═══ FUND MODAL ═══ */}
+            {showFundModal && fundTarget && (
+                <div className="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+                    <div className="glass-card p-8 max-w-md w-full">
+                        <div className="flex items-center justify-between mb-6">
+                            <h3 className="text-xl font-bold text-white">⚡ {tKey === "zh" ? "注入算力" : "Fund Bounty"}</h3>
+                            <button onClick={() => setShowFundModal(false)} className="text-white/30 hover:text-white text-xl cursor-pointer">✕</button>
+                        </div>
+                        <p className="text-sm text-white/40 mb-6">{fundTarget.title}</p>
+                        <FundForm onClose={() => setShowFundModal(false)} tKey={tKey} />
+                    </div>
+                </div>
+            )}
+
             <Footer />
         </>
     );
@@ -432,6 +473,73 @@ export default function HomePage() {
 
 type DemoNovel = typeof DEMO_NOVELS[number];
 type Translations = typeof T["en"];
+
+function FundForm({ onClose, tKey }: { onClose: () => void; tKey: "en" | "zh" }) {
+    const [amount, setAmount] = useState(50);
+    const [submitted, setSubmitted] = useState(false);
+
+    const handleSubmit = () => {
+        setSubmitted(true);
+        setTimeout(onClose, 2000);
+    };
+
+    if (submitted) {
+        return (
+            <div className="text-center py-8">
+                <div className="text-4xl mb-4">🎉</div>
+                <div className="text-lg font-bold text-terminal-green mb-2">
+                    {tKey === "zh" ? `成功注入 $${amount} USDC!` : `$${amount} USDC Funded!`}
+                </div>
+                <div className="text-xs text-white/30 font-mono">
+                    {tKey === "zh" ? "交易已提交到链上" : "Transaction submitted onchain"}
+                </div>
+            </div>
+        );
+    }
+
+    return (
+        <div>
+            <div className="mb-6">
+                <div className="flex justify-between text-xs mb-2">
+                    <span className="text-white/30 font-mono">{tKey === "zh" ? "注入金额" : "Fund Amount"}</span>
+                    <span className="text-terminal-green font-mono font-bold">${amount} USDC</span>
+                </div>
+                <input
+                    type="range"
+                    min={10}
+                    max={500}
+                    step={10}
+                    value={amount}
+                    onChange={(e) => setAmount(Number(e.target.value))}
+                    className="w-full accent-terminal-green"
+                />
+                <div className="flex justify-between text-[9px] text-white/20 font-mono mt-1">
+                    <span>$10</span><span>$500</span>
+                </div>
+            </div>
+            <div className="flex gap-2 mb-6">
+                {[10, 50, 100, 200].map((v) => (
+                    <button
+                        key={v}
+                        onClick={() => setAmount(v)}
+                        className={`flex-1 py-2 rounded-lg text-xs font-mono border transition-all cursor-pointer ${amount === v
+                                ? "bg-terminal-green/20 border-terminal-green/30 text-terminal-green"
+                                : "border-white/10 text-white/30 hover:border-white/20"
+                            }`}
+                    >
+                        ${v}
+                    </button>
+                ))}
+            </div>
+            <button
+                onClick={handleSubmit}
+                className="w-full py-3.5 bg-terminal-green text-black font-bold rounded-xl text-sm tracking-wider uppercase hover:shadow-[0_0_30px_rgba(5,150,105,0.4)] transition-all cursor-pointer"
+            >
+                {tKey === "zh" ? `⚡ 注入 $${amount} USDC` : `⚡ Fund $${amount} USDC`}
+            </button>
+        </div>
+    );
+}
 
 function ForkableCard({ novel, t }: { novel: DemoNovel; t: Translations }) {
     return (
