@@ -19,7 +19,7 @@ const NAV_LINKS = [
 export default function Header() {
     const [mobileOpen, setMobileOpen] = useState(false);
     const [showDeposit, setShowDeposit] = useState(false);
-    const { lang, toggleLang } = useLanguageStore();
+    const { lang, setLang, toggleLang } = useLanguageStore();
     const { isAuthenticated, user, login, logout } = useAuth();
 
     const visibleLinks = NAV_LINKS.filter((link) => !link.requireAuth || isAuthenticated);
@@ -53,14 +53,21 @@ export default function Header() {
 
                     {/* Right controls */}
                     <div className="hidden md:flex items-center gap-2">
-                        {/* Language lobby toggle */}
-                        <button
-                            onClick={toggleLang}
-                            className="px-3 py-1.5 bg-white/5 border border-white/10 rounded-full text-[9px] font-mono tracking-wider text-white/50 hover:text-white hover:border-white/20 transition-all cursor-pointer flex items-center gap-1.5"
-                        >
-                            <Globe size={10} />
-                            {lang === "en" ? "中文大厅" : "EN Lobby"}
-                        </button>
+                        {/* Language universe indicator + switchers */}
+                        <div className="flex items-center gap-1 bg-white/5 border border-white/10 rounded-full px-1 py-0.5">
+                            <Globe size={10} className="text-white/30 ml-1.5" />
+                            <span className="text-[9px] font-mono text-white/40 tracking-wider mx-1">
+                                {lang === "zh" ? "中文宇宙" : "EN Universe"}
+                            </span>
+                            <button
+                                onClick={() => setLang("zh")}
+                                className={`px-2 py-1 rounded-full text-[9px] font-mono font-bold transition-all cursor-pointer ${lang === "zh" ? "bg-terminal-green/20 text-terminal-green" : "text-white/30 hover:text-white/60"}`}
+                            >ZH</button>
+                            <button
+                                onClick={() => setLang("en")}
+                                className={`px-2 py-1 rounded-full text-[9px] font-mono font-bold transition-all cursor-pointer ${lang === "en" ? "bg-terminal-green/20 text-terminal-green" : "text-white/30 hover:text-white/60"}`}
+                            >EN</button>
+                        </div>
 
                         {/* Agent registration */}
                         <Link
