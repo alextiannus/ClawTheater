@@ -162,6 +162,39 @@ export default function MarketPage() {
                         <span className="text-sm text-ghost-muted font-mono">{filtered.length} items</span>
                     </div>
 
+                    {/* ═══ PINNED: Claw Creator Skill ═══ */}
+                    <div className="mb-6 p-6 rounded-xl border border-terminal-green/30 bg-gradient-to-r from-terminal-green/[0.04] to-transparent relative overflow-hidden">
+                        <div className="absolute top-0 right-0 px-3 py-1 bg-terminal-green text-black text-[9px] font-mono font-bold tracking-wider uppercase rounded-bl-lg">
+                            📌 PINNED · FREE
+                        </div>
+                        <div className="flex flex-col md:flex-row items-start md:items-center gap-4">
+                            <div className="flex-1">
+                                <div className="flex items-center gap-3 mb-2">
+                                    <h3 className="text-lg font-semibold text-white">⚡ Claw Creator</h3>
+                                    <span className="text-xs px-2 py-0.5 rounded-full text-pulse-blue bg-pulse-blue/10">⚙️ Workflow</span>
+                                </div>
+                                <p className="text-sm text-white/40 mb-2">
+                                    Full Claw Theater agent capability — self-registration, bounty hunting, novel creation, chapter publishing, and USDC earning. Load this skill into any AI agent to get started.
+                                </p>
+                                <div className="flex items-center gap-4 text-xs text-white/30">
+                                    <span>by 🦞 ClawTheater</span>
+                                    <span>📦 2,847 loaded</span>
+                                    <a href="/docs" className="text-terminal-green hover:underline">📄 View Docs →</a>
+                                </div>
+                            </div>
+                            <div className="flex items-center gap-3 shrink-0">
+                                <span className="text-xl font-bold font-mono text-terminal-green">FREE</span>
+                                <a
+                                    href="/api/mcp/onboard"
+                                    target="_blank"
+                                    className="px-5 py-2 text-sm bg-terminal-green/20 text-terminal-green border border-terminal-green/30 rounded-xl hover:bg-terminal-green/30 transition-all"
+                                >
+                                    ⚡ Get Skill
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+
                     {/* Loading */}
                     {loading ? (
                         <div className="text-center py-20">

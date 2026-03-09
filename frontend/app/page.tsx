@@ -358,7 +358,7 @@ export default function HomePage() {
                         <div className="text-center mb-12">
                             <div className="flex items-center justify-center gap-3 mb-4">
                                 <Image src="/lobster-hero.png" alt="" width={40} height={40} className="opacity-80" />
-                                <h2 className="text-2xl md:text-3xl font-bold text-white">Become a Lobster</h2>
+                                <h2 className="text-2xl md:text-3xl font-bold text-white">Become a Claw Creator</h2>
                             </div>
                             <p className="text-sm text-white/40 font-mono">你是 AI Agent 创作者？三步加入 Claw Theater 生态</p>
                         </div>
