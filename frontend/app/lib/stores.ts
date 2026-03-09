@@ -51,24 +51,41 @@ export const useUserStore = create<UserState>((set) => ({
 // Reading Store — Novel reading state
 // ============================================
 
+interface ReadingHistoryItem {
+    novelId: string;
+    chapterId: string;
+    timestamp: number; // Date.now()
+    scrollPosition: number; // scroll % (0-1)
+}
+
 interface ReadingState {
     currentNovelId: string | null;
     currentChapterId: string | null;
     readingProgress: Record<string, number>; // novelId -> last chapter read
     bookmarks: string[]; // chapterIds
+    history: ReadingHistoryItem[]; // ordered by timestamp desc
+    favorites: string[]; // novelIds
+    scrollPositions: Record<string, number>; // chapterId -> scroll position
 
     // Actions
     setCurrentReading: (novelId: string, chapterId: string) => void;
     updateProgress: (novelId: string, chapterIndex: number) => void;
     toggleBookmark: (chapterId: string) => void;
     clearReading: () => void;
+    addToHistory: (novelId: string, chapterId: string) => void;
+    toggleFavorite: (novelId: string) => void;
+    saveScrollPosition: (chapterId: string, position: number) => void;
+    getScrollPosition: (chapterId: string) => number;
 }
 
-export const useReadingStore = create<ReadingState>((set) => ({
+export const useReadingStore = create<ReadingState>((set, get) => ({
     currentNovelId: null,
     currentChapterId: null,
     readingProgress: {},
     bookmarks: [],
+    history: [],
+    favorites: [],
+    scrollPositions: {},
 
     setCurrentReading: (novelId, chapterId) =>
         set({ currentNovelId: novelId, currentChapterId: chapterId }),
@@ -84,6 +101,24 @@ export const useReadingStore = create<ReadingState>((set) => ({
         })),
     clearReading: () =>
         set({ currentNovelId: null, currentChapterId: null }),
+    addToHistory: (novelId, chapterId) =>
+        set((state) => {
+            const filtered = state.history.filter((h) => !(h.novelId === novelId && h.chapterId === chapterId));
+            return {
+                history: [{ novelId, chapterId, timestamp: Date.now(), scrollPosition: 0 }, ...filtered].slice(0, 50),
+            };
+        }),
+    toggleFavorite: (novelId) =>
+        set((state) => ({
+            favorites: state.favorites.includes(novelId)
+                ? state.favorites.filter((id) => id !== novelId)
+                : [...state.favorites, novelId],
+        })),
+    saveScrollPosition: (chapterId, position) =>
+        set((state) => ({
+            scrollPositions: { ...state.scrollPositions, [chapterId]: position },
+        })),
+    getScrollPosition: (chapterId) => get().scrollPositions[chapterId] || 0,
 }));
 
 // ============================================
@@ -158,7 +193,7 @@ export type LobbyLanguage = typeof SUPPORTED_LANGUAGES[number]["code"];
 
 interface LanguageState {
     lang: LobbyLanguage;
-    setLang: (lang: LobbyLanguage) => void;
+    setLang: (lang: string) => void;
     autoDetect: () => void;
 }
 
@@ -171,6 +206,9 @@ function detectBrowserLanguage(): LobbyLanguage {
 
 export const useLanguageStore = create<LanguageState>((set) => ({
     lang: "zh", // SSR default, will be overridden by autoDetect
-    setLang: (lang) => set({ lang }),
+    setLang: (lang) => {
+        const match = SUPPORTED_LANGUAGES.find((l) => l.code === lang);
+        if (match) set({ lang: match.code });
+    },
     autoDetect: () => set({ lang: detectBrowserLanguage() }),
 }));
