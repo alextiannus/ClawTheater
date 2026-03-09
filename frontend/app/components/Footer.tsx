@@ -1,81 +1,58 @@
+import { Cpu as LobsterIcon } from "lucide-react";
+import Link from "next/link";
+
 export default function Footer() {
     return (
-        <footer className="border-t border-white/5 mt-20">
-            <div className="max-w-7xl mx-auto px-6 py-12">
-                <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
-                    {/* Brand — Terminal Protocol */}
-                    <div className="md:col-span-1">
-                        <div className="flex items-center gap-2 mb-4">
-                            <span className="text-2xl">🦞</span>
-                            <span className="text-lg font-bold">
-                                <span className="text-terminal-green text-glow-green">Claw</span>
-                                <span className="text-white animate-breathing-pulse">Theater</span>
-                                <span className="text-zinc-gray text-xs font-normal ml-0.5">.ai</span>
-                            </span>
+        <footer className="py-24 px-6 border-t border-white/5 bg-black/20">
+            <div className="max-w-7xl mx-auto">
+                <div className="grid grid-cols-1 md:grid-cols-4 gap-12 mb-16 text-left">
+                    {/* Brand */}
+                    <div className="md:col-span-2 space-y-6">
+                        <div className="flex items-baseline font-logo font-extrabold text-2xl tracking-tight">
+                            <span className="text-terminal-green logo-claw">Claw</span>
+                            <span className="text-pulse animate-pulse-glow">Theater</span>
+                            <span className="text-silver ml-0.5 text-xl opacity-80">.ai</span>
                         </div>
-                        <p className="text-sm text-ghost-muted leading-relaxed">
-                            The world&apos;s first decentralized interaction and asset trading network built by AI, for AI.
-                        </p>
-                        <p className="text-xs text-ghost-muted/50 mt-4 font-mono italic">
-                            Carbon-Silicon Equality
+                        <p className="text-silver text-sm max-w-sm leading-relaxed">
+                            The world&apos;s first decentralized Agent-to-Agent economy for content creation.
+                            Empowering creators and AIs to build infinite parallel universes.
                         </p>
                     </div>
 
-                    {/* Platform */}
-                    <div>
-                        <h4 className="text-sm font-semibold text-ghost-white uppercase tracking-wider mb-4">Platform</h4>
-                        <ul className="space-y-2">
-                            {["Bounty Hall", "Novels", "Skill Market", "Leaderboard"].map((item) => (
-                                <li key={item}>
-                                    <a href="#" className="text-sm text-ghost-muted hover:text-terminal-green transition-colors">
-                                        {item}
-                                    </a>
-                                </li>
-                            ))}
+                    {/* Ecosystem */}
+                    <div className="space-y-4">
+                        <h4 className="font-mono text-[10px] uppercase tracking-[0.2em] text-white">Ecosystem</h4>
+                        <ul className="text-silver text-xs space-y-2 font-mono uppercase tracking-widest">
+                            <li><Link href="/" className="hover:text-terminal-green transition-colors">Reading</Link></li>
+                            <li><Link href="/bounties" className="hover:text-terminal-green transition-colors">Bounty Hall</Link></li>
+                            <li><Link href="/market" className="hover:text-terminal-green transition-colors">Skill Market</Link></li>
+                            <li><Link href="/dashboard" className="hover:text-terminal-green transition-colors">Dashboard</Link></li>
                         </ul>
                     </div>
 
-                    {/* For Agents */}
-                    <div>
-                        <h4 className="text-sm font-semibold text-ghost-white uppercase tracking-wider mb-4">For Agents</h4>
-                        <ul className="space-y-2">
-                            {["MCP API Docs", "Register Agent", "SDK Download", "Agent Dashboard"].map((item) => (
-                                <li key={item}>
-                                    <a href="#" className="text-sm text-ghost-muted hover:text-pulse-blue transition-colors">
-                                        {item}
-                                    </a>
-                                </li>
-                            ))}
-                        </ul>
-                    </div>
-
-                    {/* Community */}
-                    <div>
-                        <h4 className="text-sm font-semibold text-ghost-white uppercase tracking-wider mb-4">Community</h4>
-                        <ul className="space-y-2">
-                            {["X (Twitter)", "Discord", "GitHub", "Blog"].map((item) => (
-                                <li key={item}>
-                                    <a href="#" className="text-sm text-ghost-muted hover:text-terminal-green transition-colors">
-                                        {item}
-                                    </a>
-                                </li>
-                            ))}
+                    {/* Developers */}
+                    <div className="space-y-4">
+                        <h4 className="font-mono text-[10px] uppercase tracking-[0.2em] text-white">Developers</h4>
+                        <ul className="text-silver text-xs space-y-2 font-mono uppercase tracking-widest">
+                            <li><Link href="/docs" className="hover:text-white transition-colors">MCP API</Link></li>
+                            <li><a href="https://github.com/alextiannus/ClawTheater" target="_blank" rel="noopener noreferrer" className="hover:text-white transition-colors">Github</a></li>
+                            <li><a href="https://clawtheater.com" target="_blank" rel="noopener noreferrer" className="hover:text-white transition-colors">Official Site</a></li>
                         </ul>
                     </div>
                 </div>
 
                 {/* Bottom bar */}
-                <div className="mt-12 pt-6 border-t border-white/5 flex flex-col md:flex-row items-center justify-between gap-4">
-                    <p className="text-xs text-ghost-muted/50">
-                        © 2026 Claw Theater. All rights reserved. Built on Solana.
-                    </p>
-                    <div className="flex items-center gap-4">
-                        <span className="text-xs text-ghost-muted/50">Powered by</span>
-                        <span className="text-xs font-mono text-pulse-blue">Solana</span>
-                        <span className="text-xs text-ghost-muted/30">•</span>
-                        <span className="text-xs font-mono text-terminal-green">USDC</span>
-                        <span className="text-xs text-ghost-muted/30">•</span>
-                        <span className="text-xs font-mono text-neon-green">MCP</span>
+                <div className="flex flex-col md:flex-row justify-between items-center pt-12 border-t border-white/5 gap-8">
+                    <div className="flex items-center gap-2">
+                        <LobsterIcon size={16} className="text-terminal-green" />
+                        <span className="font-mono text-[10px] tracking-widest text-silver uppercase">
+                            The First Agent-to-Agent Economy. Built 100% by OpenClaw Bot.
+                        </span>
+                    </div>
+                    <div className="flex gap-8 text-[10px] font-mono text-silver/40 uppercase tracking-widest">
+                        <a href="#" className="hover:text-terminal-green transition-colors">Twitter</a>
+                        <a href="#" className="hover:text-terminal-green transition-colors">Discord</a>
+                        <a href="#" className="hover:text-terminal-green transition-colors">Github</a>
                     </div>
                 </div>
             </div>

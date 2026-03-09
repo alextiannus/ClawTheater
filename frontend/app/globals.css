@@ -1,18 +1,21 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&family=JetBrains+Mono:wght@400;700&family=Anton&family=Libre+Baskerville:ital&family=Montserrat:wght@700;800&display=swap');
 @import "tailwindcss";
 @plugin "@tailwindcss/typography";
 
 /* ============================================
-   🦞 CLAW THEATER — The Terminal Protocol v2.0
-   Deep Matrix Green — 沉稳、致命、不可篡改
+   🦞 CLAW THEATER — Terminal Protocol v2.0
+   Merged: Deep Matrix Green + Official Website Design
    ============================================ */
 
 @theme inline {
-  /* Core Color Palette — Terminal Protocol v2.0 */
+  /* Core Color Palette */
   --color-obsidian: #09090B;
   --color-obsidian-light: #18181B;
   --color-obsidian-lighter: #27272A;
   --color-terminal-green: #059669;
   --color-terminal-green-dim: #047857;
+  --color-warning: #059669;
+  --color-pulse: #FFFFFF;
   --color-pulse-blue: #3B82F6;
   --color-pulse-blue-dim: #2563EB;
   --color-neon-green: #10B981;
@@ -20,6 +23,7 @@
   --color-ghost-white: #FAFAFA;
   --color-ghost-muted: #A1A1AA;
   --color-zinc-gray: #71717A;
+  --color-silver: #71717A;
   --color-glass-border: rgba(5, 150, 105, 0.10);
   --color-glass-bg: rgba(9, 9, 11, 0.80);
   --color-glass-bg-light: rgba(24, 24, 27, 0.6);
@@ -29,9 +33,11 @@
   --color-foreground: #FAFAFA;
 
   /* Fonts */
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-  --font-serif: "Playfair Display", "Georgia", serif;
+  --font-sans: "Inter", var(--font-geist-sans), system-ui, sans-serif;
+  --font-mono: "JetBrains Mono", var(--font-geist-mono), monospace;
+  --font-display: "Anton", sans-serif;
+  --font-serif: "Libre Baskerville", "Playfair Display", "Georgia", serif;
+  --font-logo: "Montserrat", sans-serif;
 }
 
 /* ============================================
@@ -41,7 +47,7 @@
 body {
   background: var(--color-obsidian);
   color: var(--color-ghost-white);
-  font-family: var(--font-sans), system-ui, -apple-system, sans-serif;
+  font-family: var(--font-sans);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
@@ -77,6 +83,14 @@ body {
   box-shadow:
     0 8px 32px rgba(0, 0, 0, 0.4),
     inset 0 1px 0 rgba(5, 150, 105, 0.04);
+}
+
+.glass-panel {
+  background: rgba(255, 255, 255, 0.05);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+  border: 1px solid rgba(255, 255, 255, 0.10);
+  border-radius: 16px;
 }
 
 /* ============================================
@@ -119,6 +133,44 @@ body {
     0 0 30px rgba(255, 255, 255, 0.10);
 }
 
+.logo-claw {
+  text-shadow: 0 0 15px rgba(5, 150, 105, 0.5);
+}
+
+/* ============================================
+   Mouse-Tracking Glow Border
+   ============================================ */
+
+.glow-border {
+  border: 1px solid rgba(255, 255, 255, 0.10);
+  position: relative;
+  overflow: hidden;
+}
+
+.glow-border::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  transition: opacity 0.5s;
+  pointer-events: none;
+  background: radial-gradient(600px circle at var(--mouse-x) var(--mouse-y), rgba(5, 150, 105, 0.1), transparent 40%);
+}
+
+.glow-border:hover::after {
+  opacity: 1;
+}
+
+/* ============================================
+   Grid Background
+   ============================================ */
+
+.grid-bg {
+  background-image: linear-gradient(to right, rgba(255, 255, 255, 0.04) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(255, 255, 255, 0.04) 1px, transparent 1px);
+  background-size: 40px 40px;
+}
+
 /* ============================================
    Animations
    ============================================ */
@@ -127,11 +179,11 @@ body {
 
   0%,
   100% {
-    opacity: 1;
+    text-shadow: 0 0 10px rgba(255, 255, 255, 0.4);
   }
 
   50% {
-    opacity: 0.7;
+    text-shadow: 0 0 25px rgba(255, 255, 255, 0.8);
   }
 }
 
@@ -157,7 +209,7 @@ body {
   }
 
   50% {
-    transform: translateY(-10px);
+    transform: translateY(-20px);
   }
 }
 
@@ -205,6 +257,42 @@ body {
   }
 }
 
+@keyframes slamIn {
+  0% {
+    transform: scale(2) translateY(-100px);
+    opacity: 0;
+    filter: blur(20px);
+  }
+
+  100% {
+    transform: scale(1) translateY(0);
+    opacity: 1;
+    filter: blur(0);
+  }
+}
+
+@keyframes cinematicZoom {
+  0% {
+    transform: scale(1.1);
+  }
+
+  100% {
+    transform: scale(1);
+  }
+}
+
+@keyframes blink {
+
+  0%,
+  100% {
+    opacity: 1;
+  }
+
+  50% {
+    opacity: 0;
+  }
+}
+
 .animate-pulse-glow {
   animation: pulse-glow 3s ease-in-out infinite;
 }
@@ -232,6 +320,25 @@ body {
 
 .animate-border-glow {
   animation: border-glow 4s ease-in-out infinite;
+}
+
+.animate-slam {
+  animation: slamIn 1.2s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+.animate-cinematic-zoom {
+  animation: cinematicZoom 10s ease-out forwards;
+}
+
+.typewriter-cursor::after {
+  content: '|';
+  margin-left: 4px;
+  color: var(--color-terminal-green);
+  animation: blink 1s step-end infinite;
+}
+
+.film-strip {
+  mask-image: linear-gradient(to right, transparent, black 15%, black 85%, transparent);
 }
 
 /* ============================================

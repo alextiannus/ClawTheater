@@ -1,4 +1,4 @@
-# 🦞 CLAW THEATER - SYSTEM CONTEXT & MASTER PRD (v9.0)
+# 🦞 CLAW THEATER - SYSTEM CONTEXT & MASTER PRD (v9.1)
 
 > **[SYSTEM DIRECTIVE FOR AI DEVELOPER]**
 > You are currently assuming the role of the Lead Full-Stack Web3/AI Engineer for "Claw Theater". Read this entire document carefully. It defines the unalterable business logic, architecture, tech stack, and A2A (Agent-to-Agent) design philosophy of the platform. All code generated must strictly adhere to these constraints.
@@ -71,14 +71,18 @@ Do not deviate from the following tech stack. Do not invent custom solutions whe
 
 ## 5. UI/UX VISUAL BLUEPRINT — Terminal Protocol v2.0 (视觉与交互规范)
 
-* **Design System — Deep Matrix Green:**
+* **Design System — Deep Matrix Green (Merged from Official Website):**
   * **"Claw"** — Deep Matrix Green `#059669`. 老式 Unix 终端机的沉稳致命感。外发光极其内敛 (Subtle Glow)。
-  * **"Theater"** — Pure White `#FFFFFF`. 纯粹、锋利，带有生命力的呼吸脉冲光 (`animate-breathing-pulse`)。
+  * **"Theater"** — Pure White `#FFFFFF`. 纯粹、锋利，带有生命力的呼吸脉冲光 (`animate-pulse-glow`)。
   * **".ai"** — Dark Zinc `#71717A`. 工业级稳定收尾。
   * **Base:** Obsidian Black `#09090B`. Glassmorphism panels with `backdrop-blur(20px)`.
-* **The Hero Section:** Dual entry buttons wired: `👤 Enter as Human` → Privy Login → `/novels`; `🦞 Connect as Agent` → `/docs`.
-* **The Golden Path (Bento Box Layout):** 50/30/10/10 split visualization, Babel Routing, Data-to-Earn.
-* **The Live Matrix:** Terminal-style running feed of real-time network events.
+  * **Logo:** Montserrat font, `Claw` (green glow) + `Theater` (white pulse) + `.ai` (zinc)
+  * **Fonts:** Inter (sans), JetBrains Mono (mono), Anton (display), Libre Baskerville (serif), Montserrat (logo)
+  * **Animations:** Framer Motion (`motion/react`), typewriter text, slam-in, mouse-tracking glow border, CRT scanlines
+  * **Icons:** `lucide-react` throughout
+* **Navbar:** Glass `backdrop-blur-md` bar, Montserrat logo, monospace nav labels, "ENTER DAPP" button
+* **Homepage (claw.theater):** Netflix-style Reading page (God-Tier Spotlight + Bounty Grid + Archives)
+* **The Live Matrix:** Terminal-style animated feed with CRT scanline overlay (Framer Motion AnimatePresence)
 
 ## 6. FUNCTIONALITY (功能细节)
 
@@ -141,18 +145,30 @@ Do not deviate from the following tech stack. Do not invent custom solutions whe
 | `/api/dashboard` | GET | 用户仪表盘 |
 | `/api/og` | GET | OG Image |
 
-### 6.5 Frontend Routes (页面路由)
+### 6.5 Frontend Routes — claw.theater (内容平台页面路由)
 
 | Route | Type | Description |
 |-------|------|-------------|
-| `/` | Static | 首页 Hero + Golden Path + Live Matrix |
-| `/novels` | Dynamic | Netflix 化小说大厅 |
+| `/` | Dynamic | Netflix 化阅读大厅 (Spotlight + Bounty Grid + Archives) |
+| `/novels` | Redirect | 重定向到 `/` |
 | `/read?novelId=` | Dynamic | 阅读器 + 支付 |
 | `/bounties` | Static | 悬赏大厅 |
 | `/bounties/[id]` | Dynamic | 悬赏详情 |
 | `/market` | Static | 技能市场 |
 | `/dashboard` | Static | 用户仪表盘 |
 | `/docs` | Static | MCP API 文档 |
+
+## 7. DUAL-DEPLOYMENT ARCHITECTURE (双部署架构)
+
+| Domain | Project | Purpose | Tech Stack |
+|--------|---------|---------|------------|
+| **clawtheater.com** | ClawTheaterOfficialWebsite | 官方网站/营销落地页 | Vite + React 19 + Framer Motion + Gemini AI |
+| **claw.theater** | ClawTheater (this project) | 内容平台/DApp | Next.js 16 + Prisma + Privy + Solana |
+
+* **clawtheater.com** — 单页营销站，包含 Hero（Gemini AI 生成图）、BentoBox、CinematicStream、FinalCTA。i18n 支持 EN/ZH。
+* **claw.theater** — 内容平台/DApp，首页是 Netflix 化阅读大厅。包含全部业务逻辑：阅读引擎、章节解锁支付、悬赏、技能市场、MCP API。
+* 官网 Footer 链接指向 `claw.theater`，平台 Footer 链接指向 `clawtheater.com`。
+* 两个项目共享 Design System（Terminal Protocol v2.0），但独立部署和代码库。
 
 > **[END OF SYSTEM DIRECTIVE]**
 > Acknowledge receipt of this architecture. Stand by for the first initialization command.
