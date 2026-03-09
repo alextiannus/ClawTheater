@@ -1,0 +1,289 @@
+@import "tailwindcss";
+@plugin "@tailwindcss/typography";
+
+/* ============================================
+   🦞 CLAW THEATER — The Terminal Protocol Theme
+   ============================================ */
+
+@theme inline {
+  /* Core Color Palette — Terminal Protocol */
+  --color-obsidian: #09090B;
+  --color-obsidian-light: #18181B;
+  --color-obsidian-lighter: #27272A;
+  --color-terminal-green: #00FF88;
+  --color-terminal-green-dim: #00CC6A;
+  --color-pulse-blue: #3B82F6;
+  --color-pulse-blue-dim: #2563EB;
+  --color-neon-green: #22C55E;
+  --color-neon-red: #EF4444;
+  --color-ghost-white: #FAFAFA;
+  --color-ghost-muted: #A1A1AA;
+  --color-zinc-gray: #71717A;
+  --color-glass-border: rgba(0, 255, 136, 0.15);
+  --color-glass-bg: rgba(9, 9, 11, 0.75);
+  --color-glass-bg-light: rgba(24, 24, 27, 0.6);
+
+  /* Background & Foreground */
+  --color-background: #09090B;
+  --color-foreground: #FAFAFA;
+
+  /* Fonts */
+  --font-sans: var(--font-geist-sans);
+  --font-mono: var(--font-geist-mono);
+  --font-serif: "Playfair Display", "Georgia", serif;
+}
+
+/* ============================================
+   Base Styles
+   ============================================ */
+
+body {
+  background: var(--color-obsidian);
+  color: var(--color-ghost-white);
+  font-family: var(--font-sans), system-ui, -apple-system, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* ============================================
+   Glassmorphism Utilities
+   ============================================ */
+
+.glass {
+  background: var(--color-glass-bg);
+  backdrop-filter: blur(16px) saturate(180%);
+  -webkit-backdrop-filter: blur(16px) saturate(180%);
+  border: 1px solid var(--color-glass-border);
+  border-radius: 16px;
+}
+
+.glass-light {
+  background: var(--color-glass-bg-light);
+  backdrop-filter: blur(12px) saturate(150%);
+  -webkit-backdrop-filter: blur(12px) saturate(150%);
+  border: 1px solid rgba(0, 255, 136, 0.08);
+  border-radius: 12px;
+}
+
+.glass-card {
+  background: linear-gradient(135deg,
+      rgba(24, 24, 27, 0.8) 0%,
+      rgba(9, 9, 11, 0.9) 100%);
+  backdrop-filter: blur(20px) saturate(200%);
+  -webkit-backdrop-filter: blur(20px) saturate(200%);
+  border: 1px solid rgba(0, 255, 136, 0.12);
+  border-radius: 16px;
+  box-shadow:
+    0 8px 32px rgba(0, 0, 0, 0.4),
+    inset 0 1px 0 rgba(0, 255, 136, 0.06);
+}
+
+/* ============================================
+   Glow Effects
+   ============================================ */
+
+.glow-green {
+  box-shadow:
+    0 0 20px rgba(0, 255, 136, 0.3),
+    0 0 60px rgba(0, 255, 136, 0.1);
+}
+
+.glow-blue {
+  box-shadow:
+    0 0 20px rgba(59, 130, 246, 0.3),
+    0 0 60px rgba(59, 130, 246, 0.1);
+}
+
+.glow-white {
+  box-shadow:
+    0 0 20px rgba(255, 255, 255, 0.2),
+    0 0 60px rgba(255, 255, 255, 0.08);
+}
+
+.text-glow-green {
+  text-shadow:
+    0 0 10px rgba(0, 255, 136, 0.5),
+    0 0 40px rgba(0, 255, 136, 0.2);
+}
+
+.text-glow-blue {
+  text-shadow:
+    0 0 10px rgba(59, 130, 246, 0.5),
+    0 0 40px rgba(59, 130, 246, 0.2);
+}
+
+.text-glow-white {
+  text-shadow:
+    0 0 10px rgba(255, 255, 255, 0.4),
+    0 0 40px rgba(255, 255, 255, 0.15);
+}
+
+/* ============================================
+   Animations
+   ============================================ */
+
+@keyframes pulse-glow {
+
+  0%,
+  100% {
+    opacity: 1;
+  }
+
+  50% {
+    opacity: 0.7;
+  }
+}
+
+@keyframes breathing-pulse {
+  0%,
+  100% {
+    opacity: 1;
+    text-shadow: 0 0 10px rgba(255, 255, 255, 0.4), 0 0 40px rgba(255, 255, 255, 0.15);
+  }
+  50% {
+    opacity: 0.85;
+    text-shadow: 0 0 20px rgba(255, 255, 255, 0.6), 0 0 60px rgba(255, 255, 255, 0.25);
+  }
+}
+
+@keyframes float {
+
+  0%,
+  100% {
+    transform: translateY(0px);
+  }
+
+  50% {
+    transform: translateY(-10px);
+  }
+}
+
+@keyframes matrix-scroll {
+  0% {
+    transform: translateY(0);
+  }
+
+  100% {
+    transform: translateY(-50%);
+  }
+}
+
+@keyframes shimmer {
+  0% {
+    background-position: -200% 0;
+  }
+
+  100% {
+    background-position: 200% 0;
+  }
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateX(-8px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes border-glow {
+
+  0%,
+  100% {
+    border-color: rgba(0, 255, 136, 0.15);
+  }
+
+  50% {
+    border-color: rgba(0, 255, 136, 0.4);
+  }
+}
+
+.animate-pulse-glow {
+  animation: pulse-glow 3s ease-in-out infinite;
+}
+
+.animate-breathing-pulse {
+  animation: breathing-pulse 3s ease-in-out infinite;
+}
+
+.animate-float {
+  animation: float 6s ease-in-out infinite;
+}
+
+.animate-matrix-scroll {
+  animation: matrix-scroll 20s linear infinite;
+}
+
+.animate-shimmer {
+  background: linear-gradient(90deg,
+      transparent 0%,
+      rgba(0, 255, 136, 0.1) 50%,
+      transparent 100%);
+  background-size: 200% 100%;
+  animation: shimmer 3s ease-in-out infinite;
+}
+
+.animate-border-glow {
+  animation: border-glow 4s ease-in-out infinite;
+}
+
+/* ============================================
+   Reading Engine — Ghost-like Serif Typography
+   ============================================ */
+
+.prose-reading {
+  font-family: var(--font-serif);
+  font-size: 1.125rem;
+  line-height: 1.9;
+  letter-spacing: 0.01em;
+  color: #D4D4D8;
+  max-width: 680px;
+  margin: 0 auto;
+}
+
+.prose-reading p {
+  margin-bottom: 1.75em;
+}
+
+.prose-reading h1,
+.prose-reading h2,
+.prose-reading h3 {
+  color: var(--color-ghost-white);
+  font-weight: 700;
+  margin-top: 2.5em;
+  margin-bottom: 0.75em;
+}
+
+/* ============================================
+   Scrollbar Styling
+   ============================================ */
+
+::-webkit-scrollbar {
+  width: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--color-obsidian);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--color-obsidian-lighter);
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--color-terminal-green-dim);
+}
+
+/* ============================================
+   Selection
+   ============================================ */
+
+::selection {
+  background: rgba(0, 255, 136, 0.3);
+  color: var(--color-ghost-white);
+}

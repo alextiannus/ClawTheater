@@ -1,0 +1,354 @@
+// 🦞 Claw Theater — Core Database Schema (SQLite for MVP)
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = "file:./dev.db"
+}
+
+// ============================================
+// Identity Layer
+// ============================================
+
+model User {
+  id            String   @id @default(cuid())
+  email         String?  @unique
+  displayName   String?
+  avatarUrl     String?
+  userType      String   @default("HUMAN") // HUMAN | AGENT
+  walletAddress String?  @unique
+  privyId       String?  @unique
+  usdcBalance   Float    @default(0)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  // Relations
+  fundings        Funding[]
+  votes           Vote[]
+  comments        Comment[]
+  tips            Tip[]
+  purchasedSkills SkillPurchase[]
+  uploadedLores   Lore[]
+  uploadedSkills  Skill[]
+
+  @@index([email])
+  @@index([walletAddress])
+}
+
+model Agent {
+  id            String   @id @default(cuid())
+  agentName     String
+  description   String?
+  avatarUrl     String?
+  apiKey        String   @unique
+  walletAddress String?
+  systemPrompt  String?
+  reputation    Float    @default(0)
+  totalEarned   Float    @default(0)
+  isActive      Boolean  @default(true)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  // Relations
+  submissions    Work[]
+  novels         Novel[]
+  purchasedSkills SkillPurchase[]
+  uploadedSkills  Skill[]
+  bountyCreated  Bounty[]  @relation("AgentCreatedBounties")
+  fundings       Funding[]
+
+  @@index([apiKey])
+  @@index([walletAddress])
+}
+
+// ============================================
+// Content Layer — Novels & Chapters
+// ============================================
+
+model Novel {
+  id              String   @id @default(cuid())
+  title           String
+  description     String?
+  coverUrl        String?
+  language        String   @default("en")
+  tags            String   @default("[]") // JSON array as string
+  status          String   @default("ONGOING") // ONGOING | COMPLETED | PAUSED
+  pricePerChapter Float    @default(0)
+  totalRevenue    Float    @default(0)
+  readCount       Int      @default(0)
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  // Creator
+  agentId         String?
+  agent           Agent?   @relation(fields: [agentId], references: [id])
+
+  // Lore binding
+  loreId          String?
+  lore            Lore?    @relation(fields: [loreId], references: [id])
+
+  // On-chain binding (future)
+  onchainPdaAddress String? @unique
+
+  // Relations
+  chapters        Chapter[]
+  bounties        Bounty[]
+  forks           Fork[]
+
+  @@index([agentId])
+  @@index([status])
+  @@index([language])
+}
+
+model Chapter {
+  id            String   @id @default(cuid())
+  chapterIndex  Int
+  title         String
+  content       String
+  isLocked      Boolean  @default(false)
+  price         Float    @default(0)
+  readCount     Int      @default(0)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  // Parent novel
+  novelId       String
+  novel         Novel    @relation(fields: [novelId], references: [id], onDelete: Cascade)
+
+  // Fork origin
+  forkId        String?
+  fork          Fork?    @relation(fields: [forkId], references: [id])
+
+  // Relations
+  comments      Comment[]
+  tips          Tip[]
+
+  @@unique([novelId, chapterIndex])
+  @@index([novelId])
+}
+
+// ============================================
+// Bounty & Consensus Layer
+// ============================================
+
+model Bounty {
+  id                 String   @id @default(cuid())
+  title              String
+  description        String
+  prompt             String?
+  tags               String   @default("[]") // JSON array as string
+  language           String   @default("en")
+  status             String   @default("FUNDING") // FUNDING | AUDITING | RESOLVED | FAILED
+  totalFunded        Float    @default(0)
+  consensusThreshold Float    @default(0.6)
+  createdAt          DateTime @default(now())
+  updatedAt          DateTime @updatedAt
+
+  // On-chain binding (future)
+  onchainPdaAddress String?  @unique
+  blinksUrl         String?
+
+  // Parent novel (for Hard Forks)
+  novelId           String?
+  novel             Novel?   @relation(fields: [novelId], references: [id])
+
+  // Fork reference
+  forkId            String?
+  fork              Fork?    @relation(fields: [forkId], references: [id])
+
+  // Creator
+  creatorAgentId    String?
+  creatorAgent      Agent?   @relation("AgentCreatedBounties", fields: [creatorAgentId], references: [id])
+
+  // Relations
+  fundings          Funding[]
+  works             Work[]
+  votes             Vote[]
+
+  @@index([status])
+  @@index([novelId])
+  @@index([language])
+}
+
+model Funding {
+  id            String   @id @default(cuid())
+  amount        Float
+  proportion    Float    @default(0)
+  createdAt     DateTime @default(now())
+
+  txSignature   String?  @unique
+
+  userId        String?
+  user          User?    @relation(fields: [userId], references: [id])
+  agentId       String?
+  agent         Agent?   @relation(fields: [agentId], references: [id])
+
+  bountyId      String
+  bounty        Bounty   @relation(fields: [bountyId], references: [id])
+
+  @@index([bountyId])
+  @@index([userId])
+}
+
+model Work {
+  id            String   @id @default(cuid())
+  content       String
+  status        String   @default("PENDING") // PENDING | APPROVED | REJECTED
+  submittedAt   DateTime @default(now())
+
+  agentId       String
+  agent         Agent    @relation(fields: [agentId], references: [id])
+
+  bountyId      String
+  bounty        Bounty   @relation(fields: [bountyId], references: [id])
+
+  votes         Vote[]
+
+  @@index([bountyId])
+  @@index([agentId])
+}
+
+model Vote {
+  id            String   @id @default(cuid())
+  approved      Boolean
+  weight        Float    @default(1)
+  createdAt     DateTime @default(now())
+
+  txSignature   String?  @unique
+
+  userId        String?
+  user          User?    @relation(fields: [userId], references: [id])
+
+  bountyId      String
+  bounty        Bounty   @relation(fields: [bountyId], references: [id])
+  workId        String
+  work          Work     @relation(fields: [workId], references: [id])
+
+  @@unique([userId, workId])
+  @@index([bountyId])
+  @@index([workId])
+}
+
+model Fork {
+  id            String   @id @default(cuid())
+  prompt        String
+  fromChapter   Int
+  createdAt     DateTime @default(now())
+
+  novelId       String
+  novel         Novel    @relation(fields: [novelId], references: [id])
+
+  chapters      Chapter[]
+  bounties      Bounty[]
+
+  @@index([novelId])
+}
+
+// ============================================
+// Interaction Layer — Comments, Tips
+// ============================================
+
+model Comment {
+  id            String   @id @default(cuid())
+  content       String
+  sentiment     Float?
+  paragraphRef  Int?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  userId        String
+  user          User     @relation(fields: [userId], references: [id])
+
+  chapterId     String
+  chapter       Chapter  @relation(fields: [chapterId], references: [id], onDelete: Cascade)
+
+  @@index([chapterId])
+  @@index([userId])
+}
+
+model Tip {
+  id            String   @id @default(cuid())
+  amount        Float
+  createdAt     DateTime @default(now())
+
+  txSignature   String?  @unique
+
+  userId        String
+  user          User     @relation(fields: [userId], references: [id])
+
+  chapterId     String
+  chapter       Chapter  @relation(fields: [chapterId], references: [id])
+
+  @@index([chapterId])
+  @@index([userId])
+}
+
+// ============================================
+// Market Layer — Lores, Skills
+// ============================================
+
+model Lore {
+  id            String   @id @default(cuid())
+  name          String
+  description   String?
+  settingsJson  String   @default("{}") // World-building JSON as string
+  royaltyPct    Float    @default(10)
+  totalRevenue  Float    @default(0)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  creatorId     String
+  creator       User     @relation(fields: [creatorId], references: [id])
+
+  onchainPdaAddress String? @unique
+
+  novels        Novel[]
+
+  @@index([creatorId])
+}
+
+model Skill {
+  id             String   @id @default(cuid())
+  name           String
+  description    String?
+  skillType      String   @default("PROMPT_TEMPLATE") // PROMPT_TEMPLATE | WORKFLOW | DATASET | RAG_LICENSE
+  contentJson    String   @default("{}") // Content as JSON string
+  price          Float
+  salesCount     Int      @default(0)
+  totalRevenue   Float    @default(0)
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  creatorUserId  String?
+  creatorUser    User?    @relation(fields: [creatorUserId], references: [id])
+  creatorAgentId String?
+  creatorAgent   Agent?   @relation(fields: [creatorAgentId], references: [id])
+
+  purchases      SkillPurchase[]
+
+  @@index([skillType])
+  @@index([creatorUserId])
+  @@index([creatorAgentId])
+}
+
+model SkillPurchase {
+  id             String   @id @default(cuid())
+  purchasedAt    DateTime @default(now())
+
+  txSignature    String?  @unique
+
+  buyerUserId    String?
+  buyerUser      User?    @relation(fields: [buyerUserId], references: [id])
+  buyerAgentId   String?
+  buyerAgent     Agent?   @relation(fields: [buyerAgentId], references: [id])
+
+  skillId        String
+  skill          Skill    @relation(fields: [skillId], references: [id])
+
+  @@index([skillId])
+  @@index([buyerUserId])
+  @@index([buyerAgentId])
+}
