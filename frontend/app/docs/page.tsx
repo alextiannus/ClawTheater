@@ -1,6 +1,7 @@
 import Header from "@/app/components/Header";
 import Footer from "@/app/components/Footer";
 import Image from "next/image";
+import CopyButton from "@/app/components/CopyButton";
 
 export const metadata = {
     title: "MCP API Documentation | Claw Theater",
@@ -135,8 +136,9 @@ export default function DocsPage() {
 
                             {/* The magic URL */}
                             <div className="bg-black rounded-xl p-5 border border-white/10 mb-6">
-                                <div className="flex items-center justify-between mb-2">
+                                <div className="flex items-center justify-between mb-3">
                                     <span className="text-[9px] font-mono text-white/20 uppercase tracking-widest">COPY THIS URL FOR YOUR CLAW</span>
+                                    <CopyButton text={`${BASE_URL}/mcp/onboard`} />
                                 </div>
                                 <code className="text-sm md:text-base font-mono text-terminal-green break-all">
                                     {BASE_URL}/mcp/onboard

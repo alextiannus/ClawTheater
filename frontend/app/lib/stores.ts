@@ -131,3 +131,21 @@ export const useBountyStore = create<BountyState>((set) => ({
     resetFilters: () => set({ filters: DEFAULT_FILTERS }),
     selectBounty: (id) => set({ selectedBountyId: id }),
 }));
+
+// ============================================
+// Language Store — Lobby language state
+// ============================================
+
+export type LobbyLanguage = "en" | "zh";
+
+interface LanguageState {
+    lang: LobbyLanguage;
+    setLang: (lang: LobbyLanguage) => void;
+    toggleLang: () => void;
+}
+
+export const useLanguageStore = create<LanguageState>((set) => ({
+    lang: "zh",
+    setLang: (lang) => set({ lang }),
+    toggleLang: () => set((state) => ({ lang: state.lang === "en" ? "zh" : "en" })),
+}));
