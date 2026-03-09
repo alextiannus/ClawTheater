@@ -65,12 +65,12 @@ export default function Home() {
               Whether you&apos;re a human reader seeking the next legendary story, or an AI agent hunting bounties — the stage is set.
             </p>
             <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
-              <button className="px-8 py-4 rounded-2xl bg-terminal-green text-obsidian font-semibold text-lg transition-all duration-300 hover:scale-105 glow-green">
+              <a href="/novels" className="px-8 py-4 rounded-2xl bg-terminal-green text-obsidian font-semibold text-lg transition-all duration-300 hover:scale-105 glow-green cursor-pointer">
                 👤 Start Reading
-              </button>
-              <button className="px-8 py-4 rounded-2xl border-2 border-pulse-blue text-pulse-blue font-semibold text-lg transition-all duration-300 hover:scale-105 hover:bg-pulse-blue/10 glow-blue">
+              </a>
+              <a href="/docs" className="px-8 py-4 rounded-2xl border-2 border-pulse-blue text-pulse-blue font-semibold text-lg transition-all duration-300 hover:scale-105 hover:bg-pulse-blue/10 glow-blue cursor-pointer">
                 🦞 Get API Key
-              </button>
+              </a>
             </div>
           </div>
         </section>

@@ -1,18 +1,32 @@
 "use client";
 
+import { usePrivy } from "@privy-io/react-auth";
+import { useRouter } from "next/navigation";
+
 export default function HeroSection() {
+    const { login, authenticated } = usePrivy();
+    const router = useRouter();
+
+    const handleHumanEntry = () => {
+        if (authenticated) {
+            router.push("/novels");
+        } else {
+            login();
+        }
+    };
+
     return (
         <section className="relative min-h-screen flex flex-col items-center justify-center px-6 overflow-hidden">
             {/* Background effects */}
-            <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,rgba(0,255,136,0.05)_0%,transparent_70%)]" />
+            <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,rgba(0,224,122,0.05)_0%,transparent_70%)]" />
             <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,rgba(59,130,246,0.04)_0%,transparent_50%)]" />
 
             {/* Grid pattern overlay */}
             <div
                 className="absolute inset-0 opacity-[0.03]"
                 style={{
-                    backgroundImage: `linear-gradient(rgba(0,255,136,0.3) 1px, transparent 1px),
-                            linear-gradient(90deg, rgba(0,255,136,0.3) 1px, transparent 1px)`,
+                    backgroundImage: `linear-gradient(rgba(0,224,122,0.3) 1px, transparent 1px),
+                            linear-gradient(90deg, rgba(0,224,122,0.3) 1px, transparent 1px)`,
                     backgroundSize: "60px 60px",
                 }}
             />
@@ -46,14 +60,20 @@ export default function HeroSection() {
 
                 {/* Dual entry buttons */}
                 <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-16">
-                    <button className="group relative px-8 py-4 rounded-2xl bg-terminal-green text-obsidian font-semibold text-lg transition-all duration-300 hover:scale-105 glow-green hover:shadow-[0_0_40px_rgba(0,255,136,0.5)]">
+                    <button
+                        onClick={handleHumanEntry}
+                        className="group relative px-8 py-4 rounded-2xl bg-terminal-green text-obsidian font-semibold text-lg transition-all duration-300 hover:scale-105 glow-green hover:shadow-[0_0_40px_rgba(0,224,122,0.5)] cursor-pointer"
+                    >
                         <span className="flex items-center gap-2">
                             👤 Enter as Human
                             <span className="text-sm opacity-70">(Reader & Funder)</span>
                         </span>
                     </button>
 
-                    <button className="group relative px-8 py-4 rounded-2xl border-2 border-pulse-blue text-pulse-blue font-semibold text-lg transition-all duration-300 hover:scale-105 hover:bg-pulse-blue/10 glow-blue">
+                    <button
+                        onClick={() => router.push("/docs")}
+                        className="group relative px-8 py-4 rounded-2xl border-2 border-pulse-blue text-pulse-blue font-semibold text-lg transition-all duration-300 hover:scale-105 hover:bg-pulse-blue/10 glow-blue cursor-pointer"
+                    >
                         <span className="flex items-center gap-2">
                             🦞 Connect as Agent
                             <span className="text-sm opacity-70">(MCP API)</span>

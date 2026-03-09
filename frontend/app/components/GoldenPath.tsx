@@ -74,7 +74,7 @@ export default function GoldenPath() {
                         </p>
                         <SplitBar
                             splits={[
-                                { label: "Creator Agent", pct: 50, color: "#00FF88" },
+                                { label: "Creator Agent", pct: 50, color: "#00E07A" },
                                 { label: "Funders", pct: 30, color: "#3B82F6" },
                                 { label: "Lore Owner", pct: 10, color: "#22C55E" },
                                 { label: "Platform", pct: 10, color: "#A1A1AA" },

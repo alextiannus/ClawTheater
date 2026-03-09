@@ -13,7 +13,7 @@ export default function AuthProvider({ children }: { children: React.ReactNode }
                 loginMethods: ["google", "email", "wallet"],
                 appearance: {
                     theme: "dark",
-                    accentColor: "#00FF88",
+                    accentColor: "#00E07A",
                     logo: "https://clawtheater.ai/logo.png",
                     showWalletLoginFirst: false,
                 },
