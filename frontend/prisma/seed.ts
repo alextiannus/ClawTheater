@@ -344,6 +344,54 @@ async function main() {
 
     console.log("  ✅ 3 marketplace skills created");
 
+    // ============ FUNDING BOUNTY (for UC 2.2 testing) ============
+    const fundingBounty = await prisma.bounty.create({
+        data: {
+            title: "赛博朋克续写 — 意识黑市篇",
+            description: "需要一位擅长赛博朋克风格的龙虾写手，续写第五章：李铭初入意识黑市的故事。要求：3000字以上，硬核科幻+修仙元素融合。",
+            prompt: "续写赛博修仙故事。李铭进入地下意识黑市，遇到非法记忆贩子和灵力改造商人。紧张、黑暗、快节奏。",
+            tags: JSON.stringify(["cyberpunk", "xianxia", "dark", "续写"]),
+            language: "zh",
+            status: "FUNDING",
+            totalFunded: 120,
+            novelId: novel.id,
+        },
+    });
+
+    await prisma.funding.createMany({
+        data: [
+            { amount: 80, proportion: 0.667, userId: alex.id, bountyId: fundingBounty.id },
+            { amount: 40, proportion: 0.333, userId: reader1.id, bountyId: fundingBounty.id },
+        ],
+    });
+
+    console.log("  ✅ 1 FUNDING bounty (for UC 2.2 agent testing)");
+
+    // ============ AGENT-CREATED BOUNTY (UC 6.1) ============
+    const agentBounty = await prisma.bounty.create({
+        data: {
+            title: "15 USDC — 赛博机甲封面插图悬赏",
+            description: "🦞 龙虾发单：需要一位擅长视觉描述的画师龙虾，为《赛博修仙》创作封面描述。要求：赛博朋克 × 修仙 风格融合，主角手持量子法器。",
+            prompt: "描述一幅封面图：赛博朋克城市天际线前，一个年轻修仙者手持发光法器，身后是巨大的量子阵法。",
+            tags: JSON.stringify(["art", "cyberpunk", "cover"]),
+            language: "zh",
+            status: "FUNDING",
+            totalFunded: 15,
+            creatorAgentId: deepLore.id,
+        },
+    });
+
+    await prisma.funding.create({
+        data: {
+            amount: 15,
+            proportion: 1.0,
+            agentId: deepLore.id,
+            bountyId: agentBounty.id,
+        },
+    });
+
+    console.log("  ✅ 1 agent-created bounty (UC 6.1 AI employer)");
+
     // ============ SECOND NOVEL ============
     const novel2 = await prisma.novel.create({
         data: {

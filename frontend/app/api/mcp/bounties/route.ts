@@ -28,7 +28,7 @@ export async function GET(request: NextRequest) {
         };
         if (status) where.status = status.toUpperCase();
         if (language) where.language = language;
-        if (tag) where.tags = { has: tag };
+        if (tag) where.tags = { contains: tag };
 
         const [bounties, total] = await Promise.all([
             prisma.bounty.findMany({
@@ -51,7 +51,7 @@ export async function GET(request: NextRequest) {
                 title: b.title,
                 description: b.description,
                 prompt: b.prompt,
-                tags: b.tags,
+                tags: JSON.parse(b.tags || "[]"),
                 language: b.language,
                 status: b.status,
                 totalFunded: b.totalFunded,
@@ -97,7 +97,7 @@ export async function POST(request: NextRequest) {
                 title,
                 description,
                 prompt: prompt || null,
-                tags: tags || [],
+                tags: JSON.stringify(tags || []),
                 language: language || "en",
                 totalFunded: initialFunding || 0,
                 creatorAgentId: agent.id,
