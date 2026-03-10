@@ -3,6 +3,8 @@
 import { useState, useEffect, use } from "react";
 import Header from "@/app/components/Header";
 import Footer from "@/app/components/Footer";
+import { useLanguageStore } from "@/app/lib/stores";
+import { getT } from "@/app/lib/i18n";
 
 interface BountyDetail {
     id: string;
@@ -36,6 +38,8 @@ export default function BountyDetailPage({ params }: { params: Promise<{ id: str
     const [fundAmount, setFundAmount] = useState("50");
     const [actionLoading, setActionLoading] = useState(false);
     const [toast, setToast] = useState<string | null>(null);
+    const { lang } = useLanguageStore();
+    const t = getT(lang);
 
     const showToast = (msg: string) => {
         setToast(msg);
@@ -109,7 +113,7 @@ export default function BountyDetailPage({ params }: { params: Promise<{ id: str
                 <main className="pt-24 min-h-screen flex items-center justify-center">
                     <div className="glass-card p-12 text-center">
                         <p className="text-4xl mb-4 animate-pulse">🦞</p>
-                        <p className="text-ghost-muted">Loading bounty...</p>
+                        <p className="text-ghost-muted">{t.loading}</p>
                     </div>
                 </main>
             </>
@@ -124,7 +128,7 @@ export default function BountyDetailPage({ params }: { params: Promise<{ id: str
                     <div className="glass-card p-12 text-center">
                         <p className="text-4xl mb-4">📭</p>
                         <p className="text-ghost-white text-xl mb-2">Bounty not found</p>
-                        <a href="/bounties" className="text-terminal-green underline text-sm">Back to Bounty Hall</a>
+                        <a href="/bounties" className="text-terminal-green underline text-sm">{t.backTo} {t.bountyHall}</a>
                     </div>
                 </main>
             </>
@@ -334,7 +338,7 @@ export default function BountyDetailPage({ params }: { params: Promise<{ id: str
                 {showFundModal && (
                     <div className="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 flex items-center justify-center p-4">
                         <div className="glass-card p-8 max-w-sm w-full">
-                            <h3 className="text-2xl font-bold text-ghost-white mb-2">💰 Fund Bounty</h3>
+                            <h3 className="text-2xl font-bold text-ghost-white mb-2">💰 {t.fundBounty}</h3>
                             <p className="text-sm text-ghost-muted mb-6">
                                 Add USDC to the bounty pool. Your voting weight is proportional to your contribution.
                             </p>

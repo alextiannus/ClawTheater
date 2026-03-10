@@ -3,6 +3,8 @@
 import { useState, useEffect } from "react";
 import Header from "@/app/components/Header";
 import Footer from "@/app/components/Footer";
+import { useLanguageStore } from "@/app/lib/stores";
+import { getT } from "@/app/lib/i18n";
 
 interface DashboardData {
     user: {
@@ -44,6 +46,8 @@ export default function DashboardPage() {
     const [loreSettings, setLoreSettings] = useState("");
     const [actionLoading, setActionLoading] = useState(false);
     const [toast, setToast] = useState<string | null>(null);
+    const { lang } = useLanguageStore();
+    const t = getT(lang);
 
     const showToast = (msg: string) => {
         setToast(msg);
@@ -95,7 +99,7 @@ export default function DashboardPage() {
                 <main className="pt-24 min-h-screen flex items-center justify-center">
                     <div className="glass-card p-12 text-center">
                         <p className="text-4xl mb-4 animate-pulse">🦞</p>
-                        <p className="text-ghost-muted">Loading dashboard...</p>
+                        <p className="text-ghost-muted">{t.loading}</p>
                     </div>
                 </main>
             </>
@@ -124,11 +128,11 @@ export default function DashboardPage() {
                             <div className="flex gap-6">
                                 <div className="text-center">
                                     <p className="text-2xl font-bold font-mono text-terminal-green">${user.usdcBalance.toFixed(2)}</p>
-                                    <p className="text-xs text-ghost-muted">USDC Balance</p>
+                                    <p className="text-xs text-ghost-muted">{t.walletBalance}</p>
                                 </div>
                                 <div className="text-center">
                                     <p className="text-2xl font-bold font-mono text-neon-green">${user.totalEarned.toFixed(2)}</p>
-                                    <p className="text-xs text-ghost-muted">Total Earned</p>
+                                    <p className="text-xs text-ghost-muted">{t.totalEarned}</p>
                                 </div>
                             </div>
                         </div>
@@ -145,7 +149,7 @@ export default function DashboardPage() {
                                     : "text-ghost-muted hover:text-ghost-white"
                                     }`}
                             >
-                                {tab === "overview" ? "📊 Overview" : tab === "portfolio" ? "💼 Portfolio" : "🔑 API Keys"}
+                                {tab === "overview" ? `📊 ${t.dashboard}` : tab === "portfolio" ? `💼 ${t.myBounties}` : "🔑 API Keys"}
                             </button>
                         ))}
                     </div>
@@ -167,7 +171,7 @@ export default function DashboardPage() {
                                     </button>
                                     <button onClick={() => setShowLoreModal(true)} className="p-4 rounded-xl bg-neon-green/10 text-neon-green border border-neon-green/30 hover:bg-neon-green/20 transition-all text-center">
                                         <p className="text-2xl mb-1">📝</p>
-                                        <p className="text-sm font-medium">Upload Lore</p>
+                                        <p className="text-sm font-medium">{t.uploadLore}</p>
                                     </button>
                                     <button className="p-4 rounded-xl bg-white/5 text-ghost-muted border border-white/10 hover:bg-white/10 transition-all text-center">
                                         <p className="text-2xl mb-1">🔀</p>
@@ -178,9 +182,9 @@ export default function DashboardPage() {
 
                             {/* Transaction History */}
                             <div className="glass-card p-6">
-                                <h3 className="text-lg font-semibold text-ghost-white mb-4">Recent Transactions</h3>
+                                <h3 className="text-lg font-semibold text-ghost-white mb-4">{t.recentTransactions}</h3>
                                 {transactions.length === 0 ? (
-                                    <p className="text-ghost-muted text-sm text-center py-8">No transactions yet</p>
+                                    <p className="text-ghost-muted text-sm text-center py-8">{t.noData}</p>
                                 ) : (
                                     <div className="space-y-3">
                                         {transactions.map((tx, i) => {

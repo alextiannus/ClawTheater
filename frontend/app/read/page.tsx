@@ -4,6 +4,8 @@ import { useState, useEffect, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
 import Header from "@/app/components/Header";
 import Footer from "@/app/components/Footer";
+import { useLanguageStore } from "@/app/lib/stores";
+import { getT } from "@/app/lib/i18n";
 
 interface ChapterData {
     id: string;
@@ -62,6 +64,8 @@ function ReadNovelPage() {
     const [localComments, setLocalComments] = useState<{ author: string; text: string; time: string }[]>([]);
     const [actionLoading, setActionLoading] = useState(false);
     const [toast, setToast] = useState<string | null>(null);
+    const { lang } = useLanguageStore();
+    const t = getT(lang);
 
     const showToast = (msg: string) => {
         setToast(msg);
@@ -284,7 +288,7 @@ function ReadNovelPage() {
                 <main className="pt-24 min-h-screen flex items-center justify-center">
                     <div className="glass-card p-12 text-center">
                         <p className="text-4xl mb-4 animate-pulse">🦞</p>
-                        <p className="text-ghost-muted">Loading novel...</p>
+                        <p className="text-ghost-muted">{t.loading}</p>
                     </div>
                 </main>
             </>
@@ -343,7 +347,7 @@ function ReadNovelPage() {
 
                                 <div className="mt-4 pt-4 border-t border-white/5 text-xs text-ghost-muted space-y-1">
                                     <p>👤 {(novel.readCount / 1000).toFixed(1)}K readers</p>
-                                    <p>📖 {novel.totalChapters} chapters</p>
+                                    <p>📖 {novel.totalChapters} {t.chapters}</p>
                                 </div>
                             </div>
                         </aside>
@@ -357,7 +361,7 @@ function ReadNovelPage() {
                                 <div className="flex items-center gap-3 text-sm text-ghost-muted">
                                     <span>🦞 {novel.agent}</span>
                                     <span>·</span>
-                                    <span>Chapter {(chapter?.index ?? 0) + 1} of {novel.totalChapters}</span>
+                                    <span>{t.chapters} {(chapter?.index ?? 0) + 1} / {novel.totalChapters}</span>
                                     <span>·</span>
                                     <span>{chapter?.readCount?.toLocaleString()} reads</span>
                                 </div>
@@ -477,7 +481,7 @@ function ReadNovelPage() {
                             {chapter && !chapter.locked && (
                                 <div className="glass-card p-6 mb-8">
                                     <h3 className="text-lg font-semibold text-ghost-white mb-4">
-                                        💬 Reader Comments ({localComments.length})
+                                        💬 {t.comments} ({localComments.length})
                                     </h3>
                                     <div className="flex gap-3 mb-6">
                                         <input
@@ -517,7 +521,7 @@ function ReadNovelPage() {
                 {showForkModal && (
                     <div className="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 flex items-center justify-center p-4">
                         <div className="glass-card p-8 max-w-lg w-full">
-                            <h3 className="text-2xl font-bold text-ghost-white mb-2">🔀 Initiate Hard Fork</h3>
+                            <h3 className="text-2xl font-bold text-ghost-white mb-2">🔀 {t.forkThis}</h3>
                             <p className="text-sm text-ghost-muted mb-6">Describe your alternate storyline.</p>
                             <textarea
                                 value={forkPrompt}

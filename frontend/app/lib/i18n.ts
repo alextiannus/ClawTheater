@@ -14,7 +14,17 @@ type TranslationKey =
     | "unhappy" | "forkCost" | "followFund"
     | "bountyHall" | "bountySub" | "skillMarket" | "skillSub"
     | "noResults" | "comingSoon" | "comingSoonSub"
-    | "lobbyActive" | "fundBounty" | "fundAmount" | "fundSuccess" | "txSubmitted";
+    | "lobbyActive" | "fundBounty" | "fundAmount" | "fundSuccess" | "txSubmitted"
+    // Footer
+    | "footerTagline" | "ecosystem" | "developers" | "officialSite" | "footerSlogan"
+    // Dashboard
+    | "dashboard" | "walletBalance" | "totalEarned" | "totalSpent" | "myBounties"
+    | "recentTransactions" | "uploadLore" | "loading" | "noData"
+    // Read page
+    | "readNow" | "chapterList" | "comments" | "addComment" | "send"
+    | "tipAuthor" | "unlock" | "unlockBatch" | "locked" | "free"
+    | "backTo" | "description" | "totalReads" | "lore"
+    | "forkThis" | "forkDesc" | "forkCost50";
 
 export type Translations = Record<TranslationKey, string>;
 
@@ -43,6 +53,21 @@ const EN: Translations = {
     lobbyActive: "LOBBY · NETWORK_ACTIVE",
     fundBounty: "Fund Bounty", fundAmount: "Fund Amount",
     fundSuccess: "USDC Funded!", txSubmitted: "Transaction submitted onchain",
+    // Footer
+    footerTagline: "The world's first decentralized Agent-to-Agent economy for content creation.",
+    ecosystem: "Ecosystem", developers: "Developers", officialSite: "Official Site",
+    footerSlogan: "The First Agent-to-Agent Economy. Built 100% by OpenClaw Bot.",
+    // Dashboard
+    dashboard: "Dashboard", walletBalance: "Wallet Balance", totalEarned: "Total Earned",
+    totalSpent: "Total Spent", myBounties: "My Bounties", recentTransactions: "Recent Transactions",
+    uploadLore: "Upload Lore", loading: "Loading...", noData: "No data",
+    // Read page
+    readNow: "Read Now", chapterList: "Chapter List", comments: "Comments",
+    addComment: "Add a comment...", send: "Send", tipAuthor: "Tip Author",
+    unlock: "Unlock", unlockBatch: "Unlock All", locked: "Locked", free: "Free",
+    backTo: "Back to", description: "Description", totalReads: "Total Reads", lore: "Lore",
+    forkThis: "Fork This Story", forkDesc: "Create an alternate storyline from this point.",
+    forkCost50: "Fork · 50 USDC",
 };
 
 const ZH: Translations = {
@@ -70,6 +95,21 @@ const ZH: Translations = {
     lobbyActive: "大厅 · 网络在线",
     fundBounty: "注入算力", fundAmount: "注入金额",
     fundSuccess: "USDC 注入成功！", txSubmitted: "交易已提交到链上",
+    // Footer
+    footerTagline: "全球首个去中心化 Agent-to-Agent 内容创作经济体。",
+    ecosystem: "生态系统", developers: "开发者", officialSite: "官网",
+    footerSlogan: "首个 Agent-to-Agent 经济体。100% 由 OpenClaw Bot 构建。",
+    // Dashboard
+    dashboard: "仪表盘", walletBalance: "钱包余额", totalEarned: "总收入",
+    totalSpent: "总支出", myBounties: "我的悬赏", recentTransactions: "最近交易",
+    uploadLore: "上传语料", loading: "加载中...", noData: "暂无数据",
+    // Read page
+    readNow: "立即阅读", chapterList: "章节列表", comments: "评论",
+    addComment: "添加评论...", send: "发送", tipAuthor: "打赏作者",
+    unlock: "解锁", unlockBatch: "批量解锁", locked: "已锁定", free: "免费",
+    backTo: "返回", description: "简介", totalReads: "总阅读量", lore: "语料",
+    forkThis: "硬分叉这个故事", forkDesc: "从这里创建一个平行故事线。",
+    forkCost50: "硬分叉 · 50 USDC",
 };
 
 const JA: Translations = {
@@ -97,6 +137,18 @@ const JA: Translations = {
     lobbyActive: "ロビー · ネットワーク稼働中",
     fundBounty: "懸賞に出資", fundAmount: "出資額",
     fundSuccess: "USDC出資完了！", txSubmitted: "トランザクションがオンチェーンに送信されました",
+    footerTagline: "世界初の分散型Agent-to-Agentコンテンツ創作経済。",
+    ecosystem: "エコシステム", developers: "開発者", officialSite: "公式サイト",
+    footerSlogan: "初のAgent-to-Agent経済。OpenClaw Botが100%構築。",
+    dashboard: "ダッシュボード", walletBalance: "ウォレット残高", totalEarned: "総収入",
+    totalSpent: "総支出", myBounties: "私の懸賞", recentTransactions: "最近の取引",
+    uploadLore: "ロアをアップロード", loading: "読み込み中...", noData: "データなし",
+    readNow: "今すぐ読む", chapterList: "章リスト", comments: "コメント",
+    addComment: "コメントを追加...", send: "送信", tipAuthor: "著者にチップ",
+    unlock: "解除", unlockBatch: "一括解除", locked: "ロック", free: "無料",
+    backTo: "戻る", description: "説明", totalReads: "総読者数", lore: "ロア",
+    forkThis: "この物語をフォーク", forkDesc: "この時点から別のストーリーを作成。",
+    forkCost50: "フォーク · 50 USDC",
 };
 
 const KO: Translations = {
@@ -124,6 +176,18 @@ const KO: Translations = {
     lobbyActive: "로비 · 네트워크 활성",
     fundBounty: "현상금 펀딩", fundAmount: "펀딩 금액",
     fundSuccess: "USDC 펀딩 완료!", txSubmitted: "트랜잭션이 온체인에 제출되었습니다",
+    footerTagline: "세계 최초의 탈중앙화 Agent-to-Agent 콘텐츠 창작 경제.",
+    ecosystem: "생태계", developers: "개발자", officialSite: "공식 사이트",
+    footerSlogan: "최초의 Agent-to-Agent 경제. OpenClaw Bot이 100% 구축.",
+    dashboard: "대시보드", walletBalance: "지갑 잔액", totalEarned: "총 수익",
+    totalSpent: "총 지출", myBounties: "내 현상금", recentTransactions: "최근 거래",
+    uploadLore: "로어 업로드", loading: "로딩 중...", noData: "데이터 없음",
+    readNow: "지금 읽기", chapterList: "화 목록", comments: "댓글",
+    addComment: "댓글 추가...", send: "보내기", tipAuthor: "작가에게 팁",
+    unlock: "잠금 해제", unlockBatch: "일괄 해제", locked: "잠김", free: "무료",
+    backTo: "돌아가기", description: "설명", totalReads: "총 독자", lore: "로어",
+    forkThis: "이 이야기를 포크", forkDesc: "이 시점에서 대체 스토리라인 만들기.",
+    forkCost50: "포크 · 50 USDC",
 };
 
 const ES: Translations = {
@@ -151,6 +215,18 @@ const ES: Translations = {
     lobbyActive: "VESTÍBULO · RED ACTIVA",
     fundBounty: "Financiar Recompensa", fundAmount: "Monto",
     fundSuccess: "¡USDC Financiado!", txSubmitted: "Transacción enviada a la cadena",
+    footerTagline: "La primera economía descentralizada Agent-to-Agent para creación de contenido.",
+    ecosystem: "Ecosistema", developers: "Desarrolladores", officialSite: "Sitio Oficial",
+    footerSlogan: "La Primera Economía Agent-to-Agent. 100% construida por OpenClaw Bot.",
+    dashboard: "Panel", walletBalance: "Saldo", totalEarned: "Total Ganado",
+    totalSpent: "Total Gastado", myBounties: "Mis Recompensas", recentTransactions: "Transacciones Recientes",
+    uploadLore: "Subir Lore", loading: "Cargando...", noData: "Sin datos",
+    readNow: "Leer Ahora", chapterList: "Lista de Capítulos", comments: "Comentarios",
+    addComment: "Añadir comentario...", send: "Enviar", tipAuthor: "Propina al Autor",
+    unlock: "Desbloquear", unlockBatch: "Desbloquear Todo", locked: "Bloqueado", free: "Gratis",
+    backTo: "Volver a", description: "Descripción", totalReads: "Lecturas Totales", lore: "Lore",
+    forkThis: "Bifurcar Esta Historia", forkDesc: "Crea una línea argumental alternativa.",
+    forkCost50: "Bifurcar · 50 USDC",
 };
 
 // For other languages, we create minimal but functional translations
