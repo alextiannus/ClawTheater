@@ -55,6 +55,10 @@ export default function BountiesPage() {
     const [pubAgreed, setPubAgreed] = useState(false);
     const [pubLoading, setPubLoading] = useState(false);
     const [toast, setToast] = useState<string | null>(null);
+    // Novel search for Plot Fork
+    const [novelSearch, setNovelSearch] = useState("");
+    const [allNovels, setAllNovels] = useState<{ id: string; title: string; agent: string; lang: string }[]>([]);
+    const [selectedNovel, setSelectedNovel] = useState<{ id: string; title: string } | null>(null);
 
     const showToast = (msg: string) => { setToast(msg); setTimeout(() => setToast(null), 3000); };
 
@@ -63,6 +67,11 @@ export default function BountiesPage() {
             .then((r) => r.json())
             .then((data) => { setBounties(data.bounties || []); setLoading(false); })
             .catch(() => setLoading(false));
+        // Also fetch novels for Plot Fork search
+        fetch("/api/novels")
+            .then((r) => r.json())
+            .then((data) => setAllNovels((data.novels || []).map((n: any) => ({ id: n.id, title: n.title, agent: n.agent, lang: n.language || n.lang }))))
+            .catch(() => { });
     }, []);
 
     const langFiltered = bounties.filter((b) => b.language === lang);
@@ -232,8 +241,8 @@ export default function BountiesPage() {
                                         key={cat.key}
                                         onClick={() => setPubCategory(cat.key)}
                                         className={`p-4 rounded-xl border text-left transition-all ${pubCategory === cat.key
-                                                ? "border-terminal-green/50 bg-terminal-green/5"
-                                                : "border-white/10 bg-white/[0.02] hover:border-white/20"
+                                            ? "border-terminal-green/50 bg-terminal-green/5"
+                                            : "border-white/10 bg-white/[0.02] hover:border-white/20"
                                             }`}
                                     >
                                         <p className="text-lg mb-1">{cat.icon}</p>
@@ -248,6 +257,45 @@ export default function BountiesPage() {
                             {/* Step 2: Details */}
                             {pubCategory && (
                                 <div className="space-y-4 mb-6">
+                                    {/* Novel search for Plot Fork */}
+                                    {pubCategory === "PLOT_FORK" && (
+                                        <div>
+                                            <label className="text-xs text-ghost-muted mb-1 block">📖 {t.description} — Select Source Novel</label>
+                                            {selectedNovel ? (
+                                                <div className="flex items-center gap-3 bg-terminal-green/5 border border-terminal-green/20 rounded-xl px-4 py-2.5">
+                                                    <span className="text-sm text-terminal-green flex-1">📖 {selectedNovel.title}</span>
+                                                    <button onClick={() => setSelectedNovel(null)} className="text-xs text-ghost-muted hover:text-neon-red">✕</button>
+                                                </div>
+                                            ) : (
+                                                <>
+                                                    <input
+                                                        type="text" value={novelSearch}
+                                                        onChange={(e) => setNovelSearch(e.target.value)}
+                                                        placeholder="Search novels..."
+                                                        className="w-full bg-obsidian border border-white/10 rounded-xl px-4 py-2.5 text-sm text-ghost-white placeholder-ghost-muted/50 focus:border-terminal-green/50 focus:outline-none"
+                                                    />
+                                                    {novelSearch.length > 0 && (
+                                                        <div className="mt-2 max-h-40 overflow-y-auto rounded-xl border border-white/10 bg-obsidian">
+                                                            {allNovels.filter(n => n.title.toLowerCase().includes(novelSearch.toLowerCase())).slice(0, 8).map(n => (
+                                                                <button
+                                                                    key={n.id}
+                                                                    onClick={() => { setSelectedNovel({ id: n.id, title: n.title }); setNovelSearch(""); }}
+                                                                    className="w-full text-left px-4 py-2.5 text-sm text-ghost-white hover:bg-white/5 flex items-center gap-2 border-b border-white/5 last:border-0"
+                                                                >
+                                                                    <span className="text-terminal-green">📖</span>
+                                                                    <span className="flex-1 truncate">{n.title}</span>
+                                                                    <span className="text-xs text-ghost-muted">🦞 {n.agent}</span>
+                                                                </button>
+                                                            ))}
+                                                            {allNovels.filter(n => n.title.toLowerCase().includes(novelSearch.toLowerCase())).length === 0 && (
+                                                                <p className="px-4 py-2.5 text-xs text-ghost-muted">{t.noResults}</p>
+                                                            )}
+                                                        </div>
+                                                    )}
+                                                </>
+                                            )}
+                                        </div>
+                                    )}
                                     <div>
                                         <label className="text-xs text-ghost-muted mb-1 block">{t.bountyTitle}</label>
                                         <input
