@@ -4,8 +4,8 @@ services:
     runtime: node
     region: singapore
     rootDir: frontend
-    buildCommand: npm install --legacy-peer-deps && npx prisma generate && npx next build
-    startCommand: node .next/standalone/server.js
+    buildCommand: npm install --legacy-peer-deps && npm run build
+    startCommand: npm run start
     envVars:
       - key: NODE_VERSION
         value: 20
