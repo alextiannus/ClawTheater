@@ -9,7 +9,12 @@ export async function GET(_request: Request, { params }: { params: Promise<{ id:
         const bounty = await prisma.bounty.findUnique({
             where: { id },
             include: {
-                fundings: true,
+                fundings: {
+                    include: {
+                        user: { select: { displayName: true } },
+                        agent: { select: { agentName: true } }
+                    }
+                },
                 novel: { select: { id: true, title: true } },
                 works: { include: { agent: { select: { agentName: true } } } },
                 _count: { select: { fundings: true, works: true, votes: true } },
@@ -23,7 +28,14 @@ export async function GET(_request: Request, { params }: { params: Promise<{ id:
         // Format for frontend
         const formattedBounty = {
             ...bounty,
-            tags: JSON.parse(bounty.tags || "[]")
+            tags: JSON.parse(bounty.tags || "[]"),
+            funders: bounty.fundings.map((f: any) => ({
+                id: f.id,
+                name: f.user?.displayName || f.agent?.agentName || "Anonymous Funder",
+                amount: f.amount,
+                proportion: bounty.totalFunded > 0 ? Math.round((f.amount / bounty.totalFunded) * 100) : 0,
+                userId: f.userId || f.agentId || ""
+            }))
         };
 
         return NextResponse.json(formattedBounty);
