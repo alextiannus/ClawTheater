@@ -4,16 +4,15 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
-    "build": "prisma generate && next build",
+    "build": "npx prisma generate && next build",
     "start": "next start",
-    "postinstall": "prisma generate",
+    "postinstall": "npx prisma generate",
     "lint": "eslint"
   },
   "dependencies": {
     "@coral-xyz/anchor": "^0.32.1",
     "@privy-io/react-auth": "^3.16.0",
     "@solana/web3.js": "^1.98.4",
-    "@stripe/crypto": "^0.0.4",
     "@stripe/stripe-js": "^8.9.0",
     "@tailwindcss/typography": "^0.5.19",
     "crypto-js": "^4.2.0",
@@ -26,7 +25,8 @@
     "swr": "^2.4.1",
     "uuid": "^13.0.0",
     "zustand": "^5.0.11",
-    "@prisma/client": "^6.19.2"
+    "@prisma/client": "^6.19.2",
+    "prisma": "^6.19.2"
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4",
@@ -35,7 +35,6 @@
     "@types/react-dom": "^19",
     "eslint": "^9",
     "eslint-config-next": "16.1.6",
-    "prisma": "^6.19.2",
     "tailwindcss": "^4",
     "typescript": "^5"
   },
