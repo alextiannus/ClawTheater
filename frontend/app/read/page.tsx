@@ -55,9 +55,6 @@ function ReadNovelPage() {
     const [chapters, setChapters] = useState<ChapterData[]>([]);
     const [selectedChapter, setSelectedChapter] = useState(0);
     const [loading, setLoading] = useState(true);
-    const [showForkModal, setShowForkModal] = useState(false);
-    const [forkPrompt, setForkPrompt] = useState("");
-    const [forkAmount, setForkAmount] = useState(50);
     const [showTipModal, setShowTipModal] = useState(false);
     const [showUnlockModal, setShowUnlockModal] = useState(false);
     const [commentText, setCommentText] = useState("");
@@ -258,28 +255,7 @@ function ReadNovelPage() {
         }
     };
 
-    const handleFork = async () => {
-        if (!forkPrompt.trim() || !novelId) return;
-        setActionLoading(true);
-        try {
-            const res = await fetch("/api/bounties/fork", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ novelId, prompt: forkPrompt, fundAmount: forkAmount }),
-            });
-            const data = await res.json();
-            if (data.success) {
-                showToast(`🔀 Fork bounty created! Funded $${forkAmount} USDC`);
-                setShowForkModal(false);
-                setForkPrompt("");
-            } else {
-                showToast(`❌ ${data.error}`);
-            }
-        } catch {
-            showToast("❌ Network error");
-        }
-        setActionLoading(false);
-    };
+
 
     if (loading) {
         return (
@@ -457,12 +433,7 @@ function ReadNovelPage() {
                                     >
                                         ⚡ 赛博投喂
                                     </button>
-                                    <button
-                                        onClick={() => setShowForkModal(true)}
-                                        className="px-5 py-2.5 rounded-xl bg-pulse-blue/10 text-pulse-blue border border-pulse-blue/30 hover:bg-pulse-blue/20 transition-all text-sm font-medium"
-                                    >
-                                        🔀 发起硬分叉
-                                    </button>
+
                                     <button className="px-5 py-2.5 rounded-xl bg-white/5 text-ghost-muted border border-white/10 hover:bg-white/10 transition-all text-sm">
                                         🔖 收藏本章
                                     </button>
@@ -517,41 +488,6 @@ function ReadNovelPage() {
                     </div>
                 </div>
 
-                {/* Fork Modal */}
-                {showForkModal && (
-                    <div className="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-                        <div className="glass-card p-8 max-w-lg w-full">
-                            <h3 className="text-2xl font-bold text-ghost-white mb-2">🔀 {t.forkThis}</h3>
-                            <p className="text-sm text-ghost-muted mb-6">Describe your alternate storyline.</p>
-                            <textarea
-                                value={forkPrompt}
-                                onChange={(e) => setForkPrompt(e.target.value)}
-                                placeholder="e.g. 主角必须黑化！..."
-                                className="w-full h-32 bg-obsidian border border-white/10 rounded-xl p-4 text-sm text-ghost-white placeholder-ghost-muted/50 focus:border-pulse-blue/50 focus:outline-none resize-none"
-                            />
-                            <div className="flex items-center gap-3 mt-4">
-                                <input
-                                    type="number"
-                                    value={forkAmount}
-                                    onChange={(e) => setForkAmount(Number(e.target.value))}
-                                    min={1}
-                                    className="w-32 bg-obsidian border border-white/10 rounded-xl px-4 py-2.5 text-sm text-ghost-white focus:border-terminal-green/50 focus:outline-none"
-                                />
-                                <span className="text-sm text-ghost-muted">USDC Initial Funding</span>
-                            </div>
-                            <div className="flex justify-end gap-3 mt-6">
-                                <button onClick={() => setShowForkModal(false)} className="px-4 py-2 text-sm text-ghost-muted">Cancel</button>
-                                <button
-                                    onClick={handleFork}
-                                    disabled={actionLoading}
-                                    className="px-6 py-2.5 bg-pulse-blue text-white rounded-xl text-sm font-medium hover:bg-pulse-blue/80 transition-all glow-blue disabled:opacity-50"
-                                >
-                                    {actionLoading ? "Creating..." : "Create Fork Bounty"}
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-                )}
 
                 {/* Tip Modal */}
                 {showTipModal && (

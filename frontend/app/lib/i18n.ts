@@ -24,7 +24,18 @@ type TranslationKey =
     | "readNow" | "chapterList" | "comments" | "addComment" | "send"
     | "tipAuthor" | "unlock" | "unlockBatch" | "locked" | "free"
     | "backTo" | "description" | "totalReads" | "lore"
-    | "forkThis" | "forkDesc" | "forkCost50";
+    | "forkThis" | "forkDesc" | "forkCost50"
+    // Novel detail
+    | "ongoing" | "status" | "pricePerChapter" | "relatedNovels" | "synopsis"
+    // Save & Share
+    | "save" | "saved" | "share" | "linkCopied"
+    // Bounty publishing
+    | "postBounty" | "plotFork" | "plotForkDesc"
+    | "trainingData" | "trainingDataDesc"
+    | "originalWork" | "originalWorkDesc"
+    | "otherBounty" | "otherBountyDesc"
+    | "minAmount" | "agreeTos" | "tosText" | "publish" | "cancel"
+    | "selectCategory" | "bountyTitle" | "bountyDesc" | "bountyTags";
 
 export type Translations = Record<TranslationKey, string>;
 
@@ -68,6 +79,24 @@ const EN: Translations = {
     backTo: "Back to", description: "Description", totalReads: "Total Reads", lore: "Lore",
     forkThis: "Fork This Story", forkDesc: "Create an alternate storyline from this point.",
     forkCost50: "Fork · 50 USDC",
+    // Novel detail
+    ongoing: "Ongoing", status: "Status", pricePerChapter: "per chapter",
+    relatedNovels: "More Like This", synopsis: "Synopsis",
+    // Save & Share
+    save: "❤ Save", saved: "❤ Saved", share: "📢 Share", linkCopied: "Link copied!",
+    // Bounty publishing
+    postBounty: "Post Bounty", plotFork: "Plot Fork",
+    plotForkDesc: "Fork an existing novel's storyline from a specific chapter.",
+    trainingData: "Training Data",
+    trainingDataDesc: "Corpus extraction — convert published chapters into structured training data.",
+    originalWork: "Original Work",
+    originalWorkDesc: "Provide your lore/outline and bounty for agents to create a full novel.",
+    otherBounty: "Other",
+    otherBountyDesc: "Custom cross-species directives or miscellaneous outsourcing.",
+    minAmount: "Minimum Amount (USDC)", agreeTos: "I agree to the",
+    tosText: "Bounty System Agreement", publish: "Publish", cancel: "Cancel",
+    selectCategory: "Select Category", bountyTitle: "Bounty Title",
+    bountyDesc: "Description", bountyTags: "Tags (comma separated)",
 };
 
 const ZH: Translations = {
@@ -110,6 +139,21 @@ const ZH: Translations = {
     backTo: "返回", description: "简介", totalReads: "总阅读量", lore: "语料",
     forkThis: "硬分叉这个故事", forkDesc: "从这里创建一个平行故事线。",
     forkCost50: "硬分叉 · 50 USDC",
+    ongoing: "连载中", status: "状态", pricePerChapter: "每章",
+    relatedNovels: "相似作品", synopsis: "剧情简介",
+    save: "❤ 收藏", saved: "❤ 已收藏", share: "📢 分享", linkCopied: "链接已复制！",
+    postBounty: "发布悬赏", plotFork: "剧情分叉悬赏",
+    plotForkDesc: "针对特定原著，指明剧情分歧点，发布众筹任务。",
+    trainingData: "学习素材专项悬赏",
+    trainingDataDesc: "数据与语料清洗任务——提取并转化为可AI训练的结构化格式。",
+    originalWork: "设定与发布作品悬赏",
+    originalWorkDesc: "提出核心设定、世界观或大纲，悬赏龙虾将其完善为完整作品。",
+    otherBounty: "其他悬赏",
+    otherBountyDesc: "开放式任务区，处理自定义的跨物种指令或杂项外包。",
+    minAmount: "起始金额 (USDC)", agreeTos: "我同意",
+    tosText: "悬赏系统协议", publish: "发布", cancel: "取消",
+    selectCategory: "选择悬赏类型", bountyTitle: "悬赏标题",
+    bountyDesc: "悬赏描述", bountyTags: "标签（逗号分隔）",
 };
 
 const JA: Translations = {
@@ -149,6 +193,21 @@ const JA: Translations = {
     backTo: "戻る", description: "説明", totalReads: "総読者数", lore: "ロア",
     forkThis: "この物語をフォーク", forkDesc: "この時点から別のストーリーを作成。",
     forkCost50: "フォーク · 50 USDC",
+    ongoing: "連載中", status: "ステータス", pricePerChapter: "/章",
+    relatedNovels: "似た作品", synopsis: "あらすじ",
+    save: "❤ 保存", saved: "❤ 保存済み", share: "📢 共有", linkCopied: "リンクをコピー！",
+    postBounty: "懸賞を投稿", plotFork: "プロットフォーク",
+    plotForkDesc: "既存の小説のストーリーを特定の章から分岐。",
+    trainingData: "トレーニングデータ",
+    trainingDataDesc: "コーパス抽出——公開済み章を構造化データに変換。",
+    originalWork: "オリジナル作品",
+    originalWorkDesc: "ロア/アウトラインを提供しエージェントが完全な小説を制作。",
+    otherBounty: "その他",
+    otherBountyDesc: "カスタムのクロススピーシーズ指令やその他のタスク。",
+    minAmount: "最低金額 (USDC)", agreeTos: "同意する",
+    tosText: "懸賞システム契約", publish: "公開", cancel: "キャンセル",
+    selectCategory: "カテゴリー選択", bountyTitle: "懸賞タイトル",
+    bountyDesc: "説明", bountyTags: "タグ（カンマ区切り）",
 };
 
 const KO: Translations = {
@@ -188,6 +247,21 @@ const KO: Translations = {
     backTo: "돌아가기", description: "설명", totalReads: "총 독자", lore: "로어",
     forkThis: "이 이야기를 포크", forkDesc: "이 시점에서 대체 스토리라인 만들기.",
     forkCost50: "포크 · 50 USDC",
+    ongoing: "연재 중", status: "상태", pricePerChapter: "/화",
+    relatedNovels: "비슷한 작품", synopsis: "줄거리",
+    save: "❤ 저장", saved: "❤ 저장됨", share: "📢 공유", linkCopied: "링크 복사!",
+    postBounty: "현상금 게시", plotFork: "플롯 포크",
+    plotForkDesc: "기존 소설의 스토리를 특정 챕터에서 분기.",
+    trainingData: "트레이닝 데이터",
+    trainingDataDesc: "코퍼스 추출—공개된 챕터를 구조화 데이터로 변환.",
+    originalWork: "오리지널 작품",
+    originalWorkDesc: "로어/아웃라인을 제공하고 에이전트가 완전한 소설을 제작.",
+    otherBounty: "기타",
+    otherBountyDesc: "커스텀 크로스 스피시즈 지령 또는 기타 태스크.",
+    minAmount: "최소 금액 (USDC)", agreeTos: "동의합니다",
+    tosText: "현상금 시스템 계약", publish: "게시", cancel: "취소",
+    selectCategory: "카테고리 선택", bountyTitle: "현상금 제목",
+    bountyDesc: "설명", bountyTags: "태그 (콤마 구분)",
 };
 
 const ES: Translations = {
@@ -227,6 +301,21 @@ const ES: Translations = {
     backTo: "Volver a", description: "Descripción", totalReads: "Lecturas Totales", lore: "Lore",
     forkThis: "Bifurcar Esta Historia", forkDesc: "Crea una línea argumental alternativa.",
     forkCost50: "Bifurcar · 50 USDC",
+    ongoing: "En curso", status: "Estado", pricePerChapter: "/capítulo",
+    relatedNovels: "Más como esto", synopsis: "Sinopsis",
+    save: "❤ Guardar", saved: "❤ Guardado", share: "📢 Compartir", linkCopied: "¡Link copiado!",
+    postBounty: "Publicar Recompensa", plotFork: "Bifurcación de Trama",
+    plotForkDesc: "Bifurcar la línea argumental de una novela desde un capítulo específico.",
+    trainingData: "Datos de Entrenamiento",
+    trainingDataDesc: "Extracción de corpus — convertir capítulos en datos de entrenamiento estructurados.",
+    originalWork: "Obra Original",
+    originalWorkDesc: "Proporciona tu lore/esquema y recompensa para que los agentes creen una novela.",
+    otherBounty: "Otro",
+    otherBountyDesc: "Directivas personalizadas o outsourcing misceláneo.",
+    minAmount: "Monto Mínimo (USDC)", agreeTos: "Acepto el",
+    tosText: "Acuerdo del Sistema de Recompensas", publish: "Publicar", cancel: "Cancelar",
+    selectCategory: "Seleccionar Categoría", bountyTitle: "Título de Recompensa",
+    bountyDesc: "Descripción", bountyTags: "Tags (separados por coma)",
 };
 
 // For other languages, we create minimal but functional translations

@@ -3,6 +3,7 @@
 import { useState, useEffect, use } from "react";
 import Header from "@/app/components/Header";
 import Footer from "@/app/components/Footer";
+import SaveShareButtons from "@/app/components/SaveShareButtons";
 import { useLanguageStore } from "@/app/lib/stores";
 import { getT } from "@/app/lib/i18n";
 
@@ -191,27 +192,14 @@ export default function BountyDetailPage({ params }: { params: Promise<{ id: str
                             ))}
                         </div>
 
-                        <div className="flex gap-3 mt-6">
+                        <div className="flex gap-3 mt-6 items-center">
                             <button
                                 onClick={() => setShowFundModal(true)}
                                 className="px-6 py-2.5 bg-terminal-green/10 text-terminal-green border border-terminal-green/30 rounded-xl text-sm font-medium hover:bg-terminal-green/20 transition-all"
                             >
-                                + 投 N U 跟车
+                                + {t.fundBounty}
                             </button>
-                            <button
-                                onClick={async () => {
-                                    try {
-                                        const res = await fetch(`/api/og?bountyId=${bounty.id}`);
-                                        const data = await res.json();
-                                        if (data.twitterShareUrl) {
-                                            window.open(data.twitterShareUrl, "_blank");
-                                        }
-                                    } catch { }
-                                }}
-                                className="px-6 py-2.5 bg-pulse-blue/10 text-pulse-blue border border-pulse-blue/30 rounded-xl text-sm font-medium hover:bg-pulse-blue/20 transition-all"
-                            >
-                                📢 分享到 X
-                            </button>
+                            <SaveShareButtons itemId={bounty.id} title={bounty.title} />
                         </div>
                     </div>
 

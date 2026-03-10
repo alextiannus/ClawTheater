@@ -291,13 +291,13 @@ export default function HomePage() {
                                         <button onClick={() => openFund(slide.title, slide.id)} className="px-8 py-3.5 rounded-sm bg-terminal-green text-black font-bold text-sm tracking-wider uppercase hover:shadow-[0_0_30px_rgba(5,150,105,0.4)] hover:scale-105 transition-all cursor-pointer">
                                             {t.fundCta}
                                         </button>
-                                        <Link href={`/read?novelId=${slide.novelId}`} className="px-8 py-3.5 rounded-sm border border-white/20 text-white font-bold text-sm tracking-wider uppercase hover:bg-white/5 hover:scale-105 transition-all">
+                                        <Link href={`/novels/${slide.novelId}`} className="px-8 py-3.5 rounded-sm border border-white/20 text-white font-bold text-sm tracking-wider uppercase hover:bg-white/5 hover:scale-105 transition-all">
                                             {t.readPrev}
                                         </Link>
                                     </>
                                 ) : (
                                     <>
-                                        <Link href={`/read?novelId=${slide?.novelId}`} className="px-8 py-3.5 rounded-sm bg-white text-black font-bold text-sm tracking-wider uppercase hover:shadow-[0_0_30px_rgba(255,255,255,0.3)] hover:scale-105 transition-all">
+                                        <Link href={`/novels/${slide?.novelId}`} className="px-8 py-3.5 rounded-sm bg-white text-black font-bold text-sm tracking-wider uppercase hover:shadow-[0_0_30px_rgba(255,255,255,0.3)] hover:scale-105 transition-all">
                                             {t.startReading}
                                         </Link>
                                         <Link href="/bounties" className="px-8 py-3.5 rounded-sm border border-white/20 text-white font-bold text-sm tracking-wider uppercase hover:bg-white/5 hover:scale-105 transition-all">
@@ -558,7 +558,7 @@ function FundForm({ onClose, lang }: { onClose: () => void; lang: string }) {
 function ForkableCard({ novel, t }: { novel: DemoNovel; t: PageTranslations }) {
     return (
         <div className="flex-shrink-0 w-56 group relative">
-            <Link href={`/read?novelId=${novel.id}`}>
+            <Link href={`/novels/${novel.id}`}>
                 <div className="relative aspect-[3/4] rounded-lg overflow-hidden border border-white/5 transition-all duration-500 group-hover:border-white/20 group-hover:shadow-[0_8px_50px_rgba(0,0,0,0.6)] group-hover:scale-[1.04]">
                     <div className="absolute inset-0" style={{ background: novel.gradient }} />
                     <div className="absolute inset-0 flex flex-col justify-end p-4">
@@ -631,7 +631,7 @@ function MissionCard({ directive, t }: { directive: typeof ACTIVE_DIRECTIVES[num
 
 function ArchiveCard({ novel }: { novel: DemoNovel }) {
     return (
-        <Link href={`/read?novelId=${novel.id}`} className="group relative">
+        <Link href={`/novels/${novel.id}`} className="group relative">
             <div className="relative aspect-[3/4] rounded-lg overflow-hidden border border-white/5 transition-all duration-300 group-hover:border-white/20 group-hover:shadow-[0_4px_30px_rgba(0,0,0,0.4)] group-hover:scale-[1.03]">
                 <div className="absolute inset-0" style={{ background: novel.gradient }} />
                 <div className="absolute inset-0 flex flex-col justify-between p-3">
