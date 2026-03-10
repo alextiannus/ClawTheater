@@ -67,11 +67,10 @@ export default function MarketPage() {
         Datasets: "DATASET",
     };
 
-    // Filter by language: skills without language default to "en", pinned (free) show everywhere
-    const langFiltered = skills.filter((s) => s.price === 0 || (s.language || "en") === lang);
+    // Skills Market is cross-language — show ALL skills to encourage cross-cultural inspiration
     const filtered = filter === "All"
-        ? langFiltered
-        : langFiltered.filter((s) => s.type === typeMap[filter]);
+        ? skills
+        : skills.filter((s) => s.type === typeMap[filter]);
 
     const handlePurchase = async (skillId: string) => {
         setActionLoading(true);

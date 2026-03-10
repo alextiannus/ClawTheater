@@ -20,7 +20,9 @@ export default function Header() {
     const [mobileOpen, setMobileOpen] = useState(false);
     const [showDeposit, setShowDeposit] = useState(false);
     const [showLangPicker, setShowLangPicker] = useState(false);
+    const [showAvatarMenu, setShowAvatarMenu] = useState(false);
     const langRef = useRef<HTMLDivElement>(null);
+    const avatarRef = useRef<HTMLDivElement>(null);
     const { lang, setLang, autoDetect } = useLanguageStore();
     const { isAuthenticated, user, login, logout } = useAuth();
 
@@ -29,11 +31,14 @@ export default function Header() {
         autoDetect();
     }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
-    // Close dropdown when clicking outside
+    // Close dropdowns when clicking outside
     useEffect(() => {
         const handler = (e: MouseEvent) => {
             if (langRef.current && !langRef.current.contains(e.target as Node)) {
                 setShowLangPicker(false);
+            }
+            if (avatarRef.current && !avatarRef.current.contains(e.target as Node)) {
+                setShowAvatarMenu(false);
             }
         };
         document.addEventListener("mousedown", handler);
@@ -101,8 +106,8 @@ export default function Header() {
                                                 key={l.code}
                                                 onClick={() => { setLang(l.code); setShowLangPicker(false); }}
                                                 className={`w-full px-4 py-2.5 flex items-center gap-3 text-left transition-all cursor-pointer ${l.code === lang
-                                                        ? "bg-terminal-green/10 text-terminal-green"
-                                                        : "text-white/50 hover:bg-white/5 hover:text-white/80"
+                                                    ? "bg-terminal-green/10 text-terminal-green"
+                                                    : "text-white/50 hover:bg-white/5 hover:text-white/80"
                                                     }`}
                                             >
                                                 <span className="text-lg w-7 text-center leading-none">{l.flag}</span>
@@ -138,20 +143,67 @@ export default function Header() {
                             </button>
                         )}
 
-                        {/* Login / User */}
-                        {isAuthenticated ? (
-                            <div className="flex items-center gap-2">
-                                <div className="px-3 py-1.5 bg-terminal-green/10 border border-terminal-green/20 rounded-full text-[9px] font-mono text-terminal-green flex items-center gap-1.5">
-                                    <User size={10} />
-                                    {user?.wallet?.address
-                                        ? `${user.wallet.address.slice(0, 4)}...${user.wallet.address.slice(-4)}`
-                                        : user?.email?.address?.split("@")[0] || "User"}
+                        {/* Login / User Avatar Dropdown */}
+                        {isAuthenticated ? (() => {
+                            const displayInitial = user?.google?.name?.[0] || user?.email?.address?.[0] || "U";
+                            const avatarUrl = (user?.google as Record<string, string> | undefined)?.picture || null;
+                            const userName = user?.google?.name || user?.email?.address?.split("@")[0] || "User";
+                            return (
+                                <div className="relative" ref={avatarRef}>
+                                    <button
+                                        onClick={() => setShowAvatarMenu(!showAvatarMenu)}
+                                        className="w-9 h-9 rounded-full bg-terminal-green/20 border-2 border-terminal-green/40 flex items-center justify-center cursor-pointer hover:border-terminal-green hover:shadow-[0_0_12px_rgba(57,255,20,0.3)] transition-all overflow-hidden"
+                                    >
+                                        {avatarUrl ? (
+                                            <Image src={avatarUrl} alt="" width={36} height={36} className="rounded-full object-cover" />
+                                        ) : (
+                                            <span className="text-terminal-green font-bold text-sm uppercase">{displayInitial}</span>
+                                        )}
+                                    </button>
+
+                                    {showAvatarMenu && (
+                                        <div className="absolute top-full right-0 mt-2 w-56 bg-obsidian/95 backdrop-blur-xl border border-white/10 rounded-xl shadow-2xl overflow-hidden z-50">
+                                            {/* User info header */}
+                                            <div className="px-4 py-3 border-b border-white/5">
+                                                <div className="text-sm font-medium text-ghost-white truncate">{userName}</div>
+                                                <div className="text-[10px] font-mono text-white/30 truncate">
+                                                    {user?.wallet?.address
+                                                        ? `${user.wallet.address.slice(0, 6)}...${user.wallet.address.slice(-4)}`
+                                                        : user?.email?.address || ""}
+                                                </div>
+                                            </div>
+                                            {/* Menu items */}
+                                            <div className="py-1">
+                                                <Link
+                                                    href="/dashboard"
+                                                    onClick={() => setShowAvatarMenu(false)}
+                                                    className="w-full px-4 py-2.5 flex items-center gap-3 text-white/60 hover:bg-white/5 hover:text-white transition-all text-sm"
+                                                >
+                                                    <User size={14} />
+                                                    {lang === "zh" ? "个人中心" : "Profile"}
+                                                </Link>
+                                                <Link
+                                                    href="/docs"
+                                                    onClick={() => setShowAvatarMenu(false)}
+                                                    className="w-full px-4 py-2.5 flex items-center gap-3 text-white/60 hover:bg-terminal-green/10 hover:text-terminal-green transition-all text-sm"
+                                                >
+                                                    <span className="text-sm">🦞</span>
+                                                    {lang === "zh" ? "成为龙虾创作者" : "Become a Creator"}
+                                                </Link>
+                                                <div className="border-t border-white/5 my-1" />
+                                                <button
+                                                    onClick={() => { logout(); setShowAvatarMenu(false); }}
+                                                    className="w-full px-4 py-2.5 flex items-center gap-3 text-white/40 hover:bg-neon-red/10 hover:text-neon-red transition-all text-sm cursor-pointer"
+                                                >
+                                                    <LogOut size={14} />
+                                                    {lang === "zh" ? "退出登录" : "Sign Out"}
+                                                </button>
+                                            </div>
+                                        </div>
+                                    )}
                                 </div>
-                                <button onClick={logout} className="p-1.5 bg-white/5 border border-white/10 rounded-full text-white/30 hover:text-neon-red hover:border-neon-red/30 transition-all cursor-pointer">
-                                    <LogOut size={10} />
-                                </button>
-                            </div>
-                        ) : (
+                            );
+                        })() : (
                             <button
                                 onClick={login}
                                 className="px-4 py-1.5 bg-white text-black rounded-full text-[9px] font-mono font-bold tracking-wider hover:shadow-[0_0_20px_rgba(255,255,255,0.3)] transition-all cursor-pointer flex items-center gap-1.5 uppercase"
