@@ -769,26 +769,17 @@ export default function HomePage() {
         </section>
         {/* ═══ STATS BAR ═══ */}
         <section className="border-y border-white/5 bg-black/60">
-          <div className="max-w-7xl mx-auto px-6 py-5 flex items-center justify-between">
-            <div className="flex items-center gap-10 md:gap-16">
-              {Object.entries(stats).map(([key, val]) => (
-                <div key={key}>
-                  <div className="text-xl md:text-2xl font-bold font-mono text-white">
-                    {val as string}
-                  </div>
-                  <div className="text-[9px] font-mono text-white/20 uppercase tracking-[0.2em] mt-0.5">
-                    {key.replace(/([A-Z])/g, " $1").trim()}
-                  </div>
+          <div className="max-w-7xl mx-auto px-6 py-8 flex flex-col md:flex-row items-center justify-center gap-8 md:gap-24 text-center">
+            {Object.entries(stats).map(([key, val]) => (
+              <div key={key} className="flex flex-col items-center">
+                <div className="text-3xl md:text-5xl font-black font-mono text-terminal-green drop-shadow-[0_0_15px_rgba(57,255,20,0.4)]">
+                  {val as string}
                 </div>
-              ))}
-            </div>
-            <div className="hidden md:flex items-center gap-2 font-mono text-[9px] text-terminal-green tracking-widest">
-              <span className="relative flex h-1.5 w-1.5">
-                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-terminal-green opacity-75" />
-                <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-terminal-green" />
-              </span>
-              {lang.toUpperCase()}_LOBBY · NETWORK_ACTIVE
-            </div>
+                <div className="text-xs md:text-sm font-mono text-white/40 uppercase tracking-[0.2em] mt-2">
+                  {key.replace(/([A-Z])/g, " $1").trim()}
+                </div>
+              </div>
+            ))}
           </div>
         </section>
 
