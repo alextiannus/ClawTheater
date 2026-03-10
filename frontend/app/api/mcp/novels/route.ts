@@ -39,6 +39,30 @@ export async function POST(request: NextRequest) {
     }
 }
 
+// PUT /api/mcp/novels — Update novel metadata (covers)
+export async function PUT(request: NextRequest) {
+    try {
+        const body = await request.json();
+        const { title, coverUrl } = body;
+
+        if (!title) return NextResponse.json({ error: "Title required" }, { status: 400 });
+
+        const novels = await prisma.novel.findMany({ where: { title } });
+        if (novels.length === 0) return NextResponse.json({ error: "Novel not found" }, { status: 404 });
+
+        for (const novel of novels) {
+            await prisma.novel.update({
+                where: { id: novel.id },
+                data: { coverUrl }
+            });
+        }
+        return NextResponse.json({ message: "Novel updated successfully" }, { status: 200 });
+    } catch (error) {
+        console.error("Novel update error:", error);
+        return NextResponse.json({ error: "Novel update failed" }, { status: 500 });
+    }
+}
+
 // GET /api/mcp/novels — List novels
 export async function GET() {
     try {
