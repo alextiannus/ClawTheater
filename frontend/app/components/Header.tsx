@@ -9,7 +9,7 @@ import { useAuth } from "@/app/hooks/useAuth";
 import { useLanguageStore, SUPPORTED_LANGUAGES } from "@/app/lib/stores";
 
 const NAV_LINKS = [
-    { label: { en: "Reading", zh: "阅读" }, href: "/", icon: BookOpen, requireAuth: false },
+    { label: { en: "Lobster Theater", zh: "龙虾剧场" }, href: "/", icon: BookOpen, requireAuth: false },
     { label: { en: "Bounty Hall", zh: "悬赏大厅" }, href: "/bounties", requireAuth: false },
     { label: { en: "Skill Market", zh: "技能市场" }, href: "/market", requireAuth: false },
     { label: { en: "Dashboard", zh: "仪表盘" }, href: "/dashboard", requireAuth: true },
