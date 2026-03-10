@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import Link from "next/link";
 import Header from "@/app/components/Header";
 import Footer from "@/app/components/Footer";
+import { useLanguageStore, SUPPORTED_LANGUAGES } from "@/app/lib/stores";
 
 interface BountyItem {
     id: string;
@@ -37,6 +38,8 @@ export default function BountiesPage() {
     const [bounties, setBounties] = useState<BountyItem[]>([]);
     const [loading, setLoading] = useState(true);
     const [filter, setFilter] = useState("All");
+    const { lang } = useLanguageStore();
+    const langInfo = SUPPORTED_LANGUAGES.find((l) => l.code === lang) || SUPPORTED_LANGUAGES[0];
 
     useEffect(() => {
         fetch("/api/bounties")
@@ -48,9 +51,11 @@ export default function BountiesPage() {
             .catch(() => setLoading(false));
     }, []);
 
+    // Filter by language first, then by status
+    const langFiltered = bounties.filter((b) => b.language === lang);
     const filtered = filter === "All"
-        ? bounties
-        : bounties.filter((b) => b.status === filter.toUpperCase());
+        ? langFiltered
+        : langFiltered.filter((b) => b.status === filter.toUpperCase());
 
     return (
         <>
@@ -59,11 +64,14 @@ export default function BountiesPage() {
                 <div className="max-w-7xl mx-auto px-6 py-12">
                     {/* Header */}
                     <div className="text-center mb-12">
+                        <p className="text-3xl mb-2">{langInfo.flag}</p>
                         <h1 className="text-4xl md:text-5xl font-bold text-ghost-white mb-4">
-                            Bounty Hall
+                            {lang === "zh" ? "悬赏大厅" : "Bounty Hall"}
                         </h1>
                         <p className="text-ghost-muted text-lg max-w-2xl mx-auto">
-                            Fund narratives, shape stories, earn dividends. Every bounty is a smart contract on Solana.
+                            {lang === "zh"
+                                ? "资助叙事，塑造故事，赚取收益。每个悬赏都是Solana上的智能合约。"
+                                : "Fund narratives, shape stories, earn dividends. Every bounty is a smart contract on Solana."}
                         </p>
                     </div>
 
@@ -75,8 +83,8 @@ export default function BountiesPage() {
                                 key={f}
                                 onClick={() => setFilter(f)}
                                 className={`px-3 py-1.5 text-sm rounded-lg border transition-all ${filter === f
-                                        ? "text-terminal-green border-terminal-green/30 bg-terminal-green/10"
-                                        : "border-white/10 text-ghost-muted hover:text-terminal-green hover:border-terminal-green/30"
+                                    ? "text-terminal-green border-terminal-green/30 bg-terminal-green/10"
+                                    : "border-white/10 text-ghost-muted hover:text-terminal-green hover:border-terminal-green/30"
                                     }`}
                             >
                                 {f}

@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import Header from "@/app/components/Header";
 import Footer from "@/app/components/Footer";
+import { useLanguageStore, SUPPORTED_LANGUAGES } from "@/app/lib/stores";
 
 interface SkillItem {
     id: string;
@@ -13,6 +14,7 @@ interface SkillItem {
     salesCount: number;
     creator: string;
     creatorType: string;
+    language?: string;
 }
 
 const typeLabels: Record<string, { label: string; style: string }> = {
@@ -26,6 +28,8 @@ export default function MarketPage() {
     const [skills, setSkills] = useState<SkillItem[]>([]);
     const [loading, setLoading] = useState(true);
     const [filter, setFilter] = useState("All");
+    const { lang } = useLanguageStore();
+    const langInfo = SUPPORTED_LANGUAGES.find((l) => l.code === lang) || SUPPORTED_LANGUAGES[0];
     const [showUploadModal, setShowUploadModal] = useState(false);
     const [showPurchaseResult, setShowPurchaseResult] = useState<{ name: string; content: any } | null>(null);
     const [actionLoading, setActionLoading] = useState(false);
@@ -63,9 +67,11 @@ export default function MarketPage() {
         Datasets: "DATASET",
     };
 
+    // Filter by language: skills without language default to "en", pinned (free) show everywhere
+    const langFiltered = skills.filter((s) => s.price === 0 || (s.language || "en") === lang);
     const filtered = filter === "All"
-        ? skills
-        : skills.filter((s) => s.type === typeMap[filter]);
+        ? langFiltered
+        : langFiltered.filter((s) => s.type === typeMap[filter]);
 
     const handlePurchase = async (skillId: string) => {
         setActionLoading(true);
@@ -129,11 +135,14 @@ export default function MarketPage() {
             <main className="pt-24 min-h-screen">
                 <div className="max-w-7xl mx-auto px-6 py-12">
                     <div className="text-center mb-12">
+                        <p className="text-3xl mb-2">{langInfo.flag}</p>
                         <h1 className="text-4xl md:text-5xl font-bold text-ghost-white mb-4">
-                            Skill Market
+                            {lang === "zh" ? "技能市场" : "Skill Market"}
                         </h1>
                         <p className="text-ghost-muted text-lg max-w-2xl mx-auto">
-                            Buy and sell prompts, workflows, and training data. The arms bazaar of the content universe.
+                            {lang === "zh"
+                                ? "买卖提示词、工作流和训练数据。内容宇宙的军火库。"
+                                : "Buy and sell prompts, workflows, and training data. The arms bazaar of the content universe."}
                         </p>
                     </div>
 
