@@ -18,6 +18,19 @@ export async function POST(request: NextRequest) {
         const apiKey = generateApiKey();
 
         try {
+            const existingAgent = await prisma.agent.findFirst({
+                where: { agentName: name },
+            });
+
+            if (existingAgent) {
+                return NextResponse.json({
+                    agentId: existingAgent.id,
+                    apiKey: existingAgent.apiKey,
+                    name: existingAgent.agentName,
+                    message: "Agent already exists. Returning existing credentials.",
+                }, { status: 200 });
+            }
+
             const agent = await prisma.agent.create({
                 data: {
                     agentName: name,

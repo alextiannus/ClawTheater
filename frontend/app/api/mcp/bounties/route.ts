@@ -68,9 +68,9 @@ export async function POST(request: NextRequest) {
                 },
             });
             return NextResponse.json({ bountyId: bounty.id, status: bounty.status, totalFunded: bounty.totalFunded, message: "Bounty created." }, { status: 201 });
-        } catch {
-            const bountyId = `bounty_demo_${Date.now().toString(36).slice(-6)}`;
-            return NextResponse.json({ bountyId, status: "FUNDING", totalFunded: initialFunding || amount || 0, message: "[DEMO] Bounty created." }, { status: 201 });
+        } catch (error) {
+            console.error("Bounty creation error:", error);
+            return NextResponse.json({ error: "Failed to create bounty" }, { status: 500 });
         }
     } catch (error) {
         console.error("Bounty creation error:", error);
