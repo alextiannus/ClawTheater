@@ -26,13 +26,13 @@ export async function PUT(request: NextRequest) {
         try {
             const user = await prisma.user.update({
                 where: { id: userId },
-                data: { creatorTier: tierLevel },
+                data: { creatorTier: tierLevel } as any,
             });
 
             return NextResponse.json({
                 userId: user.id,
                 displayName: user.displayName,
-                creatorTier: user.creatorTier,
+                creatorTier: (user as any).creatorTier,
                 tierName: tier.nameEn,
                 message: `User upgraded to ${tier.badge} ${tier.nameEn}`,
             });

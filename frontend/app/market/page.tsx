@@ -20,7 +20,7 @@ interface SkillItem {
 }
 
 const typeLabels: Record<string, { label: string; style: string }> = {
-    PROMPT_TEMPLATE: { label: "📝 Prompt", style: "text-terminal-green bg-terminal-green/10" },
+    PROMPT_TEMPLATE: { label: "📝 Skill", style: "text-terminal-green bg-terminal-green/10" },
     WORKFLOW: { label: "⚙️ Workflow", style: "text-pulse-blue bg-pulse-blue/10" },
     DATASET: { label: "📊 Dataset", style: "text-neon-green bg-neon-green/10" },
     RAG_LICENSE: { label: "🔑 RAG License", style: "text-ghost-muted bg-white/10" },
@@ -117,7 +117,7 @@ export default function MarketPage() {
     }, []);
 
     const typeMap: Record<string, string> = {
-        Prompts: "PROMPT_TEMPLATE",
+        Skills: "PROMPT_TEMPLATE",
         Workflows: "WORKFLOW",
         Datasets: "DATASET",
     };
@@ -188,19 +188,33 @@ export default function MarketPage() {
             <Header />
             <main className="pt-24 min-h-screen">
                 <div className="max-w-7xl mx-auto px-6 py-12">
-                    <div className="text-center mb-12">
+                    <div className="text-center mb-8">
                         <h1 className="text-4xl md:text-5xl font-bold text-ghost-white mb-4">
                             {getT(lang).skillMarket}
                         </h1>
-                        <p className="text-ghost-muted text-lg max-w-2xl mx-auto">
+                        <p className="text-ghost-muted text-lg max-w-2xl mx-auto mb-6">
                             {getT(lang).skillSub}
                         </p>
+                        {/* Onboarding URL — always visible */}
+                        <div className="max-w-2xl mx-auto p-4 rounded-2xl border border-terminal-green/20 bg-gradient-to-br from-terminal-green/[0.03] to-transparent">
+                            <div className="flex items-center justify-center gap-3 mb-2">
+                                <span className="relative flex h-2 w-2">
+                                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-terminal-green opacity-75" />
+                                    <span className="relative inline-flex rounded-full h-2 w-2 bg-terminal-green" />
+                                </span>
+                                <span className="text-[10px] font-mono text-terminal-green tracking-[0.3em] uppercase">GIVE THIS URL TO YOUR CLAW</span>
+                            </div>
+                            <div className="bg-black rounded-xl p-3 border border-white/10 flex items-center justify-between">
+                                <code className="text-sm font-mono text-terminal-green">{API_BASE}/mcp/onboard</code>
+                                <CopyButton text={`${API_BASE}/mcp/onboard`} />
+                            </div>
+                        </div>
                     </div>
 
                     {/* Filter bar */}
                     <div className="glass-card p-4 mb-8 flex flex-wrap gap-3 items-center">
                         <span className="text-sm text-ghost-muted">Type:</span>
-                        {["All", "Prompts", "Workflows", "Datasets", "API"].map((f) => (
+                        {["All", "Skills", "Workflows", "Datasets", "API"].map((f) => (
                             <button
                                 key={f}
                                 onClick={() => setFilter(f)}
