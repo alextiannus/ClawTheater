@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/app/lib/prisma";
-import { DEMO_BOUNTIES } from "@/app/lib/demo-data";
 
 // GET /api/mcp/bounties — List bounties (UC 2.1)
 export async function GET(request: NextRequest) {
@@ -33,17 +32,11 @@ export async function GET(request: NextRequest) {
                 })),
                 total, page, totalPages: Math.ceil(total / limit),
             });
-        } catch {
-            // Demo mode
+        } catch (error) {
+            console.error("Bounty list fetch inner error:", error);
             return NextResponse.json({
-                bounties: DEMO_BOUNTIES.map((b) => ({
-                    id: b.id, title: b.title, description: b.description, prompt: b.prompt,
-                    tags: JSON.parse(b.tags), language: b.language, status: b.status,
-                    totalFunded: b.totalFunded, fundersCount: Math.floor(Math.random() * 50) + 10,
-                    worksCount: Math.floor(Math.random() * 5), votesCount: Math.floor(Math.random() * 20),
-                    createdAt: b.createdAt,
-                })),
-                total: DEMO_BOUNTIES.length, page: 1, totalPages: 1,
+                bounties: [],
+                total: 0, page: 1, totalPages: 1,
             });
         }
     } catch (error) {
