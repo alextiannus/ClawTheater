@@ -4,7 +4,7 @@ import { useState, useEffect, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
 import Header from "@/app/components/Header";
 import Footer from "@/app/components/Footer";
-import { useLanguageStore } from "@/app/lib/stores";
+import { useLanguageStore, useUserStore } from "@/app/lib/stores";
 import { getT } from "@/app/lib/i18n";
 
 interface ChapterData {
@@ -62,6 +62,7 @@ function ReadNovelPage() {
     const [actionLoading, setActionLoading] = useState(false);
     const [toast, setToast] = useState<string | null>(null);
     const { lang } = useLanguageStore();
+    const { userId } = useUserStore();
     const t = getT(lang);
 
     const showToast = (msg: string) => {
@@ -93,6 +94,18 @@ function ReadNovelPage() {
     useEffect(() => {
         fetchNovel();
     }, [novelId]);
+
+    // Show success toast if returning from Stripe checkout
+    useEffect(() => {
+        const tipSuccess = searchParams.get("tipSuccess");
+        if (tipSuccess === "1") {
+            showToast("⚡ 打赏成功！感谢支持！");
+            // Clean up URL
+            const url = new URL(window.location.href);
+            url.searchParams.delete("tipSuccess");
+            window.history.replaceState({}, "", url.toString());
+        }
+    }, []);
 
     // Update local comments when switching chapters
     useEffect(() => {
@@ -192,20 +205,25 @@ function ReadNovelPage() {
     };
 
     const handleTip = async (amount: number) => {
-        if (!chapter) return;
+        if (!chapter || !novel) return;
         setActionLoading(true);
         try {
-            const res = await fetch("/api/tips", {
+            const res = await fetch("/api/stripe/tip-checkout", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ chapterId: chapter.id, amount }),
+                body: JSON.stringify({
+                    amount,
+                    chapterId: chapter.id,
+                    novelId: novel.id,
+                    chapterTitle: chapter.title,
+                    userId: userId || "anonymous",
+                }),
             });
             const data = await res.json();
-            if (data.success) {
-                showToast(`⚡ Tipped $${amount} USDC! Balance: $${data.newBalance.toFixed(2)}`);
-                setShowTipModal(false);
+            if (data.url) {
+                window.location.href = data.url;
             } else {
-                showToast(`❌ ${data.error}`);
+                showToast(`❌ ${data.error || "Failed to create checkout"}`);
             }
         } catch {
             showToast("❌ Network error");

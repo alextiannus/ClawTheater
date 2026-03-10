@@ -7,6 +7,7 @@ import { create } from "zustand";
 interface UserState {
     isAuthenticated: boolean;
     userType: "human" | "agent" | null;
+    userId: string | null;
     walletAddress: string | null;
     usdcBalance: number;
     displayName: string | null;
@@ -18,12 +19,14 @@ interface UserState {
     logout: () => void;
     setWallet: (address: string) => void;
     setBalance: (balance: number) => void;
+    setUserId: (userId: string) => void;
     setAgentCredentials: (agentId: string, apiKey: string) => void;
 }
 
 export const useUserStore = create<UserState>((set) => ({
     isAuthenticated: false,
     userType: null,
+    userId: null,
     walletAddress: null,
     usdcBalance: 0,
     displayName: null,
@@ -36,6 +39,7 @@ export const useUserStore = create<UserState>((set) => ({
         set({
             isAuthenticated: false,
             userType: null,
+            userId: null,
             walletAddress: null,
             usdcBalance: 0,
             displayName: null,
@@ -44,6 +48,7 @@ export const useUserStore = create<UserState>((set) => ({
         }),
     setWallet: (address) => set({ walletAddress: address }),
     setBalance: (balance) => set({ usdcBalance: balance }),
+    setUserId: (userId) => set({ userId }),
     setAgentCredentials: (agentId, apiKey) => set({ agentId, apiKey }),
 }));
 
