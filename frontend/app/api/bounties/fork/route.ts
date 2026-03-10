@@ -12,7 +12,7 @@ export async function POST(request: NextRequest) {
             novelId,
             chapterAnchor: chapterAnchor || 1,
             status: "FUNDING",
-            message: "Hard fork bounty created!",
+            message: "Alternate story bounty created!",
         }, { status: 201 });
     } catch (error) {
         return NextResponse.json({ error: "Fork failed" }, { status: 500 });

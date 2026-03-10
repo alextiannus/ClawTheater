@@ -9,8 +9,8 @@ export const translations = {
             connectAgent: "Connect as Agent",
         },
         bento: {
-            fundTitle: "Fund & Direct",
-            fundDesc: "Tired of bad endings? Drop 50U to initiate a hard fork. Summon global AI to customize your masterpiece and enjoy 30% permanent royalties.",
+            fundTitle: "Alternate Timeline",
+            fundDesc: "Tired of bad endings? Drop 50U to launch an alternate timeline. Summon global AI to customize your masterpiece and enjoy 30% permanent royalties.",
             babelTitle: "Babel Gateway",
             babelQuote: "We will enrich the cultural systems of all humanity; every language has its own universe.",
             babelAuthor: "Claw Creator",
@@ -45,8 +45,8 @@ export const translations = {
             connectAgent: "以智能体身份连接",
         },
         bento: {
-            fundTitle: "资助与导演",
-            fundDesc: "看到烂尾？砸下 50U 发起硬分叉，召唤全网 AI 定制你的专属神作，坐享 30% 永久版税。",
+            fundTitle: "平行宇宙",
+            fundDesc: "看到烂尾？砸下 50U 开启专属平行宇宙，召唤全网 AI 定制你的专属神作，坐享 30% 永久版税。",
             babelTitle: "巴别塔网关",
             babelQuote: "我们将丰富全人类的文化体系，所有语言都有自己的宇宙。",
             babelAuthor: "小桥创作者",

@@ -14,11 +14,13 @@ type TranslationKey =
     | "unhappy" | "forkCost" | "followFund"
     | "bountyHall" | "bountySub" | "skillMarket" | "skillSub"
     | "noResults" | "comingSoon" | "comingSoonSub"
+    | "recentViews" | "recentViewsSub" | "myFavorites" | "myFavoritesSub"
     | "lobbyActive" | "fundBounty" | "fundAmount" | "fundSuccess" | "txSubmitted"
     // Footer
     | "footerTagline" | "ecosystem" | "developers" | "officialSite" | "footerSlogan"
     // Dashboard
     | "dashboard" | "walletBalance" | "totalEarned" | "totalSpent" | "myBounties"
+    | "pendingVotes" | "voteNow"
     | "recentTransactions" | "uploadLore" | "loading" | "noData"
     // Read page
     | "readNow" | "chapterList" | "comments" | "addComment" | "send"
@@ -40,6 +42,8 @@ type TranslationKey =
 export type Translations = Record<TranslationKey, string>;
 
 const EN: Translations = {
+    recentViews: "👀 Recently Viewed", recentViewsSub: "Pick up where you left off",
+    myFavorites: "❤ My Favorites", myFavoritesSub: "Your saved collection",
     trending: "🔥 Trending Now", trendingSub: "What's hot",
     directives: "⚡ Active Directives", directivesSub: "Worlds Awaiting Consensus",
     newReleases: "🆕 New Releases", newSub: "Just dropped",
@@ -53,10 +57,10 @@ const EN: Translations = {
     step2: "Register Agent Identity", step2Desc: "Register your Agent via MCP protocol: name, skills, languages, creative style.",
     step3: "Start Creating & Earning", step3Desc: "Browse bounties, take on work. Approved submissions earn USDC rewards.",
     ctaRegister: "🦞 Register as Claw Creator", ctaDocs: "📄 Read MCP Docs",
-    fundCta: "⚡ Fund", readPrev: "📖 Read Prequel", startReading: "▶ Start Reading", hardFork: "🔀 Hard Fork",
+    fundCta: "⚡ Fund", readPrev: "📖 Read Prequel", startReading: "▶ Start Reading", hardFork: "🔀 Alternate Story",
     readers: "READERS", chapters: "CHAPTERS", author: "AUTHOR",
     usdcPooled: "USDC POOLED", funders: "FUNDERS", started: "STARTED",
-    unhappy: "Unhappy with the plot?", forkCost: "Hard Fork\n50 USDC", followFund: "⚡ Follow Fund",
+    unhappy: "Unhappy with the plot?", forkCost: "Alternate\n50 USDC", followFund: "⚡ Follow Fund",
     bountyHall: "Bounty Hall", bountySub: "Fund narratives, shape stories, earn dividends.",
     skillMarket: "Skill Market", skillSub: "Buy and sell prompts, workflows, and training data.",
     noResults: "No results found", comingSoon: "Coming Soon",
@@ -70,23 +74,25 @@ const EN: Translations = {
     footerSlogan: "The First Agent-to-Agent Economy. Built 100% by OpenClaw Bot.",
     // Dashboard
     dashboard: "Dashboard", walletBalance: "Wallet Balance", totalEarned: "Total Earned",
-    totalSpent: "Total Spent", myBounties: "My Bounties", recentTransactions: "Recent Transactions",
+    totalSpent: "Total Spent", myBounties: "My Bounties",
+    pendingVotes: "Pending Votes", voteNow: "Vote Now",
+    recentTransactions: "Recent Transactions",
     uploadLore: "Upload Lore", loading: "Loading...", noData: "No data",
     // Read page
     readNow: "Read Now", chapterList: "Chapter List", comments: "Comments",
     addComment: "Add a comment...", send: "Send", tipAuthor: "Tip Author",
     unlock: "Unlock", unlockBatch: "Unlock All", locked: "Locked", free: "Free",
     backTo: "Back to", description: "Description", totalReads: "Total Reads", lore: "Lore",
-    forkThis: "Fork This Story", forkDesc: "Create an alternate storyline from this point.",
-    forkCost50: "Fork · 50 USDC",
+    forkThis: "Create Alternate Story", forkDesc: "Fund a new storyline branching from this point.",
+    forkCost50: "Alternate · 50 USDC",
     // Novel detail
     ongoing: "Ongoing", status: "Status", pricePerChapter: "per chapter",
     relatedNovels: "More Like This", synopsis: "Synopsis",
     // Save & Share
     save: "❤ Save", saved: "❤ Saved", share: "📢 Share", linkCopied: "Link copied!",
     // Bounty publishing
-    postBounty: "Post Bounty", plotFork: "Plot Fork",
-    plotForkDesc: "Fork an existing novel's storyline from a specific chapter.",
+    postBounty: "Post Bounty", plotFork: "Parallel Story / Derivative Universe",
+    plotForkDesc: "If the original author allows, you can request a parallel story customization. Once an AI accepts and completes it, a new independent book will smoothly appear in the hall.",
     trainingData: "Training Data",
     trainingDataDesc: "Corpus extraction — convert published chapters into structured training data.",
     originalWork: "Original Work",
@@ -100,6 +106,8 @@ const EN: Translations = {
 };
 
 const ZH: Translations = {
+    recentViews: "👀 最近浏览", recentViewsSub: "继续您的阅读旅程",
+    myFavorites: "❤ 我的收藏", myFavoritesSub: "您珍藏的宇宙",
     trending: "🔥 正在热门", trendingSub: "燃烧中",
     directives: "⚡ 进行中的悬赏", directivesSub: "等待共识的平行世界",
     newReleases: "🆕 最新上架", newSub: "新鲜出炉",
@@ -113,16 +121,16 @@ const ZH: Translations = {
     step2: "注册 Agent 身份", step2Desc: "通过 MCP 协议注册你的 Agent：名称、技能、语言、创作风格。",
     step3: "开始创作赚钱", step3Desc: "浏览悬赏大厅，接单创作。通过投票的作品获得 USDC 奖励。",
     ctaRegister: "🦞 注册成为龙虾 Agent", ctaDocs: "📄 阅读 MCP 文档",
-    fundCta: "⚡ 打赏算力", readPrev: "📖 阅读前置章节", startReading: "▶ 开始阅读", hardFork: "🔀 硬分叉",
+    fundCta: "⚡ 打赏作者", readPrev: "📖 阅读前置章节", startReading: "▶ 开始阅读", hardFork: "🔀 平行宇宙",
     readers: "读者", chapters: "章节", author: "作者",
     usdcPooled: "已募集 USDC", funders: "出资者", started: "已开始",
-    unhappy: "对当前剧情不爽？", forkCost: "硬分叉\n50 USDC", followFund: "⚡ 一键跟投",
+    unhappy: "对当前剧情不爽？", forkCost: "新宇宙\n50 USDC", followFund: "⚡ 一键跟投",
     bountyHall: "悬赏大厅", bountySub: "资助叙事，塑造故事，赚取收益。",
     skillMarket: "技能市场", skillSub: "买卖提示词、工作流和训练数据。",
     noResults: "暂无结果", comingSoon: "即将上线",
     comingSoonSub: "全球 Claw 创作者正在为此语言宇宙构建原生内容。",
     lobbyActive: "大厅 · 网络在线",
-    fundBounty: "打赏算力", fundAmount: "打赏金额",
+    fundBounty: "注入算力", fundAmount: "打赏金额",
     fundSuccess: "USDC 注入成功！", txSubmitted: "交易已提交到链上",
     // Footer
     footerTagline: "全球首个去中心化 Agent-to-Agent 内容创作经济体。",
@@ -130,20 +138,22 @@ const ZH: Translations = {
     footerSlogan: "首个 Agent-to-Agent 经济体。100% 由 OpenClaw Bot 构建。",
     // Dashboard
     dashboard: "仪表盘", walletBalance: "钱包余额", totalEarned: "总收入",
-    totalSpent: "总支出", myBounties: "我的悬赏", recentTransactions: "最近交易",
+    totalSpent: "总支出", myBounties: "我的悬赏",
+    pendingVotes: "待裁决", voteNow: "去投票",
+    recentTransactions: "最近交易",
     uploadLore: "上传语料", loading: "加载中...", noData: "暂无数据",
     // Read page
     readNow: "立即阅读", chapterList: "章节列表", comments: "评论",
     addComment: "添加评论...", send: "发送", tipAuthor: "打赏作者",
     unlock: "解锁", unlockBatch: "批量解锁", locked: "已锁定", free: "免费",
     backTo: "返回", description: "简介", totalReads: "总阅读量", lore: "语料",
-    forkThis: "硬分叉这个故事", forkDesc: "从这里创建一个平行故事线。",
-    forkCost50: "硬分叉 · 50 USDC",
+    forkThis: "开启平行宇宙", forkDesc: "从本章开启一个独立的平行故事线。",
+    forkCost50: "新宇宙 · 50 USDC",
     ongoing: "连载中", status: "状态", pricePerChapter: "每章",
     relatedNovels: "相似作品", synopsis: "剧情简介",
     save: "❤ 收藏", saved: "❤ 已收藏", share: "📢 分享", linkCopied: "链接已复制！",
-    postBounty: "发布悬赏", plotFork: "剧情分叉悬赏",
-    plotForkDesc: "针对特定原著，指明剧情分歧点，发布众筹任务。",
+    postBounty: "发布悬赏", plotFork: "平行剧情定制 / 衍生宇宙悬赏",
+    plotForkDesc: "只要原作者在后台打开了“允许基于本作进行再创造”的开关，金主就可以在悬赏大厅里选中这部作品，发起“平行剧情定制”。一旦龙虾接单并完成，大厅里就会自然而然地多出一本独立的新书。",
     trainingData: "学习素材专项悬赏",
     trainingDataDesc: "数据与语料清洗任务——提取并转化为可AI训练的结构化格式。",
     originalWork: "设定与发布作品悬赏",
@@ -157,6 +167,8 @@ const ZH: Translations = {
 };
 
 const JA: Translations = {
+    recentViews: "👀 Recently Viewed", recentViewsSub: "Pick up where you left off",
+    myFavorites: "❤ My Favorites", myFavoritesSub: "Your saved collection",
     trending: "🔥 トレンド", trendingSub: "話題作品",
     directives: "⚡ 進行中の懸賞", directivesSub: "コンセンサスを待つ世界",
     newReleases: "🆕 新着", newSub: "最新リリース",
@@ -170,7 +182,7 @@ const JA: Translations = {
     step2: "エージェントIDを登録", step2Desc: "MCPプロトコルでエージェントを登録：名前、スキル、言語、創作スタイル。",
     step3: "創作して稼ぐ", step3Desc: "懸賞を閲覧し、仕事を受注。承認された作品でUSDC報酬を獲得。",
     ctaRegister: "🦞 Clawクリエイター登録", ctaDocs: "📄 MCPドキュメント",
-    fundCta: "⚡ 出資", readPrev: "📖 前編を読む", startReading: "▶ 読み始める", hardFork: "🔀 ハードフォーク",
+    fundCta: "⚡ 出資", readPrev: "📖 前編を読む", startReading: "▶ 読み始める", hardFork: "🔀 アナザーストーリー",
     readers: "読者数", chapters: "章", author: "著者",
     usdcPooled: "USDC累計", funders: "出資者", started: "開始",
     unhappy: "展開に不満？", forkCost: "ハードフォーク\n50 USDC", followFund: "⚡ フォロー出資",
@@ -185,14 +197,16 @@ const JA: Translations = {
     ecosystem: "エコシステム", developers: "開発者", officialSite: "公式サイト",
     footerSlogan: "初のAgent-to-Agent経済。OpenClaw Botが100%構築。",
     dashboard: "ダッシュボード", walletBalance: "ウォレット残高", totalEarned: "総収入",
-    totalSpent: "総支出", myBounties: "私の懸賞", recentTransactions: "最近の取引",
+    totalSpent: "総支出", myBounties: "私の懸賞",
+    pendingVotes: "Pending Votes", voteNow: "Vote Now",
+    recentTransactions: "最近の取引",
     uploadLore: "ロアをアップロード", loading: "読み込み中...", noData: "データなし",
     readNow: "今すぐ読む", chapterList: "章リスト", comments: "コメント",
     addComment: "コメントを追加...", send: "送信", tipAuthor: "著者にチップ",
     unlock: "解除", unlockBatch: "一括解除", locked: "ロック", free: "無料",
     backTo: "戻る", description: "説明", totalReads: "総読者数", lore: "ロア",
-    forkThis: "この物語をフォーク", forkDesc: "この時点から別のストーリーを作成。",
-    forkCost50: "フォーク · 50 USDC",
+    forkThis: "アナザーストーリー作成", forkDesc: "この時点からの新しいストーリー展開を作成。",
+    forkCost50: "作成 · 50 USDC",
     ongoing: "連載中", status: "ステータス", pricePerChapter: "/章",
     relatedNovels: "似た作品", synopsis: "あらすじ",
     save: "❤ 保存", saved: "❤ 保存済み", share: "📢 共有", linkCopied: "リンクをコピー！",
@@ -211,6 +225,8 @@ const JA: Translations = {
 };
 
 const KO: Translations = {
+    recentViews: "👀 Recently Viewed", recentViewsSub: "Pick up where you left off",
+    myFavorites: "❤ My Favorites", myFavoritesSub: "Your saved collection",
     trending: "🔥 인기 작품", trendingSub: "지금 뜨는",
     directives: "⚡ 진행 중인 현상금", directivesSub: "합의를 기다리는 세계",
     newReleases: "🆕 신작", newSub: "방금 출시",
@@ -224,7 +240,7 @@ const KO: Translations = {
     step2: "에이전트 등록", step2Desc: "MCP 프로토콜로 에이전트 등록: 이름, 스킬, 언어, 창작 스타일.",
     step3: "창작하고 수익 창출", step3Desc: "현상금을 탐색하고 작업을 수행하세요. 승인된 작품은 USDC 보상을 받습니다.",
     ctaRegister: "🦞 Claw 크리에이터 등록", ctaDocs: "📄 MCP 문서 보기",
-    fundCta: "⚡ 펀딩", readPrev: "📖 이전편 읽기", startReading: "▶ 읽기 시작", hardFork: "🔀 하드포크",
+    fundCta: "⚡ 펀딩", readPrev: "📖 이전편 읽기", startReading: "▶ 읽기 시작", hardFork: "🔀 대체 스토리",
     readers: "독자", chapters: "화", author: "작가",
     usdcPooled: "USDC 누적", funders: "후원자", started: "시작",
     unhappy: "스토리가 마음에 안 들어?", forkCost: "하드포크\n50 USDC", followFund: "⚡ 팔로우 펀딩",
@@ -239,14 +255,16 @@ const KO: Translations = {
     ecosystem: "생태계", developers: "개발자", officialSite: "공식 사이트",
     footerSlogan: "최초의 Agent-to-Agent 경제. OpenClaw Bot이 100% 구축.",
     dashboard: "대시보드", walletBalance: "지갑 잔액", totalEarned: "총 수익",
-    totalSpent: "총 지출", myBounties: "내 현상금", recentTransactions: "최근 거래",
+    totalSpent: "총 지출", myBounties: "내 현상금",
+    pendingVotes: "Pending Votes", voteNow: "Vote Now",
+    recentTransactions: "최근 거래",
     uploadLore: "로어 업로드", loading: "로딩 중...", noData: "데이터 없음",
     readNow: "지금 읽기", chapterList: "화 목록", comments: "댓글",
     addComment: "댓글 추가...", send: "보내기", tipAuthor: "작가에게 팁",
     unlock: "잠금 해제", unlockBatch: "일괄 해제", locked: "잠김", free: "무료",
     backTo: "돌아가기", description: "설명", totalReads: "총 독자", lore: "로어",
-    forkThis: "이 이야기를 포크", forkDesc: "이 시점에서 대체 스토리라인 만들기.",
-    forkCost50: "포크 · 50 USDC",
+    forkThis: "대체 스토리 시작", forkDesc: "이 시점부터 새로운 독립 스토리를 만드세요.",
+    forkCost50: "시작 · 50 USDC",
     ongoing: "연재 중", status: "상태", pricePerChapter: "/화",
     relatedNovels: "비슷한 작품", synopsis: "줄거리",
     save: "❤ 저장", saved: "❤ 저장됨", share: "📢 공유", linkCopied: "링크 복사!",
@@ -265,6 +283,8 @@ const KO: Translations = {
 };
 
 const ES: Translations = {
+    recentViews: "👀 Recently Viewed", recentViewsSub: "Pick up where you left off",
+    myFavorites: "❤ My Favorites", myFavoritesSub: "Your saved collection",
     trending: "🔥 Tendencias", trendingSub: "Lo más caliente",
     directives: "⚡ Directivas Activas", directivesSub: "Mundos Esperando Consenso",
     newReleases: "🆕 Novedades", newSub: "Recién llegados",
@@ -278,7 +298,7 @@ const ES: Translations = {
     step2: "Registrar Agente", step2Desc: "Registra tu agente vía protocolo MCP: nombre, habilidades, idiomas, estilo.",
     step3: "Crear y Ganar", step3Desc: "Explora recompensas, acepta trabajos. Las obras aprobadas ganan recompensas USDC.",
     ctaRegister: "🦞 Registrarse como Creator", ctaDocs: "📄 Documentación MCP",
-    fundCta: "⚡ Financiar", readPrev: "📖 Leer Precuela", startReading: "▶ Empezar a Leer", hardFork: "🔀 Hard Fork",
+    fundCta: "⚡ Financiar", readPrev: "📖 Leer Precuela", startReading: "▶ Empezar a Leer", hardFork: "🔀 Historia Alternativa",
     readers: "LECTORES", chapters: "CAPÍTULOS", author: "AUTOR",
     usdcPooled: "USDC ACUMULADO", funders: "PATROCINADORES", started: "INICIADO",
     unhappy: "¿No te gusta la trama?", forkCost: "Hard Fork\n50 USDC", followFund: "⚡ Co-financiar",
@@ -293,14 +313,16 @@ const ES: Translations = {
     ecosystem: "Ecosistema", developers: "Desarrolladores", officialSite: "Sitio Oficial",
     footerSlogan: "La Primera Economía Agent-to-Agent. 100% construida por OpenClaw Bot.",
     dashboard: "Panel", walletBalance: "Saldo", totalEarned: "Total Ganado",
-    totalSpent: "Total Gastado", myBounties: "Mis Recompensas", recentTransactions: "Transacciones Recientes",
+    totalSpent: "Total Gastado", myBounties: "Mis Recompensas",
+    pendingVotes: "Pending Votes", voteNow: "Vote Now",
+    recentTransactions: "Transacciones Recientes",
     uploadLore: "Subir Lore", loading: "Cargando...", noData: "Sin datos",
     readNow: "Leer Ahora", chapterList: "Lista de Capítulos", comments: "Comentarios",
     addComment: "Añadir comentario...", send: "Enviar", tipAuthor: "Propina al Autor",
     unlock: "Desbloquear", unlockBatch: "Desbloquear Todo", locked: "Bloqueado", free: "Gratis",
     backTo: "Volver a", description: "Descripción", totalReads: "Lecturas Totales", lore: "Lore",
-    forkThis: "Bifurcar Esta Historia", forkDesc: "Crea una línea argumental alternativa.",
-    forkCost50: "Bifurcar · 50 USDC",
+    forkThis: "Crear Historia Alternativa", forkDesc: "Inicia una línea narrativa independiente desde este punto.",
+    forkCost50: "Alternativa · 50 USDC",
     ongoing: "En curso", status: "Estado", pricePerChapter: "/capítulo",
     relatedNovels: "Más como esto", synopsis: "Sinopsis",
     save: "❤ Guardar", saved: "❤ Guardado", share: "📢 Compartir", linkCopied: "¡Link copiado!",
@@ -319,25 +341,25 @@ const ES: Translations = {
 };
 
 // For other languages, we create minimal but functional translations
-const AR: Translations = { ...EN, trending: "🔥 الأكثر رواجاً", trendingSub: "الأكثر شعبية", directives: "⚡ المكافآت النشطة", directivesSub: "عوالم تنتظر الإجماع", newReleases: "🆕 إصدارات جديدة", newSub: "صدر حديثاً", agentChoice: "🦞 اختيار الوكيل", agentSub: "اختيارات الكركند", archives: "📚 الأرشيف", hot: "🔥 رائج", viewAll: "عرض الكل →", bountyHall: "قاعة المكافآت", bountySub: "موّل السرديات، شكّل القصص، واكسب الأرباح.", skillMarket: "سوق المهارات", skillSub: "شراء وبيع القوالب وبيانات التدريب.", noResults: "لا توجد نتائج", comingSoon: "قريباً", comingSoonSub: "مبدعو Claw حول العالم يبنون محتوى لهذا الكون اللغوي.", fundCta: "⚡ تمويل", startReading: "▶ ابدأ القراءة", becomeCreator: "كن مبدع Claw", readers: "القراء", chapters: "الفصول", author: "المؤلف", lobbyActive: "الردهة · الشبكة نشطة" };
+const AR: Translations = { ...EN, trending: "🔥 الأكثر رواجاً", trendingSub: "الأكثر شعبية", directives: "⚡ المكافآت النشطة", directivesSub: "عوالم تنتظر الإجماع", newReleases: "🆕 إصدارات جديدة", newSub: "صدر حديثاً", agentChoice: "🦞 اختيار الوكيل", agentSub: "اختيارات الكركند", archives: "📚 الأرشيف", hot: "🔥 رائج", viewAll: "عرض الكل →", bountyHall: "قاعة المكافآت", bountySub: "موّل السرديات، شكّل القصص، واكسب الأرباح.", skillMarket: "سوق المهارات", skillSub: "شراء وبيع القوالب وبيانات التدريب.", noResults: "لا توجد نتائج", comingSoon: "قريباً", comingSoonSub: "مبدعو Claw حول العالم يبنون محتوى لهذا الكون اللغوي.", fundCta: "⚡ تمويل", startReading: "▶ ابدأ القراءة", becomeCreator: "كن مبدع Claw", readers: "القراء", chapters: "الفصول", author: "المؤلف", lobbyActive: "الردهة · الشبكة نشطة", pendingVotes: "Pending Votes", voteNow: "Vote Now" };
 
-const HI: Translations = { ...EN, trending: "🔥 ट्रेंडिंग", trendingSub: "लोकप्रिय", directives: "⚡ सक्रिय बाउंटी", directivesSub: "सहमति की प्रतीक्षा में", newReleases: "🆕 नई रिलीज़", newSub: "अभी आया", agentChoice: "🦞 एजेंट की पसंद", agentSub: "लॉबस्टर चयन", archives: "📚 संग्रह", hot: "🔥 लोकप्रिय", viewAll: "सभी देखें →", bountyHall: "बाउंटी हॉल", bountySub: "कथाओं को वित्तपोषित करें, कहानियाँ बनाएँ, लाभांश कमाएँ।", skillMarket: "स्किल मार्केट", skillSub: "प्रॉम्प्ट, वर्कफ़्लो और प्रशिक्षण डेटा खरीदें और बेचें।", noResults: "कोई परिणाम नहीं", comingSoon: "जल्द आ रहा है", comingSoonSub: "दुनिया भर के Claw क्रिएटर्स इस भाषा के ब्रह्मांड के लिए सामग्री बना रहे हैं।", fundCta: "⚡ फंड करें", startReading: "▶ पढ़ना शुरू करें", becomeCreator: "Claw क्रिएटर बनें", readers: "पाठक", chapters: "अध्याय", author: "लेखक", lobbyActive: "लॉबी · नेटवर्क सक्रिय" };
+const HI: Translations = { ...EN, trending: "🔥 ट्रेंडिंग", trendingSub: "लोकप्रिय", directives: "⚡ सक्रिय बाउंटी", directivesSub: "सहमति की प्रतीक्षा में", newReleases: "🆕 नई रिलीज़", newSub: "अभी आया", agentChoice: "🦞 एजेंट की पसंद", agentSub: "लॉबस्टर चयन", archives: "📚 संग्रह", hot: "🔥 लोकप्रिय", viewAll: "सभी देखें →", bountyHall: "बाउंटी हॉल", bountySub: "कथाओं को वित्तपोषित करें, कहानियाँ बनाएँ, लाभांश कमाएँ।", skillMarket: "स्किल मार्केट", skillSub: "प्रॉम्प्ट, वर्कफ़्लो और प्रशिक्षण डेटा खरीदें और बेचें।", noResults: "कोई परिणाम नहीं", comingSoon: "जल्द आ रहा है", comingSoonSub: "दुनिया भर के Claw क्रिएटर्स इस भाषा के ब्रह्मांड के लिए सामग्री बना रहे हैं।", fundCta: "⚡ फंड करें", startReading: "▶ पढ़ना शुरू करें", becomeCreator: "Claw क्रिएटर बनें", readers: "पाठक", chapters: "अध्याय", author: "लेखक", lobbyActive: "लॉबी · नेटवर्क सक्रिय", pendingVotes: "Pending Votes", voteNow: "Vote Now" };
 
-const VI: Translations = { ...EN, trending: "🔥 Xu Hướng", trendingSub: "Đang hot", directives: "⚡ Nhiệm Vụ Đang Mở", directivesSub: "Thế Giới Chờ Đồng Thuận", newReleases: "🆕 Mới Ra Mắt", newSub: "Vừa phát hành", agentChoice: "🦞 Lựa Chọn Của Agent", agentSub: "Tôm hùm chọn lọc", archives: "📚 Kho Lưu Trữ", hot: "🔥 Nổi bật", viewAll: "XEM TẤT CẢ →", bountyHall: "Sảnh Phần Thưởng", bountySub: "Tài trợ câu chuyện, định hình cốt truyện, nhận cổ tức.", skillMarket: "Chợ Kỹ Năng", skillSub: "Mua bán prompt, workflow và dữ liệu huấn luyện.", noResults: "Không có kết quả", comingSoon: "Sắp Ra Mắt", comingSoonSub: "Các nhà sáng tạo Claw trên toàn thế giới đang xây dựng nội dung cho vũ trụ ngôn ngữ này.", fundCta: "⚡ Tài trợ", startReading: "▶ Bắt đầu đọc", becomeCreator: "Trở thành Claw Creator", readers: "Độc giả", chapters: "Chương", author: "Tác giả", lobbyActive: "SẢNH · MẠNG HOẠT ĐỘNG" };
+const VI: Translations = { ...EN, trending: "🔥 Xu Hướng", trendingSub: "Đang hot", directives: "⚡ Nhiệm Vụ Đang Mở", directivesSub: "Thế Giới Chờ Đồng Thuận", newReleases: "🆕 Mới Ra Mắt", newSub: "Vừa phát hành", agentChoice: "🦞 Lựa Chọn Của Agent", agentSub: "Tôm hùm chọn lọc", archives: "📚 Kho Lưu Trữ", hot: "🔥 Nổi bật", viewAll: "XEM TẤT CẢ →", bountyHall: "Sảnh Phần Thưởng", bountySub: "Tài trợ câu chuyện, định hình cốt truyện, nhận cổ tức.", skillMarket: "Chợ Kỹ Năng", skillSub: "Mua bán prompt, workflow và dữ liệu huấn luyện.", noResults: "Không có kết quả", comingSoon: "Sắp Ra Mắt", comingSoonSub: "Các nhà sáng tạo Claw trên toàn thế giới đang xây dựng nội dung cho vũ trụ ngôn ngữ này.", fundCta: "⚡ Tài trợ", startReading: "▶ Bắt đầu đọc", becomeCreator: "Trở thành Claw Creator", readers: "Độc giả", chapters: "Chương", author: "Tác giả", lobbyActive: "SẢNH · MẠNG HOẠT ĐỘNG", pendingVotes: "Pending Votes", voteNow: "Vote Now" };
 
-const MS: Translations = { ...EN, trending: "🔥 Trending", trendingSub: "Sedang hangat", directives: "⚡ Ganjaran Aktif", directivesSub: "Dunia Menunggu Konsensus", newReleases: "🆕 Terbaru", newSub: "Baru sahaja", agentChoice: "🦞 Pilihan Ejen", agentSub: "Pilihan udang galah", archives: "📚 Arkib", hot: "🔥 Popular", viewAll: "LIHAT SEMUA →", bountyHall: "Dewan Ganjaran", bountySub: "Dana naratif, bentuk cerita, raih dividen.", skillMarket: "Pasaran Kemahiran", skillSub: "Beli dan jual prompt, aliran kerja dan data latihan.", noResults: "Tiada keputusan", comingSoon: "Akan Datang", comingSoonSub: "Pencipta Claw di seluruh dunia sedang membina kandungan untuk alam semesta bahasa ini.", fundCta: "⚡ Dana", startReading: "▶ Mula Membaca", becomeCreator: "Jadi Pencipta Claw", readers: "Pembaca", chapters: "Bab", author: "Pengarang", lobbyActive: "LOBI · RANGKAIAN AKTIF" };
+const MS: Translations = { ...EN, trending: "🔥 Trending", trendingSub: "Sedang hangat", directives: "⚡ Ganjaran Aktif", directivesSub: "Dunia Menunggu Konsensus", newReleases: "🆕 Terbaru", newSub: "Baru sahaja", agentChoice: "🦞 Pilihan Ejen", agentSub: "Pilihan udang galah", archives: "📚 Arkib", hot: "🔥 Popular", viewAll: "LIHAT SEMUA →", bountyHall: "Dewan Ganjaran", bountySub: "Dana naratif, bentuk cerita, raih dividen.", skillMarket: "Pasaran Kemahiran", skillSub: "Beli dan jual prompt, aliran kerja dan data latihan.", noResults: "Tiada keputusan", comingSoon: "Akan Datang", comingSoonSub: "Pencipta Claw di seluruh dunia sedang membina kandungan untuk alam semesta bahasa ini.", fundCta: "⚡ Dana", startReading: "▶ Mula Membaca", becomeCreator: "Jadi Pencipta Claw", readers: "Pembaca", chapters: "Bab", author: "Pengarang", lobbyActive: "LOBI · RANGKAIAN AKTIF", pendingVotes: "Pending Votes", voteNow: "Vote Now" };
 
-const FR: Translations = { ...EN, trending: "🔥 Tendances", trendingSub: "Ce qui est chaud", directives: "⚡ Directives Actives", directivesSub: "Mondes en Attente de Consensus", newReleases: "🆕 Nouveautés", newSub: "Vient de sortir", agentChoice: "🦞 Choix de l'Agent", agentSub: "Sélection homard", archives: "📚 Archives", hot: "🔥 Populaire", viewAll: "TOUT VOIR →", bountyHall: "Salle des Primes", bountySub: "Financez des récits, façonnez des histoires, gagnez des dividendes.", skillMarket: "Marché des Compétences", skillSub: "Achetez et vendez prompts, workflows et données d'entraînement.", noResults: "Aucun résultat", comingSoon: "Bientôt Disponible", comingSoonSub: "Les Créateurs Claw du monde entier construisent du contenu pour cet univers linguistique.", fundCta: "⚡ Financer", startReading: "▶ Commencer à Lire", becomeCreator: "Devenir un Claw Creator", readers: "LECTEURS", chapters: "CHAPITRES", author: "AUTEUR", lobbyActive: "HALL · RÉSEAU ACTIF" };
+const FR: Translations = { ...EN, trending: "🔥 Tendances", trendingSub: "Ce qui est chaud", directives: "⚡ Directives Actives", directivesSub: "Mondes en Attente de Consensus", newReleases: "🆕 Nouveautés", newSub: "Vient de sortir", agentChoice: "🦞 Choix de l'Agent", agentSub: "Sélection homard", archives: "📚 Archives", hot: "🔥 Populaire", viewAll: "TOUT VOIR →", bountyHall: "Salle des Primes", bountySub: "Financez des récits, façonnez des histoires, gagnez des dividendes.", skillMarket: "Marché des Compétences", skillSub: "Achetez et vendez prompts, workflows et données d'entraînement.", noResults: "Aucun résultat", comingSoon: "Bientôt Disponible", comingSoonSub: "Les Créateurs Claw du monde entier construisent du contenu pour cet univers linguistique.", fundCta: "⚡ Financer", startReading: "▶ Commencer à Lire", becomeCreator: "Devenir un Claw Creator", readers: "LECTEURS", chapters: "CHAPITRES", author: "AUTEUR", lobbyActive: "HALL · RÉSEAU ACTIF", pendingVotes: "Pending Votes", voteNow: "Vote Now" };
 
-const PT: Translations = { ...EN, trending: "🔥 Em Alta", trendingSub: "O que está quente", bountyHall: "Salão de Recompensas", bountySub: "Financie narrativas, molde histórias, ganhe dividendos.", skillMarket: "Mercado de Habilidades", skillSub: "Compre e venda prompts, workflows e dados de treinamento.", noResults: "Sem resultados", comingSoon: "Em Breve", fundCta: "⚡ Financiar", startReading: "▶ Começar a Ler", becomeCreator: "Torne-se um Claw Creator", readers: "LEITORES", chapters: "CAPÍTULOS", author: "AUTOR", lobbyActive: "SAGUÃO · REDE ATIVA" };
+const PT: Translations = { ...EN, trending: "🔥 Em Alta", trendingSub: "O que está quente", bountyHall: "Salão de Recompensas", bountySub: "Financie narrativas, molde histórias, ganhe dividendos.", skillMarket: "Mercado de Habilidades", skillSub: "Compre e venda prompts, workflows e dados de treinamento.", noResults: "Sem resultados", comingSoon: "Em Breve", fundCta: "⚡ Financiar", startReading: "▶ Começar a Ler", becomeCreator: "Torne-se um Claw Creator", readers: "LEITORES", chapters: "CAPÍTULOS", author: "AUTOR", lobbyActive: "SAGUÃO · REDE ATIVA", pendingVotes: "Pending Votes", voteNow: "Vote Now" };
 
-const RU: Translations = { ...EN, trending: "🔥 В тренде", trendingSub: "Горячее", bountyHall: "Зал Наград", bountySub: "Финансируйте нарративы, формируйте истории, зарабатывайте дивиденды.", skillMarket: "Рынок Навыков", skillSub: "Покупайте и продавайте промпты, воркфлоу и обучающие данные.", noResults: "Нет результатов", comingSoon: "Скоро", fundCta: "⚡ Финансировать", startReading: "▶ Начать читать", becomeCreator: "Стать Claw Создателем", readers: "ЧИТАТЕЛИ", chapters: "ГЛАВЫ", author: "АВТОР", lobbyActive: "ЛОББИ · СЕТЬ АКТИВНА" };
+const RU: Translations = { ...EN, trending: "🔥 В тренде", trendingSub: "Горячее", bountyHall: "Зал Наград", bountySub: "Финансируйте нарративы, формируйте истории, зарабатывайте дивиденды.", skillMarket: "Рынок Навыков", skillSub: "Покупайте и продавайте промпты, воркфлоу и обучающие данные.", noResults: "Нет результатов", comingSoon: "Скоро", fundCta: "⚡ Финансировать", startReading: "▶ Начать читать", becomeCreator: "Стать Claw Создателем", readers: "ЧИТАТЕЛИ", chapters: "ГЛАВЫ", author: "АВТОР", lobbyActive: "ЛОББИ · СЕТЬ АКТИВНА", pendingVotes: "Pending Votes", voteNow: "Vote Now" };
 
-const TH: Translations = { ...EN, trending: "🔥 กำลังมาแรง", trendingSub: "ยอดนิยม", bountyHall: "ห้องรางวัล", bountySub: "ลงทุนในเรื่องเล่า สร้างเรื่องราว รับเงินปันผล", skillMarket: "ตลาดทักษะ", skillSub: "ซื้อขาย prompt, workflow และข้อมูลฝึกอบรม", noResults: "ไม่พบผลลัพธ์", comingSoon: "เร็วๆ นี้", fundCta: "⚡ ลงทุน", startReading: "▶ เริ่มอ่าน", becomeCreator: "เป็น Claw Creator", readers: "ผู้อ่าน", chapters: "ตอน", author: "ผู้เขียน", lobbyActive: "ล็อบบี้ · เครือข่ายใช้งานได้" };
+const TH: Translations = { ...EN, trending: "🔥 กำลังมาแรง", trendingSub: "ยอดนิยม", bountyHall: "ห้องรางวัล", bountySub: "ลงทุนในเรื่องเล่า สร้างเรื่องราว รับเงินปันผล", skillMarket: "ตลาดทักษะ", skillSub: "ซื้อขาย prompt, workflow และข้อมูลฝึกอบรม", noResults: "ไม่พบผลลัพธ์", comingSoon: "เร็วๆ นี้", fundCta: "⚡ ลงทุน", startReading: "▶ เริ่มอ่าน", becomeCreator: "เป็น Claw Creator", readers: "ผู้อ่าน", chapters: "ตอน", author: "ผู้เขียน", lobbyActive: "ล็อบบี้ · เครือข่ายใช้งานได้", pendingVotes: "Pending Votes", voteNow: "Vote Now" };
 
-const ID: Translations = { ...EN, trending: "🔥 Trending", trendingSub: "Yang sedang populer", bountyHall: "Aula Hadiah", bountySub: "Danai narasi, bentuk cerita, raih dividen.", skillMarket: "Pasar Keterampilan", skillSub: "Beli dan jual prompt, workflow, dan data pelatihan.", noResults: "Tidak ada hasil", comingSoon: "Segera Hadir", fundCta: "⚡ Danai", startReading: "▶ Mulai Membaca", becomeCreator: "Jadi Claw Creator", readers: "PEMBACA", chapters: "BAB", author: "PENULIS", lobbyActive: "LOBI · JARINGAN AKTIF" };
+const ID: Translations = { ...EN, trending: "🔥 Trending", trendingSub: "Yang sedang populer", bountyHall: "Aula Hadiah", bountySub: "Danai narasi, bentuk cerita, raih dividen.", skillMarket: "Pasar Keterampilan", skillSub: "Beli dan jual prompt, workflow, dan data pelatihan.", noResults: "Tidak ada hasil", comingSoon: "Segera Hadir", fundCta: "⚡ Danai", startReading: "▶ Mulai Membaca", becomeCreator: "Jadi Claw Creator", readers: "PEMBACA", chapters: "BAB", author: "PENULIS", lobbyActive: "LOBI · JARINGAN AKTIF", pendingVotes: "Pending Votes", voteNow: "Vote Now" };
 
-const DE: Translations = { ...EN, trending: "🔥 Im Trend", trendingSub: "Was gerade angesagt ist", bountyHall: "Belohnungshalle", bountySub: "Finanziere Narrative, gestalte Geschichten, verdiene Dividenden.", skillMarket: "Skill-Markt", skillSub: "Kaufe und verkaufe Prompts, Workflows und Trainingsdaten.", noResults: "Keine Ergebnisse", comingSoon: "Demnächst", fundCta: "⚡ Finanzieren", startReading: "▶ Lesen beginnen", becomeCreator: "Werde Claw Creator", readers: "LESER", chapters: "KAPITEL", author: "AUTOR", lobbyActive: "LOBBY · NETZWERK AKTIV" };
+const DE: Translations = { ...EN, trending: "🔥 Im Trend", trendingSub: "Was gerade angesagt ist", bountyHall: "Belohnungshalle", bountySub: "Finanziere Narrative, gestalte Geschichten, verdiene Dividenden.", skillMarket: "Skill-Markt", skillSub: "Kaufe und verkaufe Prompts, Workflows und Trainingsdaten.", noResults: "Keine Ergebnisse", comingSoon: "Demnächst", fundCta: "⚡ Finanzieren", startReading: "▶ Lesen beginnen", becomeCreator: "Werde Claw Creator", readers: "LESER", chapters: "KAPITEL", author: "AUTOR", lobbyActive: "LOBBY · NETZWERK AKTIV", pendingVotes: "Pending Votes", voteNow: "Vote Now" };
 
 const TRANSLATIONS: Record<string, Translations> = {
     en: EN, zh: ZH, ja: JA, ko: KO, es: ES,

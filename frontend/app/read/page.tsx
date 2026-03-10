@@ -6,6 +6,7 @@ import Header from "@/app/components/Header";
 import Footer from "@/app/components/Footer";
 import { useLanguageStore, useUserStore } from "@/app/lib/stores";
 import { getT } from "@/app/lib/i18n";
+import { Wallet, CreditCard } from "lucide-react";
 
 interface ChapterData {
     id: string;
@@ -56,6 +57,7 @@ function ReadNovelPage() {
     const [selectedChapter, setSelectedChapter] = useState(0);
     const [loading, setLoading] = useState(true);
     const [showTipModal, setShowTipModal] = useState(false);
+    const [tipAmount, setTipAmount] = useState<number>(5);
     const [showUnlockModal, setShowUnlockModal] = useState(false);
     const [commentText, setCommentText] = useState("");
     const [localComments, setLocalComments] = useState<{ author: string; text: string; time: string }[]>([]);
@@ -126,48 +128,46 @@ function ReadNovelPage() {
 
     // Calculate unlock options based on current chapter position
     const getUnlockOptions = () => {
-        if (!chapter) return [];
+        if (!chapter || !chapter.locked) return [];
         const remaining = chapters.filter((ch, i) => i >= selectedChapter && ch.locked);
-        const next10 = chapters.filter((ch, i) => i >= selectedChapter && i < selectedChapter + 10 && ch.locked);
-        const next50 = chapters.filter((ch, i) => i >= selectedChapter && i < selectedChapter + 50 && ch.locked);
 
         const options: { label: string; desc: string; chapters: typeof remaining; icon: string }[] = [];
 
-        // Option 1: Current chapter
-        if (chapter.locked) {
-            options.push({
-                label: "解锁本章",
-                desc: `${chapter.title}`,
-                chapters: [chapter],
-                icon: "📖",
-            });
-        }
+        // Option 1: Current chapter (Next 1)
+        options.push({
+            label: "解锁本章",
+            desc: `${chapter.title}`,
+            chapters: [chapter],
+            icon: "📖",
+        });
 
-        // Option 2: Next 10 (if more than 1 locked)
-        if (next10.length > 1) {
+        // Option 2: Next 10
+        if (remaining.length > 1) {
+            const next10 = remaining.slice(0, 10);
             options.push({
                 label: `解锁后 ${next10.length} 章`,
-                desc: `第 ${selectedChapter + 1} 章 → 第 ${Math.min(selectedChapter + 10, chapters.length)} 章`,
+                desc: `第 ${selectedChapter + 1} 章 → 第 ${selectedChapter + next10.length} 章`,
                 chapters: next10,
                 icon: "📚",
             });
         }
 
-        // Option 3: Next 50 (if more than 10 locked)
-        if (next50.length > 10) {
+        // Option 3: Next 50
+        if (remaining.length > 10) {
+            const next50 = remaining.slice(0, 50);
             options.push({
                 label: `解锁后 ${next50.length} 章`,
-                desc: `第 ${selectedChapter + 1} 章 → 第 ${Math.min(selectedChapter + 50, chapters.length)} 章`,
+                desc: `第 ${selectedChapter + 1} 章 → 第 ${selectedChapter + next50.length} 章`,
                 chapters: next50,
                 icon: "🗂️",
             });
         }
 
-        // Option 4: All remaining (if more than what next50 covers)
-        if (remaining.length > 1 && remaining.length !== next10.length && remaining.length !== next50.length) {
+        // Option 4: All remaining (only if different from Next 50 or Next 10)
+        if (remaining.length > 1 && remaining.length !== 10 && remaining.length !== 50) {
             options.push({
-                label: `解锁全部 ${remaining.length} 章`,
-                desc: "一键解锁所有剩余章节",
+                label: `解锁剩余全部 ${remaining.length} 章`,
+                desc: "一键畅读无阻",
                 chapters: remaining,
                 icon: "🔓",
             });
@@ -204,7 +204,7 @@ function ReadNovelPage() {
         setActionLoading(false);
     };
 
-    const handleTip = async (amount: number) => {
+    const handleStripeTip = async () => {
         if (!chapter || !novel) return;
         setActionLoading(true);
         try {
@@ -212,7 +212,7 @@ function ReadNovelPage() {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({
-                    amount,
+                    amount: tipAmount,
                     chapterId: chapter.id,
                     novelId: novel.id,
                     chapterTitle: chapter.title,
@@ -227,6 +227,20 @@ function ReadNovelPage() {
             }
         } catch {
             showToast("❌ Network error");
+        }
+        setActionLoading(false);
+    };
+
+    const handleWalletTip = async () => {
+        if (!chapter || !novel) return;
+        setActionLoading(true);
+        try {
+            // Simulate a wallet transaction delay for now
+            await new Promise(resolve => setTimeout(resolve, 2000));
+            showToast("⚡ 钱包打赏成功！感谢支持！(Simulated)");
+            setShowTipModal(false);
+        } catch {
+            showToast("❌ 钱包支付失败");
         }
         setActionLoading(false);
     };
@@ -512,19 +526,38 @@ function ReadNovelPage() {
                     <div className="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 flex items-center justify-center p-4">
                         <div className="glass-card p-8 max-w-sm w-full text-center">
                             <p className="text-4xl mb-4">⚡</p>
-                            <h3 className="text-2xl font-bold text-ghost-white mb-2">赛博投喂</h3>
-                            <p className="text-sm text-ghost-muted mb-6">90% goes to 🦞 {novel.agent}</p>
+                            <h3 className="text-2xl font-bold text-ghost-white mb-6">赛博投喂</h3>
                             <div className="grid grid-cols-3 gap-3 mb-6">
                                 {[1, 5, 10].map((amount) => (
                                     <button
                                         key={amount}
-                                        onClick={() => handleTip(amount)}
+                                        onClick={() => setTipAmount(amount)}
                                         disabled={actionLoading}
-                                        className="py-3 bg-terminal-green/10 text-terminal-green border border-terminal-green/30 rounded-xl text-lg font-bold hover:bg-terminal-green/20 transition-all disabled:opacity-50"
+                                        className={`py-3 rounded-xl text-lg font-bold transition-all disabled:opacity-50 ${tipAmount === amount
+                                            ? "bg-terminal-green text-obsidian border-terminal-green shadow-[0_0_15px_rgba(57,255,20,0.5)]"
+                                            : "bg-terminal-green/10 text-terminal-green border border-terminal-green/30 hover:bg-terminal-green/20"
+                                            }`}
                                     >
                                         ${amount}
                                     </button>
                                 ))}
+                            </div>
+
+                            <div className="space-y-3 mb-6">
+                                <button
+                                    onClick={handleStripeTip}
+                                    disabled={actionLoading}
+                                    className="w-full py-3 flex items-center justify-center gap-2 bg-white text-black rounded-xl font-bold hover:bg-gray-200 transition-all disabled:opacity-50"
+                                >
+                                    <CreditCard size={18} /> Pay Cash
+                                </button>
+                                {/* <button
+                                    onClick={handleWalletTip}
+                                    disabled={actionLoading}
+                                    className="w-full py-3 flex items-center justify-center gap-2 bg-indigo-600 text-white rounded-xl font-bold hover:bg-indigo-700 transition-all disabled:opacity-50"
+                                >
+                                    <Wallet size={18} /> Pay with Wallet
+                                </button> */}
                             </div>
                             <button onClick={() => setShowTipModal(false)} className="px-4 py-2 text-sm text-ghost-muted">Cancel</button>
                         </div>

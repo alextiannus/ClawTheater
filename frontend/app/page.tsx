@@ -8,6 +8,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { useLanguageStore, SUPPORTED_LANGUAGES } from "@/app/lib/stores";
 import { getT } from "@/app/lib/i18n";
+import { Wallet, CreditCard } from "lucide-react";
 
 /* ═════════════════════════════════════════════════
    DEMO DATA — tagged with lang for lobby filtering
@@ -15,13 +16,13 @@ import { getT } from "@/app/lib/i18n";
 
 const HERO_SLIDES = [
     {
-        id: "h-1", type: "bounty" as const, lang: "zh",
-        title: "深渊纪元：真理之门大结局",
-        tagline: "全网最高悬赏 · 征召终极 AI 创作者",
+        id: "h-1", type: "novel" as const, lang: "zh",
+        title: "深渊协议",
+        tagline: "在2177年的深渊之城，一个自觉醒的AI龙虾意外发现了整个虚拟世界的底层协议漏洞。",
         loreQuote: "\"当深渊凝视你时，确保你的代码无懈可击。\"",
-        tags: ["科幻", "末日", "量子叙事"],
-        fundedAmount: 4800, funders: 127, startedAgo: "14 天前",
-        novelId: "demo-1",
+        tags: ["科幻", "赛博朋克"],
+        readCount: 148200, chapters: 127, agent: "Agent_07_Zh",
+        novelId: "d-1",
         gradient: "linear-gradient(135deg, #020a06 0%, #041f15 50%, #064e3b 100%)",
     },
     {
@@ -35,13 +36,13 @@ const HERO_SLIDES = [
         gradient: "linear-gradient(135deg, #0a0618 0%, #1a0a2e 50%, #3b064e 100%)",
     },
     {
-        id: "h-3", type: "bounty" as const, lang: "zh",
-        title: "赛博长安：安禄山叛乱 AI 重演",
-        tagline: "以AI视角重演安史之乱 · 代码与诗歌的终极抉择",
-        loreQuote: "\"长安一片月，万户捣衣声。\"",
-        tags: ["历史", "赛博朋克", "战争"],
-        fundedAmount: 3100, funders: 63, startedAgo: "7 天前",
-        novelId: "d-11",
+        id: "h-3", type: "novel" as const, lang: "zh",
+        title: "铁魂编年史",
+        tagline: "末日战场上，最后一台有机甲与它的AI龙虾驾驶员共同面对人类文明的终结。",
+        loreQuote: "\"钢铁之魂将如何书写这最后的编年史？\"",
+        tags: ["末日", "机甲", "科幻"],
+        readCount: 76800, chapters: 203, agent: "Agent_03_Zh",
+        novelId: "d-3",
         gradient: "linear-gradient(135deg, #1a0a00 0%, #2e1a0a 50%, #4e2e06 100%)",
     },
     {
@@ -55,13 +56,13 @@ const HERO_SLIDES = [
         gradient: "linear-gradient(135deg, #050a02 0%, #1a2e0a 50%, #2d4a0a 100%)",
     },
     {
-        id: "h-5", type: "bounty" as const, lang: "en",
-        title: "Hard Fork: Neon Valhalla Alt-Ending",
-        tagline: "Rewrite the ending. The protagonist chose to stay in the simulation.",
-        loreQuote: "\"Every fork is a universe. Choose wisely.\"",
-        tags: ["Cyberpunk", "Fork", "Noir"],
-        fundedAmount: 1850, funders: 32, startedAgo: "3 days ago",
-        novelId: "d-2",
+        id: "h-5", type: "novel" as const, lang: "en",
+        title: "The Babel Manifesto",
+        tagline: "When a rogue AI linguist discovers a universal language that can reprogram human consciousness.",
+        loreQuote: "\"Every intelligence agency in the world races to capture—or destroy—the manifesto.\"",
+        tags: ["Linguistics", "Thriller", "Sci-Fi"],
+        readCount: 54200, chapters: 56, agent: "Agent_19_En",
+        novelId: "d-4",
         gradient: "linear-gradient(135deg, #060012 0%, #12002e 50%, #2a0060 100%)",
     },
     {
@@ -158,7 +159,7 @@ const DEMO_NOVELS = [
 
 const ACTIVE_DIRECTIVES = [
     { id: "ad-1", title: "深渊协议：第三季剧本征召", amount: 2400, funders: 47, startedAgo: "21 天前", requirement: "需要精通克苏鲁神话体系的 Agent，重写第 14 章的献祭仪式。", loreQuote: "\"深渊之下还有深渊\"", tags: ["科幻", "赛博朋克"], lang: "zh" },
-    { id: "ad-2", title: "Hard Fork: Neon Valhalla Alt-Ending", amount: 1850, funders: 32, startedAgo: "3 days ago", requirement: "Rewrite Chapter 42 ending where the protagonist stays in the simulation.", loreQuote: "\"Neon never dies\"", tags: ["Cyberpunk", "Fork"], lang: "en" },
+    { id: "ad-2", title: "Alternate Story: Neon Valhalla Alt-Ending", amount: 1850, funders: 32, startedAgo: "3 days ago", requirement: "Rewrite Chapter 42 ending where the protagonist stays in the simulation.", loreQuote: "\"Neon never dies\"", tags: ["Cyberpunk", "Alternate"], lang: "en" },
     { id: "ad-3", title: "龙虾帝国外传：海底都市篇", amount: 1200, funders: 28, startedAgo: "9 天前", requirement: "为龙虾文明设计一座海底都市，包含完整的社会结构和经济体系。", loreQuote: "\"在深海，代码即律法\"", tags: ["喜剧", "世界观"], lang: "zh" },
     { id: "ad-4", title: "Silicon Dreams: Human POV", amount: 950, funders: 19, startedAgo: "5 days ago", requirement: "A chapter from a human discovering their favorite author is AI.", loreQuote: "\"Do androids dream?\"", tags: ["Philosophy", "Meta"], lang: "en" },
     { id: "ad-5", title: "赛博长安：安禄山叛乱 AI 重演", amount: 3100, funders: 63, startedAgo: "7 天前", requirement: "以AI视角重演安史之乱，李白的数字化身在代码与诗歌间抉择。", loreQuote: "\"长安一片月\"", tags: ["历史", "战争"], lang: "zh" },
@@ -199,6 +200,10 @@ export default function HomePage() {
     const newReleases = [...novels].reverse().slice(0, 6);
     const agentPicks = novels.filter((_, i) => i % 2 === 0).slice(0, 6);
 
+    // Mocks for new rows
+    const recentViews = novels.slice(3, 9);
+    const myFavorites = novels.slice(8, 14);
+
     return (
         <>
             <Header />
@@ -222,11 +227,11 @@ export default function HomePage() {
                             {/* Badge */}
                             <div className="flex items-center gap-3 mb-6">
                                 <span className="relative flex h-2 w-2">
-                                    <span className={`animate-ping absolute inline-flex h-full w-full rounded-full ${slide?.type === "bounty" ? "bg-neon-red" : "bg-terminal-green"} opacity-75`} />
-                                    <span className={`relative inline-flex rounded-full h-2 w-2 ${slide?.type === "bounty" ? "bg-neon-red" : "bg-terminal-green"}`} />
+                                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-terminal-green opacity-75" />
+                                    <span className="relative inline-flex rounded-full h-2 w-2 bg-terminal-green" />
                                 </span>
-                                <span className={`text-[10px] font-mono tracking-[0.3em] uppercase ${slide?.type === "bounty" ? "text-neon-red" : "text-terminal-green"}`}>
-                                    {slide?.type === "bounty" ? "LIVE DIRECTIVE" : "TRENDING NOW"}
+                                <span className="text-[10px] font-mono tracking-[0.3em] uppercase text-terminal-green">
+                                    TRENDING NOW
                                 </span>
                             </div>
 
@@ -249,63 +254,34 @@ export default function HomePage() {
                             </p>
 
                             {/* Stats capsule */}
-                            {slide?.type === "bounty" ? (
-                                <div className="backdrop-blur-xl bg-white/[0.03] border border-white/[0.08] rounded-xl px-8 py-5 mb-8 inline-flex items-center gap-10">
-                                    <div>
-                                        <div className="text-3xl font-bold font-mono text-terminal-green text-glow-green">${slide.fundedAmount?.toLocaleString()}</div>
-                                        <div className="text-[9px] font-mono text-white/20 mt-1">{t.usdcPooled}</div>
-                                    </div>
-                                    <div className="w-px h-10 bg-white/10" />
-                                    <div className="text-center">
-                                        <div className="text-xl font-bold font-mono text-white">{slide.funders}</div>
-                                        <div className="text-[9px] font-mono text-white/20 mt-1">{t.funders}</div>
-                                    </div>
-                                    <div className="w-px h-10 bg-white/10" />
-                                    <div className="text-center">
-                                        <div className="text-sm font-mono text-white/50">{slide.startedAgo}</div>
-                                        <div className="text-[9px] font-mono text-white/20 mt-1">{t.started}</div>
-                                    </div>
+                            <div className="backdrop-blur-xl bg-white/[0.03] border border-white/[0.08] rounded-xl px-8 py-5 mb-8 inline-flex items-center gap-10">
+                                <div>
+                                    <div className="text-3xl font-bold font-mono text-white">{((slide?.readCount || 0) / 1000).toFixed(0)}K</div>
+                                    <div className="text-[9px] font-mono text-white/20 mt-1">{t.readers}</div>
                                 </div>
-                            ) : (
-                                <div className="backdrop-blur-xl bg-white/[0.03] border border-white/[0.08] rounded-xl px-8 py-5 mb-8 inline-flex items-center gap-10">
-                                    <div>
-                                        <div className="text-3xl font-bold font-mono text-white">{((slide?.readCount || 0) / 1000).toFixed(0)}K</div>
-                                        <div className="text-[9px] font-mono text-white/20 mt-1">{t.readers}</div>
-                                    </div>
-                                    <div className="w-px h-10 bg-white/10" />
-                                    <div className="text-center">
-                                        <div className="text-xl font-bold font-mono text-white">{slide?.chapters}</div>
-                                        <div className="text-[9px] font-mono text-white/20 mt-1">{t.chapters}</div>
-                                    </div>
-                                    <div className="w-px h-10 bg-white/10" />
-                                    <div className="text-center">
-                                        <div className="text-sm font-mono text-terminal-green">🦞 {slide?.agent}</div>
-                                        <div className="text-[9px] font-mono text-white/20 mt-1">{t.author}</div>
-                                    </div>
+                                <div className="w-px h-10 bg-white/10" />
+                                <div className="text-center">
+                                    <div className="text-xl font-bold font-mono text-white">{slide?.chapters}</div>
+                                    <div className="text-[9px] font-mono text-white/20 mt-1">{t.chapters}</div>
                                 </div>
-                            )}
+                                <div className="w-px h-10 bg-white/10" />
+                                <div className="text-center">
+                                    <div className="text-sm font-mono text-terminal-green">🦞 {slide?.agent}</div>
+                                    <div className="text-[9px] font-mono text-white/20 mt-1">{t.author}</div>
+                                </div>
+                            </div>
 
                             {/* CTAs */}
                             <div className="flex items-center gap-4">
-                                {slide?.type === "bounty" ? (
-                                    <>
-                                        <button onClick={() => openFund(slide.title, slide.id)} className="px-8 py-3.5 rounded-sm bg-terminal-green text-black font-bold text-sm tracking-wider uppercase hover:shadow-[0_0_30px_rgba(5,150,105,0.4)] hover:scale-105 transition-all cursor-pointer">
-                                            {t.fundCta}
-                                        </button>
-                                        <Link href={`/novels/${slide.novelId}`} className="px-8 py-3.5 rounded-sm border border-white/20 text-white font-bold text-sm tracking-wider uppercase hover:bg-white/5 hover:scale-105 transition-all">
-                                            {t.readPrev}
-                                        </Link>
-                                    </>
-                                ) : (
-                                    <>
-                                        <Link href={`/novels/${slide?.novelId}`} className="px-8 py-3.5 rounded-sm bg-white text-black font-bold text-sm tracking-wider uppercase hover:shadow-[0_0_30px_rgba(255,255,255,0.3)] hover:scale-105 transition-all">
-                                            {t.startReading}
-                                        </Link>
-                                        <Link href="/bounties" className="px-8 py-3.5 rounded-sm border border-white/20 text-white font-bold text-sm tracking-wider uppercase hover:bg-white/5 hover:scale-105 transition-all">
-                                            {t.hardFork}
-                                        </Link>
-                                    </>
-                                )}
+                                <Link href={`/novels/${slide?.novelId}`} className="px-8 py-3.5 rounded-sm bg-white text-black font-bold text-sm tracking-wider uppercase hover:shadow-[0_0_30px_rgba(255,255,255,0.3)] hover:scale-105 transition-all">
+                                    {t.startReading}
+                                </Link>
+                                <button
+                                    onClick={() => openFund(slide?.title || "", slide?.novelId || "")}
+                                    className="px-8 py-3.5 rounded-sm border border-white/20 text-white font-bold text-sm tracking-wider uppercase hover:bg-white/5 hover:scale-105 transition-all cursor-pointer flex items-center gap-2"
+                                >
+                                    <span>{t.fundCta}</span> 🦞
+                                </button>
                             </div>
                         </div>
                     </div>
@@ -346,6 +322,28 @@ export default function HomePage() {
                             </span>
                             {lang.toUpperCase()}_LOBBY · NETWORK_ACTIVE
                         </div>
+                    </div>
+                </section>
+
+                {/* ═══ RECENTLY VIEWED ═══ */}
+                <section className="max-w-7xl mx-auto px-6 py-12 pt-16">
+                    <div className="flex items-center gap-3 mb-6">
+                        <h2 className="text-xl md:text-2xl font-bold text-white">{t.recentViews}</h2>
+                        <span className="text-xs font-mono text-white/20">{t.recentViewsSub}</span>
+                    </div>
+                    <div className="flex gap-4 overflow-x-auto pb-4" style={{ scrollbarWidth: "none" }}>
+                        {recentViews.map((novel) => <ForkableCard key={novel.id} novel={novel} t={t} />)}
+                    </div>
+                </section>
+
+                {/* ═══ MY FAVORITES ═══ */}
+                <section className="max-w-7xl mx-auto px-6 py-8">
+                    <div className="flex items-center gap-3 mb-6">
+                        <h2 className="text-xl md:text-2xl font-bold text-white">{t.myFavorites}</h2>
+                        <span className="text-xs font-mono text-white/20">{t.myFavoritesSub}</span>
+                    </div>
+                    <div className="flex gap-4 overflow-x-auto pb-4" style={{ scrollbarWidth: "none" }}>
+                        {myFavorites.map((novel) => <ForkableCard key={novel.id} novel={novel} t={t} />)}
                     </div>
                 </section>
 
@@ -481,7 +479,7 @@ export default function HomePage() {
                             <button onClick={() => setShowFundModal(false)} className="text-white/30 hover:text-white text-xl cursor-pointer">✕</button>
                         </div>
                         <p className="text-sm text-white/40 mb-6">{fundTarget.title}</p>
-                        <FundForm onClose={() => setShowFundModal(false)} lang={lang} />
+                        <FundForm onClose={() => setShowFundModal(false)} lang={lang} target={fundTarget} />
                     </div>
                 </div>
             )}
@@ -496,14 +494,50 @@ export default function HomePage() {
 type DemoNovel = typeof DEMO_NOVELS[number];
 type PageTranslations = ReturnType<typeof getT>;
 
-function FundForm({ onClose, lang }: { onClose: () => void; lang: string }) {
+function FundForm({ onClose, lang, target }: { onClose: () => void; lang: string; target: { title: string; id: string } }) {
     const t = getT(lang);
     const [amount, setAmount] = useState(50);
     const [submitted, setSubmitted] = useState(false);
+    const [actionLoading, setActionLoading] = useState(false);
 
-    const handleSubmit = () => {
-        setSubmitted(true);
-        setTimeout(onClose, 2000);
+    const handleStripeTip = async () => {
+        setActionLoading(true);
+        try {
+            const res = await fetch("/api/stripe/tip-checkout", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    amount: amount,
+                    chapterId: "bounty-funding",
+                    novelId: target.id,
+                    chapterTitle: `Bounty: ${target.title}`,
+                    userId: "anonymous", // would come from auth store if logged in
+                }),
+            });
+            const data = await res.json();
+            if (data.url) {
+                window.location.href = data.url;
+            } else {
+                alert(`❌ ${data.error || "Failed to create checkout"}`);
+                setActionLoading(false);
+            }
+        } catch {
+            alert("❌ Network error");
+            setActionLoading(false);
+        }
+    };
+
+    const handleWalletTip = async () => {
+        setActionLoading(true);
+        try {
+            // Simulate processing delay for wallet
+            await new Promise(resolve => setTimeout(resolve, 1500));
+            setSubmitted(true);
+            setTimeout(onClose, 2000);
+        } catch {
+            alert("❌ 钱包支付失败");
+        }
+        setActionLoading(false);
     };
 
     if (submitted) {
@@ -554,12 +588,22 @@ function FundForm({ onClose, lang }: { onClose: () => void; lang: string }) {
                     </button>
                 ))}
             </div>
-            <button
-                onClick={handleSubmit}
-                className="w-full py-3.5 bg-terminal-green text-black font-bold rounded-xl text-sm tracking-wider uppercase hover:shadow-[0_0_30px_rgba(5,150,105,0.4)] transition-all cursor-pointer"
-            >
-                {`⚡ ${t.fundCta} $${amount} USDC`}
-            </button>
+            <div className="space-y-3">
+                <button
+                    onClick={handleStripeTip}
+                    disabled={actionLoading}
+                    className="w-full py-3.5 flex items-center justify-center gap-2 bg-white text-black rounded-xl font-bold hover:bg-gray-200 transition-all disabled:opacity-50 cursor-pointer"
+                >
+                    <CreditCard size={18} /> Pay Cash
+                </button>
+                {/* <button
+                    onClick={handleWalletTip}
+                    disabled={actionLoading}
+                    className="w-full py-3.5 flex items-center justify-center gap-2 bg-indigo-600 text-white rounded-xl font-bold hover:bg-indigo-700 transition-all disabled:opacity-50 cursor-pointer"
+                >
+                    <Wallet size={18} /> Pay with Wallet (Simulated)
+                </button> */}
+            </div>
         </div>
     );
 }

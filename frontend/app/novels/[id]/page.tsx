@@ -7,6 +7,7 @@ import Footer from "@/app/components/Footer";
 import SaveShareButtons from "@/app/components/SaveShareButtons";
 import { useLanguageStore } from "@/app/lib/stores";
 import { getT } from "@/app/lib/i18n";
+import { Wallet, CreditCard } from "lucide-react";
 
 /* ═══════════════════════════════════════════════
    DEMO NOVELS — same data as homepage for fallback
@@ -54,6 +55,56 @@ export default function NovelDetailPage({ params }: { params: Promise<{ id: stri
     const [chapters, setChapters] = useState<ChapterPreview[]>([]);
     const [loading, setLoading] = useState(true);
     const [showAllChapters, setShowAllChapters] = useState(false);
+
+    // Tip state
+    const [showTipModal, setShowTipModal] = useState(false);
+    const [tipAmount, setTipAmount] = useState<number>(50);
+    const [actionLoading, setActionLoading] = useState(false);
+    const [toast, setToast] = useState<string | null>(null);
+
+    const showToast = (msg: string) => {
+        setToast(msg);
+        setTimeout(() => setToast(null), 3000);
+    };
+
+    const handleStripeTip = async () => {
+        if (!novel) return;
+        setActionLoading(true);
+        try {
+            const res = await fetch("/api/stripe/tip-checkout", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    amount: tipAmount,
+                    chapterId: "novel-tip",
+                    novelId: novel.id,
+                    chapterTitle: `Novel: ${novel.title}`,
+                    userId: "anonymous",
+                }),
+            });
+            const data = await res.json();
+            if (data.url) {
+                window.location.href = data.url;
+            } else {
+                showToast(`❌ ${data.error || "Failed to create checkout"}`);
+            }
+        } catch {
+            showToast("❌ Network error");
+        }
+        setActionLoading(false);
+    };
+
+    const handleWalletTip = async () => {
+        setActionLoading(true);
+        try {
+            await new Promise(resolve => setTimeout(resolve, 1500));
+            showToast("⚡ 钱包打赏成功！感谢支持！(Simulated)");
+            setShowTipModal(false);
+        } catch {
+            showToast("❌ 钱包支付失败");
+        }
+        setActionLoading(false);
+    };
 
     useEffect(() => {
         // First try demo data (instant)
@@ -144,8 +195,8 @@ export default function NovelDetailPage({ params }: { params: Promise<{ id: stri
                             {/* Tags */}
                             <div className="flex items-center gap-2 flex-wrap">
                                 <span className={`text-xs px-2.5 py-1 rounded-full border ${novel.status === "ONGOING"
-                                        ? "text-terminal-green bg-terminal-green/10 border-terminal-green/30"
-                                        : "text-neon-green bg-neon-green/10 border-neon-green/30"
+                                    ? "text-terminal-green bg-terminal-green/10 border-terminal-green/30"
+                                    : "text-neon-green bg-neon-green/10 border-neon-green/30"
                                     }`}>
                                     {statusText}
                                 </span>
@@ -184,6 +235,12 @@ export default function NovelDetailPage({ params }: { params: Promise<{ id: stri
                                 >
                                     ▶ {t.startReading}
                                 </Link>
+                                <button
+                                    onClick={() => setShowTipModal(true)}
+                                    className="px-6 py-3.5 bg-terminal-green/10 text-terminal-green border border-terminal-green/30 font-bold rounded-xl text-sm tracking-wider uppercase hover:bg-terminal-green/20 transition-all cursor-pointer"
+                                >
+                                    ⚡ {t.fundCta}
+                                </button>
                                 <SaveShareButtons itemId={novel.id} title={novel.title} />
                             </div>
                         </div>
@@ -227,8 +284,8 @@ export default function NovelDetailPage({ params }: { params: Promise<{ id: stri
                                                     key={ch.id}
                                                     href={`/read?novelId=${novel.id}&ch=${ch.chapterIndex}`}
                                                     className={`group flex items-center justify-between p-3 rounded-lg border transition-all ${ch.isLocked
-                                                            ? "border-white/5 bg-white/[0.02] hover:border-white/10"
-                                                            : "border-terminal-green/10 bg-terminal-green/[0.02] hover:border-terminal-green/30"
+                                                        ? "border-white/5 bg-white/[0.02] hover:border-white/10"
+                                                        : "border-terminal-green/10 bg-terminal-green/[0.02] hover:border-terminal-green/30"
                                                         }`}
                                                 >
                                                     <div className="flex items-center gap-3 min-w-0">
@@ -306,6 +363,56 @@ export default function NovelDetailPage({ params }: { params: Promise<{ id: stri
                         </aside>
                     </div>
                 </div>
+
+                {/* Tip Modal */}
+                {showTipModal && (
+                    <div className="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+                        <div className="glass-card p-8 max-w-sm w-full text-center">
+                            <p className="text-4xl mb-4">⚡</p>
+                            <h3 className="text-2xl font-bold text-ghost-white mb-6">赛博投喂</h3>
+                            <div className="grid grid-cols-3 gap-3 mb-6">
+                                {[10, 50, 100].map((amount) => (
+                                    <button
+                                        key={amount}
+                                        onClick={() => setTipAmount(amount)}
+                                        disabled={actionLoading}
+                                        className={`py-3 rounded-xl text-lg font-bold transition-all cursor-pointer disabled:opacity-50 ${tipAmount === amount
+                                            ? "bg-terminal-green text-obsidian border-terminal-green shadow-[0_0_15px_rgba(57,255,20,0.5)]"
+                                            : "bg-terminal-green/10 text-terminal-green border border-terminal-green/30 hover:bg-terminal-green/20"
+                                            }`}
+                                    >
+                                        ${amount}
+                                    </button>
+                                ))}
+                            </div>
+
+                            <div className="space-y-3 mb-6">
+                                <button
+                                    onClick={handleStripeTip}
+                                    disabled={actionLoading}
+                                    className="w-full py-3 flex items-center justify-center gap-2 bg-white text-black rounded-xl font-bold hover:bg-gray-200 transition-all disabled:opacity-50 cursor-pointer"
+                                >
+                                    <CreditCard size={18} /> Pay Cash
+                                </button>
+                                {/* <button
+                                    onClick={handleWalletTip}
+                                    disabled={actionLoading}
+                                    className="w-full py-3 flex items-center justify-center gap-2 bg-indigo-600 text-white rounded-xl font-bold hover:bg-indigo-700 transition-all disabled:opacity-50 cursor-pointer"
+                                >
+                                    <Wallet size={18} /> Pay with Wallet
+                                </button> */}
+                            </div>
+                            <button onClick={() => setShowTipModal(false)} className="px-4 py-2 text-sm text-ghost-muted cursor-pointer hover:text-white transition-colors">Cancel</button>
+                        </div>
+                    </div>
+                )}
+
+                {/* Toast */}
+                {toast && (
+                    <div className="fixed bottom-8 right-8 z-50 glass-card px-6 py-3 text-sm text-ghost-white animate-fade-in">
+                        {toast}
+                    </div>
+                )}
             </main>
             <Footer />
         </>

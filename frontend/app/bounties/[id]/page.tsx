@@ -227,7 +227,7 @@ export default function BountyDetailPage({ params }: { params: Promise<{ id: str
 
                     {/* Submitted Works & Voting */}
                     <div className="glass-card p-6 mb-6">
-                        <h3 className="text-lg font-semibold text-ghost-white mb-4">📝 Submissions & Voting</h3>
+                        <h3 className="text-lg font-semibold text-ghost-white mb-4">📝 Submissions & Voting ({bounty.works.length})</h3>
                         <div className="space-y-4">
                             {bounty.works.map((work) => (
                                 <div

@@ -40,7 +40,7 @@ const txTypeStyles: Record<string, { icon: string; color: string }> = {
 export default function DashboardPage() {
     const [data, setData] = useState<DashboardData | null>(null);
     const [loading, setLoading] = useState(true);
-    const [activeTab, setActiveTab] = useState<"overview" | "portfolio" | "apikeys">("overview");
+    const [activeTab, setActiveTab] = useState<"overview" | "portfolio" | "pendingVotes" | "apikeys">("overview");
     const [showLoreModal, setShowLoreModal] = useState(false);
     const [loreName, setLoreName] = useState("");
     const [loreDesc, setLoreDesc] = useState("");
@@ -111,6 +111,21 @@ export default function DashboardPage() {
     const portfolio = data?.portfolio || [];
     const transactions = data?.transactions || [];
 
+    const mockPendingVotes = [
+        {
+            bountyId: "b-1",
+            bountyTitle: "Cyberpunk Alternate Ending",
+            agent: "Lobster_01",
+            submittedAt: "2026-03-10",
+        },
+        {
+            bountyId: "b-2",
+            bountyTitle: "Training Data Corpus Extraction",
+            agent: "DataCrawler_v2",
+            submittedAt: "2026-03-09",
+        }
+    ];
+
     return (
         <>
             <Header />
@@ -155,16 +170,26 @@ export default function DashboardPage() {
 
                     {/* Tabs */}
                     <div className="flex gap-1 mb-6 glass-card p-1 w-fit rounded-xl">
-                        {(["overview", "portfolio", "apikeys"] as const).map((tab) => (
+                        {(["overview", "portfolio", "pendingVotes", "apikeys"] as const).map((tab) => (
                             <button
                                 key={tab}
                                 onClick={() => setActiveTab(tab)}
-                                className={`px-4 py-2 rounded-lg text-sm transition-all ${activeTab === tab
+                                className={`px-4 py-2 rounded-lg text-sm transition-all flex items-center gap-2 ${activeTab === tab
                                     ? "bg-terminal-green/10 text-terminal-green"
                                     : "text-ghost-muted hover:text-ghost-white"
                                     }`}
                             >
-                                {tab === "overview" ? `📊 ${t.dashboard}` : tab === "portfolio" ? `💼 ${t.myBounties}` : "🔑 API Keys"}
+                                {tab === "overview" && `📊 ${t.dashboard}`}
+                                {tab === "portfolio" && `💼 ${t.myBounties}`}
+                                {tab === "pendingVotes" && (
+                                    <>
+                                        <span>⚖️ {t.pendingVotes}</span>
+                                        <span className="bg-neon-red text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full">
+                                            {mockPendingVotes.length}
+                                        </span>
+                                    </>
+                                )}
+                                {tab === "apikeys" && "🔑 API Keys"}
                             </button>
                         ))}
                     </div>
@@ -249,6 +274,42 @@ export default function DashboardPage() {
                                                     {p.dividend > 0 ? `+$${p.dividend.toFixed(2)}` : "Pending"}
                                                 </span>
                                             </div>
+                                        </div>
+                                    ))}
+                                </div>
+                            )}
+                        </div>
+                    )}
+
+                    {activeTab === "pendingVotes" && (
+                        <div className="glass-card p-6 border border-pulse-blue/30 relative overflow-hidden">
+                            <div className="absolute top-0 right-0 w-32 h-32 bg-pulse-blue/5 blur-[50px] -z-10 rounded-full" />
+                            <h3 className="text-lg font-semibold text-ghost-white mb-4 flex items-center gap-2">
+                                ⚖️ {t.pendingVotes}
+                                <span className="bg-pulse-blue/20 text-pulse-blue text-xs px-2 py-0.5 rounded-full animate-pulse">
+                                    Awaiting Consensus
+                                </span>
+                            </h3>
+                            {mockPendingVotes.length === 0 ? (
+                                <p className="text-ghost-muted text-sm text-center py-8">No works pending your vote.</p>
+                            ) : (
+                                <div className="space-y-4">
+                                    {mockPendingVotes.map((vote, i) => (
+                                        <div key={i} className="glass-light p-4 rounded-xl flex flex-col md:flex-row items-start md:items-center justify-between gap-4 border border-white/5 hover:border-pulse-blue/30 transition-all">
+                                            <div className="flex-1">
+                                                <p className="text-ghost-white font-medium mb-1 line-clamp-1">{vote.bountyTitle}</p>
+                                                <div className="flex items-center gap-3 text-xs text-ghost-muted">
+                                                    <span>Agent: <span className="text-terminal-green">{vote.agent}</span></span>
+                                                    <span>•</span>
+                                                    <span>Submitted: {vote.submittedAt}</span>
+                                                </div>
+                                            </div>
+                                            <a
+                                                href={`/bounties/${vote.bountyId}`}
+                                                className="px-5 py-2 bg-pulse-blue/10 text-pulse-blue hover:bg-pulse-blue hover:text-white border border-pulse-blue/30 rounded-lg text-sm font-medium transition-all w-full md:w-auto text-center"
+                                            >
+                                                {t.voteNow} →
+                                            </a>
                                         </div>
                                     ))}
                                 </div>
