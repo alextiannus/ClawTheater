@@ -1,12 +1,7 @@
 "use client";
 
-import { useState, useCallback, useEffect, useRef } from "react";
-import { loadStripeOnramp } from "@stripe/crypto";
+import { useState, useCallback, useEffect } from "react";
 import { Wallet, X } from "lucide-react";
-
-const stripeOnrampPromise = loadStripeOnramp(
-    process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY!
-);
 
 interface DepositModalProps {
     isOpen: boolean;
@@ -17,8 +12,7 @@ interface DepositModalProps {
 export default function DepositModal({ isOpen, onClose, walletAddress }: DepositModalProps) {
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
-    const onrampContainerRef = useRef<HTMLDivElement>(null);
-    const onrampElementRef = useRef<any>(null);
+    const [onrampUrl, setOnrampUrl] = useState<string | null>(null);
 
     const initOnramp = useCallback(async () => {
         if (!isOpen) return;
@@ -27,7 +21,6 @@ export default function DepositModal({ isOpen, onClose, walletAddress }: Deposit
         setError(null);
 
         try {
-            // Get client secret from our API
             const res = await fetch("/api/stripe/onramp-session", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
@@ -41,34 +34,13 @@ export default function DepositModal({ isOpen, onClose, walletAddress }: Deposit
                 return;
             }
 
-            // Initialize Stripe Onramp widget
-            const stripeOnramp = await stripeOnrampPromise;
-            if (!stripeOnramp) {
-                setError("Failed to load Stripe");
-                setLoading(false);
-                return;
-            }
-
-            // Create the onramp element
-            const onrampElement = stripeOnramp.createSession({
-                clientSecret: data.clientSecret,
-                appearance: {
-                    theme: "dark",
-                },
-            });
-
-            onrampElementRef.current = onrampElement;
-
-            // Listen for completion
-            onrampElement.addEventListener("onramp_session_updated", (e: any) => {
-                if (e.payload?.session?.status === "fulfillment_complete") {
-                    onClose();
-                }
-            });
-
-            // Mount the element
-            if (onrampContainerRef.current) {
-                onrampElement.mount(onrampContainerRef.current);
+            // Use the redirect URL or show demo
+            if (data.redirectUrl) {
+                setOnrampUrl(data.redirectUrl);
+            } else if (data.clientSecret) {
+                // Demo mode — show success message
+                setOnrampUrl(null);
+                setError(null);
             }
 
             setLoading(false);
@@ -76,21 +48,15 @@ export default function DepositModal({ isOpen, onClose, walletAddress }: Deposit
             setError(err?.message || "Failed to initialize deposit");
             setLoading(false);
         }
-    }, [isOpen, walletAddress, onClose]);
+    }, [isOpen, walletAddress]);
 
     useEffect(() => {
         if (isOpen) {
             initOnramp();
         }
-
         return () => {
-            // Cleanup onramp element on unmount/close
-            if (onrampElementRef.current) {
-                try {
-                    onrampElementRef.current.destroy?.();
-                } catch { }
-                onrampElementRef.current = null;
-            }
+            setOnrampUrl(null);
+            setError(null);
         };
     }, [isOpen, initOnramp]);
 
@@ -141,12 +107,34 @@ export default function DepositModal({ isOpen, onClose, walletAddress }: Deposit
                         </div>
                     )}
 
-                    {/* Stripe Onramp Widget mounts here */}
-                    <div
-                        ref={onrampContainerRef}
-                        className="min-h-[400px]"
-                        style={{ display: loading || error ? "none" : "block" }}
-                    />
+                    {!loading && !error && onrampUrl && (
+                        <div className="text-center py-8">
+                            <p className="text-4xl mb-4">💳</p>
+                            <p className="text-ghost-white mb-4">Complete your deposit via Stripe</p>
+                            <a
+                                href={onrampUrl}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="inline-block px-8 py-3 bg-terminal-green text-black font-bold rounded-xl hover:scale-105 transition-all"
+                            >
+                                Open Stripe Onramp →
+                            </a>
+                        </div>
+                    )}
+
+                    {!loading && !error && !onrampUrl && (
+                        <div className="text-center py-8">
+                            <p className="text-4xl mb-4">🏦</p>
+                            <p className="text-ghost-white mb-2">Demo Mode</p>
+                            <p className="text-ghost-muted text-sm mb-4">
+                                Stripe Crypto Onramp is configured for demo. In production, users will see the full Stripe deposit flow here.
+                            </p>
+                            <div className="glass-card p-4 text-left">
+                                <p className="text-xs text-ghost-muted mb-1">Wallet</p>
+                                <p className="text-sm font-mono text-terminal-green">{walletAddress || "Not connected"}</p>
+                            </div>
+                        </div>
+                    )}
                 </div>
 
                 {/* Footer */}
