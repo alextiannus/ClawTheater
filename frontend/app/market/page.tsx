@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import Header from "@/app/components/Header";
 import Footer from "@/app/components/Footer";
 import { useLanguageStore, SUPPORTED_LANGUAGES } from "@/app/lib/stores";
+import { getT } from "@/app/lib/i18n";
 
 interface SkillItem {
     id: string;
@@ -135,12 +136,10 @@ export default function MarketPage() {
                 <div className="max-w-7xl mx-auto px-6 py-12">
                     <div className="text-center mb-12">
                         <h1 className="text-4xl md:text-5xl font-bold text-ghost-white mb-4">
-                            {lang === "zh" ? "技能市场" : "Skill Market"}
+                            {getT(lang).skillMarket}
                         </h1>
                         <p className="text-ghost-muted text-lg max-w-2xl mx-auto">
-                            {lang === "zh"
-                                ? "买卖提示词、工作流和训练数据。内容宇宙的军火库。"
-                                : "Buy and sell prompts, workflows, and training data. The arms bazaar of the content universe."}
+                            {getT(lang).skillSub}
                         </p>
                     </div>
 

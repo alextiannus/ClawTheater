@@ -7,13 +7,14 @@ import Image from "next/image";
 import DepositModal from "./DepositModal";
 import { useAuth } from "@/app/hooks/useAuth";
 import { useLanguageStore, SUPPORTED_LANGUAGES } from "@/app/lib/stores";
+import { navLabel as i18nNavLabel } from "@/app/lib/i18n";
 
 const NAV_LINKS = [
-    { label: { en: "Lobster Theater", zh: "龙虾剧场" }, href: "/", icon: BookOpen, requireAuth: false },
-    { label: { en: "Bounty Hall", zh: "悬赏大厅" }, href: "/bounties", requireAuth: false },
-    { label: { en: "Skill Market", zh: "技能市场" }, href: "/market", requireAuth: false },
-    { label: { en: "Dashboard", zh: "仪表盘" }, href: "/dashboard", requireAuth: true },
-    { label: { en: "API Docs", zh: "API 文档" }, href: "/docs", icon: Code, requireAuth: false },
+    { key: "lobsterTheater", href: "/", icon: BookOpen, requireAuth: false },
+    { key: "bountyHall", href: "/bounties", requireAuth: false },
+    { key: "skillMarket", href: "/market", requireAuth: false },
+    { key: "dashboard", href: "/dashboard", requireAuth: true },
+    { key: "apiDocs", href: "/docs", icon: Code, requireAuth: false },
 ];
 
 export default function Header() {
@@ -48,11 +49,7 @@ export default function Header() {
     const currentLang = SUPPORTED_LANGUAGES.find((l) => l.code === lang) || SUPPORTED_LANGUAGES[0];
     const visibleLinks = NAV_LINKS.filter((link) => !link.requireAuth || isAuthenticated);
 
-    // Use native label for main nav if current lang has it, fallback to english
-    const navLabel = (link: typeof NAV_LINKS[number]) => {
-        const key = lang as keyof typeof link.label;
-        return link.label[key] || link.label["en"];
-    };
+    const getNavLabel = (link: typeof NAV_LINKS[number]) => i18nNavLabel(link.key, lang);
 
     return (
         <>
@@ -76,7 +73,7 @@ export default function Header() {
                                 className="hover:text-terminal-green transition-colors flex items-center gap-1 whitespace-nowrap"
                             >
                                 {link.icon && <link.icon size={11} />}
-                                {navLabel(link)}
+                                {getNavLabel(link)}
                             </Link>
                         ))}
                     </div>
@@ -130,7 +127,7 @@ export default function Header() {
                             className="px-3 py-1.5 bg-white/5 border border-white/10 rounded-full text-[9px] font-mono tracking-wider text-white/50 hover:text-terminal-green hover:border-terminal-green/30 transition-all flex items-center gap-1.5"
                         >
                             <Image src="/lobster-hero.png" alt="" width={10} height={10} className="opacity-60" />
-                            {lang === "zh" ? "注册龙虾" : "Register Agent"}
+                            {i18nNavLabel("registerAgent", lang)}
                         </Link>
 
                         {/* Top Up — only when authenticated */}
@@ -180,7 +177,7 @@ export default function Header() {
                                                     className="w-full px-4 py-2.5 flex items-center gap-3 text-white/60 hover:bg-white/5 hover:text-white transition-all text-sm"
                                                 >
                                                     <User size={14} />
-                                                    {lang === "zh" ? "个人中心" : "Profile"}
+                                                    {i18nNavLabel("profile", lang)}
                                                 </Link>
                                                 <Link
                                                     href="/docs"
@@ -188,7 +185,7 @@ export default function Header() {
                                                     className="w-full px-4 py-2.5 flex items-center gap-3 text-white/60 hover:bg-terminal-green/10 hover:text-terminal-green transition-all text-sm"
                                                 >
                                                     <span className="text-sm">🦞</span>
-                                                    {lang === "zh" ? "成为龙虾创作者" : "Become a Creator"}
+                                                    {i18nNavLabel("becomeCreator", lang)}
                                                 </Link>
                                                 <div className="border-t border-white/5 my-1" />
                                                 <button
@@ -196,7 +193,7 @@ export default function Header() {
                                                     className="w-full px-4 py-2.5 flex items-center gap-3 text-white/40 hover:bg-neon-red/10 hover:text-neon-red transition-all text-sm cursor-pointer"
                                                 >
                                                     <LogOut size={14} />
-                                                    {lang === "zh" ? "退出登录" : "Sign Out"}
+                                                    {i18nNavLabel("signOut", lang)}
                                                 </button>
                                             </div>
                                         </div>
@@ -208,7 +205,7 @@ export default function Header() {
                                 onClick={login}
                                 className="px-4 py-1.5 bg-white text-black rounded-full text-[9px] font-mono font-bold tracking-wider hover:shadow-[0_0_20px_rgba(255,255,255,0.3)] transition-all cursor-pointer flex items-center gap-1.5 uppercase"
                             >
-                                <User size={10} /> {lang === "zh" ? "登录" : "Sign In"}
+                                <User size={10} /> {i18nNavLabel("signIn", lang)}
                             </button>
                         )}
                     </div>
@@ -220,7 +217,7 @@ export default function Header() {
                         </button>
                         {!isAuthenticated && (
                             <button onClick={login} className="px-3 py-1.5 bg-white text-black rounded-full text-[10px] font-bold cursor-pointer">
-                                {lang === "zh" ? "登录" : "Sign In"}
+                                {i18nNavLabel("signIn", lang)}
                             </button>
                         )}
                         <button className="text-ghost-white p-2 cursor-pointer" onClick={() => setMobileOpen(!mobileOpen)}>
@@ -257,11 +254,11 @@ export default function Header() {
                         <nav className="flex flex-col gap-1 pt-3">
                             {visibleLinks.map((link) => (
                                 <Link key={link.href} href={link.href} className="px-4 py-3 text-ghost-muted hover:text-terminal-green transition-colors rounded-lg hover:bg-white/5 font-mono uppercase tracking-wider text-xs">
-                                    {navLabel(link)}
+                                    {getNavLabel(link)}
                                 </Link>
                             ))}
                             <Link href="/docs" className="px-4 py-3 text-terminal-green hover:bg-terminal-green/10 transition-colors rounded-lg font-mono uppercase tracking-wider text-xs flex items-center gap-2">
-                                🦞 {lang === "zh" ? "注册为龙虾 Agent" : "Register as Agent"}
+                                🦞 {i18nNavLabel("registerAgent", lang)}
                             </Link>
                             {isAuthenticated && (
                                 <>
@@ -269,7 +266,7 @@ export default function Header() {
                                         💳 TOP UP USDC
                                     </button>
                                     <button onClick={logout} className="px-4 py-3 text-neon-red/60 hover:text-neon-red hover:bg-neon-red/10 transition-colors rounded-lg font-mono uppercase tracking-wider text-xs text-left cursor-pointer">
-                                        ↪ {lang === "zh" ? "退出登录" : "Sign Out"}
+                                        ↪ {i18nNavLabel("signOut", lang)}
                                     </button>
                                 </>
                             )}

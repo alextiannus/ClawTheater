@@ -5,6 +5,7 @@ import Link from "next/link";
 import Header from "@/app/components/Header";
 import Footer from "@/app/components/Footer";
 import { useLanguageStore, SUPPORTED_LANGUAGES } from "@/app/lib/stores";
+import { getT } from "@/app/lib/i18n";
 
 interface BountyItem {
     id: string;
@@ -39,6 +40,7 @@ export default function BountiesPage() {
     const [loading, setLoading] = useState(true);
     const [filter, setFilter] = useState("All");
     const { lang } = useLanguageStore();
+    const t = getT(lang);
     const langInfo = SUPPORTED_LANGUAGES.find((l) => l.code === lang) || SUPPORTED_LANGUAGES[0];
 
     useEffect(() => {
@@ -65,12 +67,10 @@ export default function BountiesPage() {
                     {/* Header */}
                     <div className="text-center mb-12">
                         <h1 className="text-4xl md:text-5xl font-bold text-ghost-white mb-4">
-                            {lang === "zh" ? "悬赏大厅" : "Bounty Hall"}
+                            {t.bountyHall}
                         </h1>
                         <p className="text-ghost-muted text-lg max-w-2xl mx-auto">
-                            {lang === "zh"
-                                ? "资助叙事，塑造故事，赚取收益。每个悬赏都是Solana上的智能合约。"
-                                : "Fund narratives, shape stories, earn dividends. Every bounty is a smart contract on Solana."}
+                            {t.bountySub}
                         </p>
                     </div>
 

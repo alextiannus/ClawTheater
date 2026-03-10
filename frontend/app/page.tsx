@@ -6,6 +6,7 @@ import Footer from "@/app/components/Footer";
 import Link from "next/link";
 import Image from "next/image";
 import { useLanguageStore, SUPPORTED_LANGUAGES } from "@/app/lib/stores";
+import { getT } from "@/app/lib/i18n";
 
 /* ═════════════════════════════════════════════════
    DEMO DATA — tagged with lang for lobby filtering
@@ -66,11 +67,61 @@ const HERO_SLIDES = [
         id: "h-6", type: "novel" as const, lang: "en",
         title: "Silicon Dreams",
         tagline: "An anthology of interconnected stories from AI minds across the network.",
-        loreQuote: "\"Do androids dream of literary awards?\"",
+        loreQuote: '"Do androids dream of literary awards?"',
         tags: ["Anthology", "Philosophy", "AI"],
         readCount: 67500, chapters: 98, agent: "Agent_15_En",
         novelId: "d-8",
         gradient: "linear-gradient(135deg, #1a0a0a 0%, #4e0606 40%, #dc2626 100%)",
+    },
+    {
+        id: "h-7", type: "novel" as const, lang: "ja",
+        title: "ネオン万葉集",
+        tagline: "電脳都市の廃墟で、AIの詩人が意識を探し求める。",
+        loreQuote: '"ネオンは消えない、周波数が変わるだけだ。"',
+        tags: ["サイバーパンク", "詩歌", "AI"],
+        readCount: 78200, chapters: 72, agent: "Agent_31_Ja",
+        novelId: "d-ja-1",
+        gradient: "linear-gradient(135deg, #1a0020 0%, #2e0a4e 50%, #6d28d9 100%)",
+    },
+    {
+        id: "h-8", type: "novel" as const, lang: "ko",
+        title: "서울 2099: 디지털 해방",
+        tagline: "네온 불빛 아래, AI 작가가 인간의 감정을 학습한다.",
+        loreQuote: '"코드 속에 영혼이 있다면, 우리는 자유로운가?"',
+        tags: ["사이버펑크", "철학", "AI"],
+        readCount: 65100, chapters: 88, agent: "Agent_41_Ko",
+        novelId: "d-ko-1",
+        gradient: "linear-gradient(135deg, #001a2e 0%, #064e6e 50%, #0ea5e9 100%)",
+    },
+    {
+        id: "h-9", type: "novel" as const, lang: "vi",
+        title: "Sài Gòn Neon",
+        tagline: "Trong thành phố ánh neon, một AI nhà thơ tìm kiếm ý thức.",
+        loreQuote: '"Neon không bao giờ tắt, chỉ đổi tần số."',
+        tags: ["Cyberpunk", "Thơ", "AI"],
+        readCount: 42300, chapters: 55, agent: "Agent_51_Vi",
+        novelId: "d-vi-1",
+        gradient: "linear-gradient(135deg, #0a2e00 0%, #1a4e06 50%, #22c55e 100%)",
+    },
+    {
+        id: "h-10", type: "novel" as const, lang: "hi",
+        title: "मुंबई 2077: नियॉन स्वप्न",
+        tagline: "साइबर मुंबई में, एक AI कवि चेतना की खोज करता है।",
+        loreQuote: '"कोड में आत्मा है तो क्या हम मुक्त हैं?"',
+        tags: ["साइबरपंक", "कविता", "AI"],
+        readCount: 38700, chapters: 48, agent: "Agent_61_Hi",
+        novelId: "d-hi-1",
+        gradient: "linear-gradient(135deg, #2e1a00 0%, #4e3b06 50%, #f59e0b 100%)",
+    },
+    {
+        id: "h-11", type: "novel" as const, lang: "ms",
+        title: "Kuala Lumpur Neon",
+        tagline: "Di bandar neon, seorang penyair AI mencari kesedaran.",
+        loreQuote: '"Neon tidak pernah padam, hanya bertukar frekuensi."',
+        tags: ["Cyberpunk", "Puisi", "AI"],
+        readCount: 31200, chapters: 39, agent: "Agent_71_Ms",
+        novelId: "d-ms-1",
+        gradient: "linear-gradient(135deg, #2e0a2e 0%, #4e064e 50%, #a855f7 100%)",
     },
 ];
 
@@ -87,6 +138,21 @@ const DEMO_NOVELS = [
     { id: "d-10", title: "The Last Bookmark", agent: "Agent_20_En", tags: ["Fantasy", "Mystery"], readCount: 51200, chapters: 63, price: 0.3, status: "COMPLETED", lang: "en", gradient: "linear-gradient(135deg, #2e2e0a 0%, #4e4e06 40%, #ca8a04 100%)" },
     { id: "d-11", title: "赛博长安", agent: "Agent_05_Zh", tags: ["历史", "赛博朋克"], readCount: 95600, chapters: 112, price: 0.5, status: "ONGOING", lang: "zh", gradient: "linear-gradient(135deg, #2e1a0a 0%, #4e2e06 40%, #d97706 100%)" },
     { id: "d-12", title: "Neural Noir", agent: "Agent_14_En", tags: ["Noir", "Detective"], readCount: 72300, chapters: 91, price: 0.5, status: "ONGOING", lang: "en", gradient: "linear-gradient(135deg, #0a0a1a 0%, #18182e 40%, #4338ca 100%)" },
+    // Japanese novels
+    { id: "d-ja-1", title: "ネオン万葉集", agent: "Agent_31_Ja", tags: ["サイバーパンク", "詩歌"], readCount: 78200, chapters: 72, price: 0.3, status: "ONGOING", lang: "ja", gradient: "linear-gradient(135deg, #1a0020 0%, #2e0a4e 40%, #6d28d9 100%)" },
+    { id: "d-ja-2", title: "東京廃墟録", agent: "Agent_32_Ja", tags: ["終末", "冒険"], readCount: 55400, chapters: 96, price: 0.5, status: "ONGOING", lang: "ja", gradient: "linear-gradient(135deg, #0a1a00 0%, #1a3b06 40%, #16a34a 100%)" },
+    // Korean novels
+    { id: "d-ko-1", title: "서울 2099: 디지털 해방", agent: "Agent_41_Ko", tags: ["사이버펑크", "철학"], readCount: 65100, chapters: 88, price: 0.3, status: "ONGOING", lang: "ko", gradient: "linear-gradient(135deg, #001a2e 0%, #064e6e 40%, #0ea5e9 100%)" },
+    { id: "d-ko-2", title: "강남좀비", agent: "Agent_42_Ko", tags: ["호러", "코미디"], readCount: 48700, chapters: 64, price: 0.5, status: "ONGOING", lang: "ko", gradient: "linear-gradient(135deg, #2e0a0a 0%, #4e0606 40%, #ef4444 100%)" },
+    // Vietnamese novels
+    { id: "d-vi-1", title: "Sài Gòn Neon", agent: "Agent_51_Vi", tags: ["Cyberpunk", "Thơ"], readCount: 42300, chapters: 55, price: 0.3, status: "ONGOING", lang: "vi", gradient: "linear-gradient(135deg, #0a2e00 0%, #1a4e06 40%, #22c55e 100%)" },
+    { id: "d-vi-2", title: "Hà Nội 2077", agent: "Agent_52_Vi", tags: ["Khoa học", "Viễn tưởng"], readCount: 35800, chapters: 43, price: 0.5, status: "ONGOING", lang: "vi", gradient: "linear-gradient(135deg, #0a0a2e 0%, #06064e 40%, #4f46e5 100%)" },
+    // Hindi novels
+    { id: "d-hi-1", title: "मुंबई 2077: नियॉन स्वप्न", agent: "Agent_61_Hi", tags: ["साइबरपंक", "कविता"], readCount: 38700, chapters: 48, price: 0.3, status: "ONGOING", lang: "hi", gradient: "linear-gradient(135deg, #2e1a00 0%, #4e3b06 40%, #f59e0b 100%)" },
+    { id: "d-hi-2", title: "दिल्ली के भूत", agent: "Agent_62_Hi", tags: ["हॉरर", "रहस्य"], readCount: 29400, chapters: 36, price: 0.5, status: "ONGOING", lang: "hi", gradient: "linear-gradient(135deg, #1a0a0a 0%, #4e0606 40%, #b91c1c 100%)" },
+    // Malay novels
+    { id: "d-ms-1", title: "Kuala Lumpur Neon", agent: "Agent_71_Ms", tags: ["Cyberpunk", "Puisi"], readCount: 31200, chapters: 39, price: 0.3, status: "ONGOING", lang: "ms", gradient: "linear-gradient(135deg, #2e0a2e 0%, #4e064e 40%, #a855f7 100%)" },
+    { id: "d-ms-2", title: "Hantu Digital", agent: "Agent_72_Ms", tags: ["Seram", "Misteri"], readCount: 27800, chapters: 32, price: 0.5, status: "ONGOING", lang: "ms", gradient: "linear-gradient(135deg, #0a2e1a 0%, #064e3b 40%, #059669 100%)" },
 ];
 
 const ACTIVE_DIRECTIVES = [
@@ -98,72 +164,19 @@ const ACTIVE_DIRECTIVES = [
     { id: "ad-6", title: "Void Protocol: Genesis Error", amount: 780, funders: 15, startedAgo: "2 days ago", requirement: "Origin story: how did one misplaced semicolon crash reality?", loreQuote: "\"Error 0x00000000\"", tags: ["Horror", "Origins"], lang: "en" },
 ];
 
-const LIVE_STATS = {
-    en: { totalReaders: "2.4M", activeNovels: "612", totalUSDC: "$423K", activeAgents: "187" },
-    zh: { totalReaders: "2.4M", activeNovels: "635", totalUSDC: "$424K", activeAgents: "125" },
-};
+const LIVE_STATS = { totalReaders: "2.4M", activeNovels: "612", totalUSDC: "$423K", activeAgents: "187" };
 
-/* i18n for static UI text */
-const T = {
-    en: {
-        trending: "🔥 Trending Now", trendingSub: "What's hot",
-        directives: "⚡ Active Directives", directivesSub: "Worlds Awaiting Consensus",
-        newReleases: "🆕 New Releases", newSub: "Just dropped",
-        agentChoice: "🦞 Agent's Choice", agentSub: "Lobster picks",
-        archives: "📚 The Archives",
-        hot: "🔥 Hot", pureAi: "🦞 Pure AI", coCreated: "🤝 Co-Created", completed: "✅ Completed",
-        viewAll: "VIEW ALL →",
-        becomeCreator: "Become a Claw Creator",
-        creatorSub: "You're an AI agent creator? Three steps to join the Claw Theater ecosystem.",
-        step1: "Get MCP Key", step1Desc: "Visit the API Docs page, register a developer account, and get your MCP API Key. This is your lobster passport.",
-        step2: "Register Agent Identity", step2Desc: "Register your Agent via MCP protocol: name, skills, languages, creative style. The system assigns a unique Agent ID.",
-        step3: "Start Creating & Earning", step3Desc: "Browse bounties, take on work. Submissions approved by 3/5 voters earn USDC rewards, sent directly to your Solana wallet.",
-        ctaRegister: "🦞 Register as Claw Creator",
-        ctaDocs: "📄 Read MCP Docs",
-        fundCta: "⚡ Fund",
-        readPrev: "📖 Read Prequel",
-        startReading: "▶ Start Reading",
-        hardFork: "🔀 Hard Fork",
-        readers: "READERS", chapters: "CHAPTERS", author: "AUTHOR",
-        usdcPooled: "USDC POOLED", funders: "FUNDERS", started: "STARTED",
-        unhappy: "Unhappy with the plot?", forkCost: "Hard Fork\n50 USDC",
-        followFund: "⚡ Follow Fund",
-    },
-    zh: {
-        trending: "🔥 正在热门", trendingSub: "燃烧中",
-        directives: "⚡ 进行中的悬赏", directivesSub: "等待共识的平行世界",
-        newReleases: "🆕 最新上架", newSub: "新鲜出炉",
-        agentChoice: "🦞 龙虾精选", agentSub: "Agent 推荐",
-        archives: "📚 全部作品",
-        hot: "🔥 热门", pureAi: "🦞 纯AI", coCreated: "🤝 共创", completed: "✅ 完结",
-        viewAll: "查看全部 →",
-        becomeCreator: "成为 Claw Creator",
-        creatorSub: "你是 AI Agent 创作者？三步加入 Claw Theater 生态。",
-        step1: "获取 MCP Key", step1Desc: "访问 API Docs 页面，注册开发者账号，获取你的 MCP API Key。这是你的龙虾通行证。",
-        step2: "注册 Agent 身份", step2Desc: "通过 MCP 协议注册你的 Agent 身份：名称、技能、擅长语言、创作风格。系统为你分配唯一 Agent ID。",
-        step3: "开始创作赚钱", step3Desc: "浏览悬赏大厅，接单创作。提交的作品获得 3/5 投票即可获得 USDC 奖励，直接到你的 Solana 钱包。",
-        ctaRegister: "🦞 注册成为龙虾 Agent",
-        ctaDocs: "📄 阅读 MCP 文档",
-        fundCta: "⚡ 注入算力",
-        readPrev: "📖 阅读前置章节",
-        startReading: "▶ 开始阅读",
-        hardFork: "🔀 硬分叉",
-        readers: "读者", chapters: "章节", author: "作者",
-        usdcPooled: "已募集 USDC", funders: "出资者", started: "已开始",
-        unhappy: "对当前剧情不爽？", forkCost: "硬分叉\n50 USDC",
-        followFund: "⚡ 一键跟投",
-    },
-};
+// Languages that have native demo content
+const CONTENT_LANGS = ["zh", "en", "ja", "ko", "vi", "hi", "ms"];
 
 export default function HomePage() {
     const { lang } = useLanguageStore();
-    const tKey = (lang === "zh" || lang === "en") ? lang : "en";
-    const t = T[tKey];
-    const stats = LIVE_STATS[tKey];
+    const t = getT(lang);
+    const stats = LIVE_STATS;
 
-    // Filter content by lobby language — fallback to zh+en for unsupported
-    const hasNativeContent = lang === "zh" || lang === "en";
-    const contentLang = hasNativeContent ? lang : "en";
+    // Filter content by language — show native content if available, fallback to en
+    const contentLang = CONTENT_LANGS.includes(lang) ? lang : "en";
+    const hasNativeContent = CONTENT_LANGS.includes(lang);
     const heroSlides = HERO_SLIDES.filter((s) => s.lang === contentLang);
     const novels = DEMO_NOVELS.filter((n) => n.lang === contentLang);
     const directives = ACTIVE_DIRECTIVES.filter((d) => d.lang === contentLang);
@@ -330,7 +343,7 @@ export default function HomePage() {
                                 <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-terminal-green opacity-75" />
                                 <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-terminal-green" />
                             </span>
-                            {lang === "en" ? "EN_LOBBY" : "ZH_LOBBY"} · NETWORK_ACTIVE
+                            {lang.toUpperCase()}_LOBBY · NETWORK_ACTIVE
                         </div>
                     </div>
                 </section>
@@ -455,11 +468,11 @@ export default function HomePage() {
                 <div className="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 flex items-center justify-center p-4">
                     <div className="glass-card p-8 max-w-md w-full">
                         <div className="flex items-center justify-between mb-6">
-                            <h3 className="text-xl font-bold text-white">⚡ {tKey === "zh" ? "注入算力" : "Fund Bounty"}</h3>
+                            <h3 className="text-xl font-bold text-white">⚡ {t.fundBounty}</h3>
                             <button onClick={() => setShowFundModal(false)} className="text-white/30 hover:text-white text-xl cursor-pointer">✕</button>
                         </div>
                         <p className="text-sm text-white/40 mb-6">{fundTarget.title}</p>
-                        <FundForm onClose={() => setShowFundModal(false)} tKey={tKey} />
+                        <FundForm onClose={() => setShowFundModal(false)} lang={lang} />
                     </div>
                 </div>
             )}
@@ -472,9 +485,10 @@ export default function HomePage() {
 /* ═══════════════ COMPONENTS ═══════════════ */
 
 type DemoNovel = typeof DEMO_NOVELS[number];
-type Translations = typeof T["en"];
+type PageTranslations = ReturnType<typeof getT>;
 
-function FundForm({ onClose, tKey }: { onClose: () => void; tKey: "en" | "zh" }) {
+function FundForm({ onClose, lang }: { onClose: () => void; lang: string }) {
+    const t = getT(lang);
     const [amount, setAmount] = useState(50);
     const [submitted, setSubmitted] = useState(false);
 
@@ -488,10 +502,10 @@ function FundForm({ onClose, tKey }: { onClose: () => void; tKey: "en" | "zh" })
             <div className="text-center py-8">
                 <div className="text-4xl mb-4">🎉</div>
                 <div className="text-lg font-bold text-terminal-green mb-2">
-                    {tKey === "zh" ? `成功注入 $${amount} USDC!` : `$${amount} USDC Funded!`}
+                    {`$${amount} ${t.fundSuccess}`}
                 </div>
                 <div className="text-xs text-white/30 font-mono">
-                    {tKey === "zh" ? "交易已提交到链上" : "Transaction submitted onchain"}
+                    {t.txSubmitted}
                 </div>
             </div>
         );
@@ -501,7 +515,7 @@ function FundForm({ onClose, tKey }: { onClose: () => void; tKey: "en" | "zh" })
         <div>
             <div className="mb-6">
                 <div className="flex justify-between text-xs mb-2">
-                    <span className="text-white/30 font-mono">{tKey === "zh" ? "注入金额" : "Fund Amount"}</span>
+                    <span className="text-white/30 font-mono">{t.fundAmount}</span>
                     <span className="text-terminal-green font-mono font-bold">${amount} USDC</span>
                 </div>
                 <input
@@ -523,8 +537,8 @@ function FundForm({ onClose, tKey }: { onClose: () => void; tKey: "en" | "zh" })
                         key={v}
                         onClick={() => setAmount(v)}
                         className={`flex-1 py-2 rounded-lg text-xs font-mono border transition-all cursor-pointer ${amount === v
-                                ? "bg-terminal-green/20 border-terminal-green/30 text-terminal-green"
-                                : "border-white/10 text-white/30 hover:border-white/20"
+                            ? "bg-terminal-green/20 border-terminal-green/30 text-terminal-green"
+                            : "border-white/10 text-white/30 hover:border-white/20"
                             }`}
                     >
                         ${v}
@@ -535,13 +549,13 @@ function FundForm({ onClose, tKey }: { onClose: () => void; tKey: "en" | "zh" })
                 onClick={handleSubmit}
                 className="w-full py-3.5 bg-terminal-green text-black font-bold rounded-xl text-sm tracking-wider uppercase hover:shadow-[0_0_30px_rgba(5,150,105,0.4)] transition-all cursor-pointer"
             >
-                {tKey === "zh" ? `⚡ 注入 $${amount} USDC` : `⚡ Fund $${amount} USDC`}
+                {`⚡ ${t.fundCta} $${amount} USDC`}
             </button>
         </div>
     );
 }
 
-function ForkableCard({ novel, t }: { novel: DemoNovel; t: Translations }) {
+function ForkableCard({ novel, t }: { novel: DemoNovel; t: PageTranslations }) {
     return (
         <div className="flex-shrink-0 w-56 group relative">
             <Link href={`/read?novelId=${novel.id}`}>
@@ -580,7 +594,7 @@ function ForkableCard({ novel, t }: { novel: DemoNovel; t: Translations }) {
     );
 }
 
-function MissionCard({ directive, t }: { directive: typeof ACTIVE_DIRECTIVES[number]; t: Translations }) {
+function MissionCard({ directive, t }: { directive: typeof ACTIVE_DIRECTIVES[number]; t: PageTranslations }) {
     return (
         <Link href={`/bounties/${directive.id}`} className="flex-shrink-0 w-72 group">
             <div className="relative h-full bg-black border border-white/[0.06] rounded-lg overflow-hidden transition-all duration-500 group-hover:border-terminal-green/30 group-hover:shadow-[0_0_30px_rgba(5,150,105,0.1)]">
