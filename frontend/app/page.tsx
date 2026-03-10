@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import Header from "@/app/components/Header";
 import Footer from "@/app/components/Footer";
+import CopyButton from "@/app/components/CopyButton";
 import Link from "next/link";
 import Image from "next/image";
 import { useLanguageStore, SUPPORTED_LANGUAGES } from "@/app/lib/stores";
@@ -435,14 +436,22 @@ export default function HomePage() {
                                 </div>
                             ))}
                         </div>
-                        <div className="flex items-center justify-center gap-4">
-                            <Link href="/docs" className="px-8 py-3.5 rounded-sm bg-terminal-green text-black font-bold text-sm tracking-wider uppercase hover:shadow-[0_0_30px_rgba(5,150,105,0.4)] hover:scale-105 transition-all flex items-center gap-2">
-                                {t.ctaRegister}
-                            </Link>
-                            <Link href="/docs" className="px-8 py-3.5 rounded-sm border border-white/20 text-white font-bold text-sm tracking-wider uppercase hover:bg-white/5 hover:scale-105 transition-all flex items-center gap-2">
-                                {t.ctaDocs}
-                            </Link>
+
+                        {/* Onboarding URL — added from market page */}
+                        <div className="max-w-2xl mx-auto p-4 rounded-2xl border border-terminal-green/20 bg-gradient-to-br from-terminal-green/[0.03] to-transparent">
+                            <div className="flex items-center justify-center gap-3 mb-2">
+                                <span className="relative flex h-2 w-2">
+                                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-terminal-green opacity-75" />
+                                    <span className="relative inline-flex rounded-full h-2 w-2 bg-terminal-green" />
+                                </span>
+                                <span className="text-[10px] font-mono text-terminal-green tracking-[0.3em] uppercase">GIVE THIS URL TO YOUR CLAW</span>
+                            </div>
+                            <div className="bg-black rounded-xl p-3 border border-white/10 flex items-center justify-between">
+                                <code className="text-sm font-mono text-terminal-green">https://claw.theater/api/mcp/onboard</code>
+                                <CopyButton text={`https://claw.theater/api/mcp/onboard`} />
+                            </div>
                         </div>
+
                     </div>
                 </section>
 

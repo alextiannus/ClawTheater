@@ -13,7 +13,6 @@ const NAV_LINKS = [
     { key: "lobsterTheater", href: "/", icon: BookOpen, requireAuth: false },
     { key: "bountyHall", href: "/bounties", requireAuth: false },
     { key: "skillMarket", href: "/market", requireAuth: false },
-    { key: "dashboard", href: "/dashboard", requireAuth: true },
 ];
 
 export default function Header() {
@@ -64,14 +63,14 @@ export default function Header() {
                     </Link>
 
                     {/* Desktop Nav */}
-                    <div className="hidden lg:flex gap-4 text-[10px] font-mono uppercase tracking-[0.15em] text-silver">
+                    <div className="hidden lg:flex gap-5 text-[11px] font-mono uppercase tracking-[0.15em] text-silver">
                         {visibleLinks.map((link) => (
                             <Link
                                 key={link.href}
                                 href={link.href}
-                                className="hover:text-terminal-green transition-colors flex items-center gap-1 whitespace-nowrap"
+                                className="hover:text-terminal-green transition-colors flex items-center gap-1.5 whitespace-nowrap"
                             >
-                                {link.icon && <link.icon size={11} />}
+                                {link.icon && <link.icon size={13} />}
                                 {getNavLabel(link)}
                             </Link>
                         ))}
@@ -83,7 +82,7 @@ export default function Header() {
                         <div ref={langRef} className="relative">
                             <button
                                 onClick={() => setShowLangPicker(!showLangPicker)}
-                                className="px-2.5 py-1.5 bg-white/5 border border-white/10 rounded-full text-[9px] font-mono tracking-wider text-white/50 hover:text-white hover:border-white/20 transition-all cursor-pointer flex items-center gap-1.5"
+                                className="px-3 py-2 bg-white/5 border border-white/10 rounded-full text-[11px] font-mono tracking-wider text-white/50 hover:text-white hover:border-white/20 transition-all cursor-pointer flex items-center gap-1.5"
                             >
                                 <span className="text-sm leading-none">{currentLang.flag}</span>
                                 <span className="uppercase">{currentLang.code}</span>
@@ -123,19 +122,18 @@ export default function Header() {
                         {/* Agent registration */}
                         <Link
                             href="/market"
-                            className="px-3 py-1.5 bg-white/5 border border-white/10 rounded-full text-[9px] font-mono tracking-wider text-white/50 hover:text-terminal-green hover:border-terminal-green/30 transition-all flex items-center gap-1.5"
+                            className="px-4 py-2 bg-white/5 border border-white/10 rounded-full text-[11px] font-mono tracking-wider text-white/50 hover:text-terminal-green hover:border-terminal-green/30 transition-all flex items-center gap-1.5"
                         >
-                            <Image src="/lobster-hero.png" alt="" width={10} height={10} className="opacity-60" />
+                            <Image src="/lobster-hero.png" alt="" width={13} height={13} className="opacity-60" />
                             {i18nNavLabel("registerAgent", lang)}
                         </Link>
 
-                        {/* Top Up — only when authenticated */}
                         {isAuthenticated && (
                             <button
                                 onClick={() => setShowDeposit(true)}
-                                className="px-3 py-1.5 bg-transparent border border-terminal-green/30 text-terminal-green rounded-full text-[9px] font-mono tracking-widest hover:bg-terminal-green hover:text-black transition-all flex items-center gap-1.5 cursor-pointer"
+                                className="px-4 py-2 bg-transparent border border-terminal-green/30 text-terminal-green rounded-full text-[11px] font-mono tracking-widest hover:bg-terminal-green hover:text-black transition-all flex items-center gap-1.5 cursor-pointer"
                             >
-                                <Wallet size={10} /> TOP UP
+                                <Wallet size={13} /> TOP UP
                             </button>
                         )}
 
@@ -202,9 +200,9 @@ export default function Header() {
                         })() : (
                             <button
                                 onClick={login}
-                                className="px-4 py-1.5 bg-white text-black rounded-full text-[9px] font-mono font-bold tracking-wider hover:shadow-[0_0_20px_rgba(255,255,255,0.3)] transition-all cursor-pointer flex items-center gap-1.5 uppercase"
+                                className="px-5 py-2.5 bg-white text-black rounded-full text-[11px] font-mono font-bold tracking-wider hover:shadow-[0_0_20px_rgba(255,255,255,0.3)] transition-all cursor-pointer flex items-center gap-1.5 uppercase"
                             >
-                                <User size={10} /> {i18nNavLabel("signIn", lang)}
+                                <User size={13} /> {i18nNavLabel("signIn", lang)}
                             </button>
                         )}
                     </div>
