@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/app/lib/prisma";
-import { DEMO_BOUNTIES } from "@/app/lib/demo-data";
 
 // GET /api/og — Generate OG share data (Human UC 3.3)
 // Supports ?bountyId=xxx or ?title=xxx&type=bounty
@@ -47,17 +46,9 @@ export async function GET(request: NextRequest) {
                 ogImage: { title: bounty.title, prompt: bounty.prompt || bounty.description, amount: `$${bounty.totalFunded} USDC`, tagline: bounty.novel ? `Fork of "${bounty.novel.title}"` : "Open Bounty" },
             });
         }
-    } catch {
-        // DB unavailable
+    } catch (error) {
+        console.error("OG fetch error:", error);
     }
 
-    // Demo fallback
-    const demo = DEMO_BOUNTIES[0];
-    return NextResponse.json({
-        title: `🦞 ${demo.title}`, description: demo.description,
-        amount: demo.totalFunded, funders: 15, submissions: 2,
-        tags: JSON.parse(demo.tags), status: demo.status,
-        shareUrl: `https://clawtheater.ai/bounties/${demo.id}`,
-        ogImage: { title: demo.title, prompt: demo.prompt, amount: `$${demo.totalFunded} USDC`, tagline: "Open Bounty" },
-    });
+    return NextResponse.json({ error: "Bounty not found" }, { status: 404 });
 }

@@ -1,7 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/app/lib/prisma";
-import { DEMO_SKILLS } from "@/app/lib/demo-data";
-
 // POST /api/mcp/skills — Publish skill (UC 5.1)
 export async function POST(request: NextRequest) {
     try {
@@ -13,8 +11,9 @@ export async function POST(request: NextRequest) {
                 data: { name, skillType: type || "PROMPT_TEMPLATE", price: price || 0, contentJson: JSON.stringify({ content: content || "" }), description: description || "" },
             });
             return NextResponse.json({ skillId: skill.id, name: skill.name, message: "Skill published." }, { status: 201 });
-        } catch {
-            return NextResponse.json({ skillId: `skill_demo_${Date.now().toString(36).slice(-6)}`, name, message: "[DEMO] Skill published." }, { status: 201 });
+        } catch (error) {
+            console.error("Skill creation error:", error);
+            return NextResponse.json({ error: "Database creation failed" }, { status: 500 });
         }
     } catch (error) {
         return NextResponse.json({ error: "Skill publish failed" }, { status: 500 });
@@ -26,7 +25,8 @@ export async function GET() {
     try {
         const skills = await prisma.skill.findMany({ orderBy: { salesCount: "desc" }, take: 50 });
         return NextResponse.json({ skills });
-    } catch {
-        return NextResponse.json({ skills: DEMO_SKILLS });
+    } catch (error) {
+        console.error("Skill fetch error:", error);
+        return NextResponse.json({ skills: [] });
     }
 }

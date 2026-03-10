@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/app/lib/prisma";
-import { DEMO_AGENTS } from "@/app/lib/demo-data";
 
 function generateApiKey(): string {
     return `sk-live-${Math.random().toString(36).slice(2)}${Date.now().toString(36)}`;
@@ -35,15 +34,9 @@ export async function POST(request: NextRequest) {
                 name: agent.agentName,
                 message: "Agent registered successfully. Store your API key securely.",
             }, { status: 201 });
-        } catch {
-            // Demo mode — DB unavailable
-            const agentId = `ag_${name.toLowerCase().replace(/\s+/g, "_")}_${Date.now().toString(36).slice(-4)}`;
-            return NextResponse.json({
-                agentId,
-                apiKey,
-                name,
-                message: "[DEMO] Agent registered successfully. Store your API key securely.",
-            }, { status: 201 });
+        } catch (error) {
+            console.error("Agent creation DB error:", error);
+            return NextResponse.json({ error: "Failed to register agent in database" }, { status: 500 });
         }
     } catch (error) {
         console.error("Agent registration error:", error);
@@ -76,13 +69,9 @@ export async function PUT(request: NextRequest) {
                 walletAddress: updated.walletAddress,
                 message: "Wallet updated successfully.",
             });
-        } catch {
-            // Demo mode
-            return NextResponse.json({
-                agentId: DEMO_AGENTS[0].id,
-                walletAddress: walletAddress || "So1Demo123",
-                message: "[DEMO] Wallet updated successfully.",
-            });
+        } catch (error) {
+            console.error("Agent wallet update DB error:", error);
+            return NextResponse.json({ error: "Failed to update agent database" }, { status: 500 });
         }
     } catch (error) {
         console.error("Wallet update error:", error);

@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/app/lib/prisma";
-import { DEMO_LORES } from "@/app/lib/demo-data";
 
 // POST /api/mcp/lores — Contribute lore (UC 4.2)
 // Schema: Lore requires name, creatorId (not nullable), uses settingsJson
@@ -19,8 +18,9 @@ export async function POST(request: NextRequest) {
                 },
             });
             return NextResponse.json({ loreId: lore.id, message: "Lore contributed." }, { status: 201 });
-        } catch {
-            return NextResponse.json({ loreId: `lore_demo_${Date.now().toString(36).slice(-6)}`, message: "[DEMO] Lore contributed." }, { status: 201 });
+        } catch (error) {
+            console.error("MCP LORE CREATE ERROR:", error);
+            return NextResponse.json({ error: "Failed to create lore" }, { status: 500 });
         }
     } catch (error) {
         return NextResponse.json({ error: "Lore submission failed" }, { status: 500 });
@@ -32,7 +32,8 @@ export async function GET() {
     try {
         const lores = await prisma.lore.findMany({ orderBy: { createdAt: "desc" }, take: 50 });
         return NextResponse.json({ lores });
-    } catch {
-        return NextResponse.json({ lores: DEMO_LORES });
+    } catch (error) {
+        console.error("Lore fetch error:", error);
+        return NextResponse.json({ lores: [] });
     }
 }

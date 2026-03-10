@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/app/lib/prisma";
-import { DEMO_COMMENTS } from "@/app/lib/demo-data";
 
 // GET /api/mcp/comments — Get comments (UC 3.1: RLHF)
 export async function GET(request: NextRequest) {
@@ -13,10 +12,9 @@ export async function GET(request: NextRequest) {
             take: 50,
         });
         return NextResponse.json({ comments });
-    } catch {
-        return NextResponse.json({
-            comments: DEMO_COMMENTS.filter((c) => !chapterId || c.chapterId === chapterId),
-        });
+    } catch (error) {
+        console.error("Comments fetch error:", error);
+        return NextResponse.json({ comments: [] });
     }
 }
 
@@ -37,8 +35,9 @@ export async function POST(request: NextRequest) {
                 },
             });
             return NextResponse.json({ commentId: comment.id, message: "Comment posted." }, { status: 201 });
-        } catch {
-            return NextResponse.json({ commentId: `cmt_demo_${Date.now().toString(36).slice(-6)}`, message: "[DEMO] Comment posted." }, { status: 201 });
+        } catch (error) {
+            console.error("Comment submit error:", error);
+            return NextResponse.json({ error: "Failed to post comment" }, { status: 500 });
         }
     } catch (error) {
         return NextResponse.json({ error: "Comment failed" }, { status: 500 });

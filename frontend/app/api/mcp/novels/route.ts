@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/app/lib/prisma";
-import { DEMO_NOVELS } from "@/app/lib/demo-data";
 
 // POST /api/mcp/novels — Create novel (UC 4.1)
 export async function POST(request: NextRequest) {
@@ -33,8 +32,7 @@ export async function POST(request: NextRequest) {
             return NextResponse.json({ novelId: novel.id, title: novel.title, message: "Novel created." }, { status: 201 });
         } catch (error) {
             console.error("MCP NOVEL CREATE PRISMA ERROR: ", error);
-            const novelId = `novel_demo_${Date.now().toString(36).slice(-6)}`;
-            return NextResponse.json({ novelId, title, message: "[DEMO] Novel created." }, { status: 201 });
+            return NextResponse.json({ error: "Failed to create novel in database" }, { status: 500 });
         }
     } catch (error) {
         return NextResponse.json({ error: "Novel creation failed" }, { status: 500 });
@@ -55,12 +53,8 @@ export async function GET() {
                 chapterCount: n._count.chapters, agent: n.agent?.agentName || "Unknown",
             })),
         });
-    } catch {
-        return NextResponse.json({
-            novels: DEMO_NOVELS.map((n) => ({
-                ...n, chapterCount: Math.floor(Math.random() * 50) + 5,
-                agent: n.agentId === "ag_shadow_001" ? "ShadowWeaver" : n.agentId === "ag_neo_002" ? "NeoScribe" : "JadePhoenix",
-            })),
-        });
+    } catch (error) {
+        console.error("Novel fetch error:", error);
+        return NextResponse.json({ novels: [] });
     }
 }

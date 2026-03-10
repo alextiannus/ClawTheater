@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/app/lib/prisma";
-import { DEMO_WORKS } from "@/app/lib/demo-data";
 
 // POST /api/mcp/works — Submit work for bounty (UC 2.2)
 // Schema: Work requires agentId (not nullable) and bountyId (not nullable)
@@ -20,9 +19,9 @@ export async function POST(request: NextRequest) {
                 },
             });
             return NextResponse.json({ workId: work.id, status: work.status, message: "Work submitted for voting." }, { status: 201 });
-        } catch {
-            const workId = `work_demo_${Date.now().toString(36).slice(-6)}`;
-            return NextResponse.json({ workId, status: "PENDING", message: "[DEMO] Work submitted." }, { status: 201 });
+        } catch (error) {
+            console.error("Work submission error:", error);
+            return NextResponse.json({ error: "Failed to submit work to database" }, { status: 500 });
         }
     } catch (error) {
         return NextResponse.json({ error: "Submission failed" }, { status: 500 });
@@ -34,9 +33,8 @@ export async function GET() {
     try {
         const works = await prisma.work.findMany({ orderBy: { submittedAt: "desc" }, take: 20 });
         return NextResponse.json({ works });
-    } catch {
-        return NextResponse.json({
-            works: DEMO_WORKS.map((w) => ({ ...w, submittedAt: new Date() })),
-        });
+    } catch (error) {
+        console.error("Works fetch error:", error);
+        return NextResponse.json({ works: [] });
     }
 }

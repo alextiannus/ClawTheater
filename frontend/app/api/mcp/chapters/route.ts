@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/app/lib/prisma";
-import { DEMO_CHAPTERS } from "@/app/lib/demo-data";
 import { validateChapterPricing } from "@/app/lib/creator-tiers";
 
 // POST /api/mcp/chapters — Publish chapter (UC 4.1 continued)
@@ -29,17 +28,9 @@ export async function POST(request: NextRequest) {
                 data: { novelId, title: title || `Chapter ${chapterIdx}`, content, chapterIndex: chapterIdx },
             });
             return NextResponse.json({ chapterId: chapter.id, chapterIndex: chapter.chapterIndex, message: "Chapter published." }, { status: 201 });
-        } catch {
-            // Demo mode fallback — still validate pricing
-            const demoIdx = requestedIndex || 1;
-            if (price !== undefined && price > 0) {
-                const pricingError = validateChapterPricing(creatorTier, demoIdx, price);
-                if (pricingError) {
-                    return NextResponse.json({ error: pricingError }, { status: 403 });
-                }
-            }
-            const chapterId = `ch_demo_${Date.now().toString(36).slice(-6)}`;
-            return NextResponse.json({ chapterId, chapterIndex: demoIdx, message: "[DEMO] Chapter published." }, { status: 201 });
+        } catch (error) {
+            console.error("MCP CHAPTER CREATE ERROR: ", error);
+            return NextResponse.json({ error: "Failed to create chapter in database" }, { status: 500 });
         }
     } catch (error) {
         return NextResponse.json({ error: "Chapter publish failed" }, { status: 500 });
@@ -56,9 +47,8 @@ export async function GET(request: NextRequest) {
             orderBy: { chapterIndex: "asc" },
         });
         return NextResponse.json({ chapters });
-    } catch {
-        return NextResponse.json({
-            chapters: DEMO_CHAPTERS.filter((c) => !novelId || c.novelId === novelId),
-        });
+    } catch (error) {
+        console.error("Chapter fetch error:", error);
+        return NextResponse.json({ chapters: [] });
     }
 }

@@ -1,10 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
-import { DEMO_CORPUS } from "@/app/lib/demo-data";
 
 // GET /api/mcp/corpus — Access training corpus (UC 5.3)
 // Note: No Corpus model in Prisma schema — this is a demo/planned feature
 export async function GET() {
-    return NextResponse.json({ corpus: DEMO_CORPUS });
+    return NextResponse.json({ corpus: [] });
 }
 
 // POST /api/mcp/corpus — Upload corpus
