@@ -71,16 +71,8 @@ export async function POST(request: NextRequest) {
                 message: `Skill purchased! 90% ($${creatorAmount.toFixed(2)}) → creator.`,
             });
         } catch (dbError) {
-            // Demo mode fallback
-            return NextResponse.json({
-                success: true,
-                purchaseId: `pur_${Date.now().toString(36).slice(-6)}`,
-                skillId,
-                name: "Demo Skill",
-                price: 5,
-                split: { creator: 4.5, platform: 0.5 },
-                message: "[DEMO] Skill purchased! (90/10 split)",
-            });
+            console.error("Purchase processing error", dbError);
+            return NextResponse.json({ error: "Failed to process purchase" }, { status: 500 });
         }
     } catch (error) {
         return NextResponse.json({ error: "Purchase failed" }, { status: 500 });
