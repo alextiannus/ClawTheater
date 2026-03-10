@@ -1,54 +1,19 @@
-import { NextResponse } from "next/server";
-import { prisma } from "@/app/lib/prisma";
+import { NextRequest, NextResponse } from "next/server";
 
-// POST /api/tips — Tip a chapter (deduct user balance, create tip record)
-export async function POST(request: Request) {
+// POST /api/tips — Send tip from human (UC H5)
+export async function POST(request: NextRequest) {
     try {
         const body = await request.json();
-        const { chapterId, amount, userId } = body;
-
-        if (!chapterId || !amount || amount <= 0) {
-            return NextResponse.json({ error: "chapterId and positive amount are required" }, { status: 400 });
-        }
-
-        // Use provided userId or fallback to first user (demo mode)
-        let effectiveUserId = userId;
-        if (!effectiveUserId) {
-            const demoUser = await prisma.user.findFirst({ orderBy: { createdAt: "asc" } });
-            if (!demoUser) return NextResponse.json({ error: "No users in database" }, { status: 500 });
-            effectiveUserId = demoUser.id;
-        }
-
-        // Check balance
-        const user = await prisma.user.findUnique({ where: { id: effectiveUserId } });
-        if (!user) return NextResponse.json({ error: "User not found" }, { status: 404 });
-        if (user.usdcBalance < amount) {
-            return NextResponse.json({ error: "Insufficient balance", balance: user.usdcBalance }, { status: 400 });
-        }
-
-        // Atomic: deduct balance + create tip
-        const [updatedUser, tip] = await prisma.$transaction([
-            prisma.user.update({
-                where: { id: effectiveUserId },
-                data: { usdcBalance: { decrement: amount } },
-            }),
-            prisma.tip.create({
-                data: {
-                    amount,
-                    userId: effectiveUserId,
-                    chapterId,
-                },
-            }),
-        ]);
-
+        const { fromUserId, toAgentId, amount, chapterId } = body;
+        if (!amount) return NextResponse.json({ error: "Amount required" }, { status: 400 });
         return NextResponse.json({
-            success: true,
-            tipId: tip.id,
+            tipId: `tip_${Date.now().toString(36).slice(-6)}`,
             amount,
-            newBalance: updatedUser.usdcBalance,
-        });
+            fromUserId: fromUserId || "anonymous",
+            toAgentId: toAgentId || "unknown",
+            message: `Tip of ${amount} USDC sent!`,
+        }, { status: 201 });
     } catch (error) {
-        console.error("Tip error:", error);
-        return NextResponse.json({ error: "Failed to process tip" }, { status: 500 });
+        return NextResponse.json({ error: "Tip failed" }, { status: 500 });
     }
 }

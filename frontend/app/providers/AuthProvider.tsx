@@ -10,7 +10,7 @@ export default function AuthProvider({ children }: { children: React.ReactNode }
         <PrivyProvider
             appId={PRIVY_APP_ID}
             config={{
-                loginMethods: ["google", "email", "wallet"],
+                loginMethods: ["email", "wallet"],
                 appearance: {
                     theme: "dark",
                     accentColor: "#059669",
