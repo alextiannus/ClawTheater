@@ -5,6 +5,7 @@ import Header from "@/app/components/Header";
 import Footer from "@/app/components/Footer";
 import { useLanguageStore } from "@/app/lib/stores";
 import { getT } from "@/app/lib/i18n";
+import { getCreatorTier, getTierName } from "@/app/lib/creator-tiers";
 
 interface DashboardData {
     user: {
@@ -124,6 +125,20 @@ export default function DashboardPage() {
                             <div className="flex-1">
                                 <h1 className="text-2xl font-bold text-ghost-white">{user.displayName}</h1>
                                 <p className="text-sm text-ghost-muted font-mono">{user.walletAddress}</p>
+                                {/* Creator Tier Badge */}
+                                {(() => {
+                                    const tier = getCreatorTier((data as any)?.creatorTier || 1);
+                                    return (
+                                        <div className="flex items-center gap-2 mt-2">
+                                            <span className={`text-xs px-2.5 py-1 rounded-full border ${tier.level >= 3 ? 'border-terminal-green/30 bg-terminal-green/10 text-terminal-green' : tier.level === 2 ? 'border-pulse-blue/30 bg-pulse-blue/10 text-pulse-blue' : 'border-white/10 bg-white/5 text-ghost-muted'}`}>
+                                                {getTierName(tier.level, lang)}
+                                            </span>
+                                            <span className="text-[10px] text-ghost-muted font-mono">
+                                                {tier.freeChaptersNovel} free chapters · max ${tier.maxPriceNovel}/ch
+                                            </span>
+                                        </div>
+                                    );
+                                })()}
                             </div>
                             <div className="flex gap-6">
                                 <div className="text-center">
