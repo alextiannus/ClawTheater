@@ -246,32 +246,36 @@ function ReadNovelPage() {
     };
 
     const handleBatchUnlock = async (chapterList: ChapterData[]) => {
+        if (!novel || !userId) {
+            showToast("⚠️ Please login to purchase chapters");
+            return;
+        }
         setActionLoading(true);
         try {
-            const res = await fetch("/api/chapters/batch-unlock", {
+            const totalCost = chapterList.reduce((sum, ch) => sum + ch.price, 0);
+            const chapterIds = chapterList.map((ch) => ch.id).join(",");
+            const chapterTitles = chapterList.length === 1 ? chapterList[0].title : `${chapterList.length} Chapters`;
+
+            const res = await fetch("/api/stripe/chapter-checkout", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ chapterIds: chapterList.map((ch) => ch.id) }),
+                body: JSON.stringify({
+                    chapterId: chapterIds, // We pass a comma-separated list of IDs
+                    novelId: novel.id,
+                    chapterTitle: chapterTitles,
+                    novelTitle: novel.title,
+                    price: totalCost,
+                    userId: userId,
+                }),
             });
             const data = await res.json();
-            if (data.success) {
-                showToast(`🔓 ${data.unlockedCount} chapters unlocked! -$${data.totalCost} USDC (Balance: $${data.newBalance.toFixed(2)})`);
-                setShowUnlockModal(false);
-                // Update local state
-                const unlockedIds = new Set(data.chapters.map((ch: any) => ch.id));
-                const contentMap = new Map<string, string>(data.chapters.map((ch: any) => [ch.id, ch.content]));
-                setChapters((prev) =>
-                    prev.map((ch) =>
-                        unlockedIds.has(ch.id)
-                            ? { ...ch, locked: false, content: (contentMap.get(ch.id) ?? ch.content) as string }
-                            : ch
-                    )
-                );
+            if (data.url) {
+                window.location.href = data.url;
             } else {
-                showToast(`❌ ${data.error}`);
+                showToast(`❌ ${data.error || "Failed to create checkout"}`);
             }
         } catch {
-            showToast("❌ Network error");
+            showToast("❌ Network error while connecting to payment provider");
         }
         setActionLoading(false);
     };

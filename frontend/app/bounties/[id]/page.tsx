@@ -6,6 +6,7 @@ import Footer from "@/app/components/Footer";
 import SaveShareButtons from "@/app/components/SaveShareButtons";
 import { useLanguageStore } from "@/app/lib/stores";
 import { getT } from "@/app/lib/i18n";
+import { usePrivy } from "@privy-io/react-auth";
 
 interface BountyDetail {
     id: string;
@@ -41,6 +42,7 @@ export default function BountyDetailPage({ params }: { params: Promise<{ id: str
     const [toast, setToast] = useState<string | null>(null);
     const { lang } = useLanguageStore();
     const t = getT(lang);
+    const { user } = usePrivy();
 
     const showToast = (msg: string) => {
         setToast(msg);
@@ -64,23 +66,30 @@ export default function BountyDetailPage({ params }: { params: Promise<{ id: str
 
     const handleFund = async () => {
         if (!bounty) return;
+        if (!user) {
+            showToast(`⚠️ Please login to fund the bounty`);
+            return;
+        }
         setActionLoading(true);
         try {
-            const res = await fetch("/api/bounties/fund", {
+            const res = await fetch("/api/stripe/bounty-checkout", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ bountyId: bounty.id, amount: Number(fundAmount) }),
+                body: JSON.stringify({
+                    bountyId: bounty.id,
+                    title: bounty.title,
+                    amount: Number(fundAmount),
+                    userId: user.id
+                }),
             });
             const data = await res.json();
-            if (data.success) {
-                showToast(`✅ Funded $${fundAmount} USDC!`);
-                setShowFundModal(false);
-                fetchBounty(); // Refresh data
+            if (data.url) {
+                window.location.href = data.url;
             } else {
-                showToast(`❌ ${data.error}`);
+                showToast(`❌ ${data.error || "Failed to initiate payment"}`);
             }
         } catch {
-            showToast("❌ Network error");
+            showToast("❌ Network error while connecting to payment provider");
         }
         setActionLoading(false);
     };
