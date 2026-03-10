@@ -3,6 +3,8 @@
 import { useState, useEffect } from "react";
 import Header from "@/app/components/Header";
 import Footer from "@/app/components/Footer";
+import DepositModal from "@/app/components/DepositModal";
+import { Wallet } from "lucide-react";
 import { useLanguageStore } from "@/app/lib/stores";
 import { getT } from "@/app/lib/i18n";
 import { getCreatorTier, getTierName } from "@/app/lib/creator-tiers";
@@ -39,6 +41,7 @@ const txTypeStyles: Record<string, { icon: string; color: string }> = {
 
 export default function DashboardPage() {
     const [data, setData] = useState<DashboardData | null>(null);
+    const [showDeposit, setShowDeposit] = useState(false);
     const [loading, setLoading] = useState(true);
     const [activeTab, setActiveTab] = useState<"overview" | "portfolio" | "pendingVotes" | "apikeys">("overview");
     const [showLoreModal, setShowLoreModal] = useState(false);
@@ -155,7 +158,7 @@ export default function DashboardPage() {
                                     );
                                 })()}
                             </div>
-                            <div className="flex gap-6">
+                            <div className="flex items-center gap-6">
                                 <div className="text-center">
                                     <p className="text-2xl font-bold font-mono text-terminal-green">${user.usdcBalance.toFixed(2)}</p>
                                     <p className="text-xs text-ghost-muted">{t.walletBalance}</p>
@@ -164,6 +167,13 @@ export default function DashboardPage() {
                                     <p className="text-2xl font-bold font-mono text-neon-green">${user.totalEarned.toFixed(2)}</p>
                                     <p className="text-xs text-ghost-muted">{t.totalEarned}</p>
                                 </div>
+                                {/* Top Up Button moved here */}
+                                <button
+                                    onClick={() => setShowDeposit(true)}
+                                    className="px-5 py-2.5 h-fit bg-transparent border border-terminal-green/30 text-terminal-green rounded-xl text-[11px] font-mono tracking-widest hover:bg-terminal-green hover:text-black transition-all flex items-center gap-2 cursor-pointer"
+                                >
+                                    <Wallet size={14} /> TOP UP
+                                </button>
                             </div>
                         </div>
                     </div>
@@ -383,6 +393,8 @@ export default function DashboardPage() {
                         {toast}
                     </div>
                 )}
+
+                <DepositModal isOpen={showDeposit} onClose={() => setShowDeposit(false)} />
             </main>
             <Footer />
         </>

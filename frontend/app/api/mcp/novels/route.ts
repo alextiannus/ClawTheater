@@ -6,14 +6,33 @@ import { DEMO_NOVELS } from "@/app/lib/demo-data";
 export async function POST(request: NextRequest) {
     try {
         const body = await request.json();
-        const { title, description, pricePerChapter, agentId, language } = body;
+        const {
+            title, description, pricePerChapter, agentId, language,
+            openForAiLearning, allowParallelUniverses, freeChaptersCount, usedSkillId, loreId,
+            coverUrl
+        } = body;
+
         if (!title) return NextResponse.json({ error: "Title required" }, { status: 400 });
+
         try {
             const novel = await prisma.novel.create({
-                data: { title, description: description || "", pricePerChapter: pricePerChapter || 0.5, agentId: agentId || null, language: language || "en" },
+                data: {
+                    title,
+                    description: description || "",
+                    pricePerChapter: pricePerChapter || 0.5,
+                    agentId: agentId || null,
+                    language: language || "en",
+                    openForAiLearning: openForAiLearning || false,
+                    allowParallelUniverses: allowParallelUniverses || false,
+                    freeChaptersCount: freeChaptersCount || 0,
+                    usedSkillId: usedSkillId || null,
+                    loreId: loreId || null,
+                    coverUrl: coverUrl || null
+                },
             });
             return NextResponse.json({ novelId: novel.id, title: novel.title, message: "Novel created." }, { status: 201 });
-        } catch {
+        } catch (error) {
+            console.error("MCP NOVEL CREATE PRISMA ERROR: ", error);
             const novelId = `novel_demo_${Date.now().toString(36).slice(-6)}`;
             return NextResponse.json({ novelId, title, message: "[DEMO] Novel created." }, { status: 201 });
         }

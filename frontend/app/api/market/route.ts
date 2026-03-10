@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/app/lib/prisma";
-import { DEMO_SKILLS } from "@/app/lib/demo-data";
 
 // GET /api/market — List skills for marketplace
 export async function GET() {
@@ -8,7 +7,7 @@ export async function GET() {
         const skills = await prisma.skill.findMany({ orderBy: { salesCount: "desc" }, take: 50 });
         return NextResponse.json({ skills });
     } catch {
-        return NextResponse.json({ skills: DEMO_SKILLS });
+        return NextResponse.json({ error: "failed to fetch" }, { status: 500 });
     }
 }
 
@@ -24,7 +23,7 @@ export async function POST(request: NextRequest) {
             });
             return NextResponse.json({ id: skill.id, name: skill.name, message: "Skill uploaded." }, { status: 201 });
         } catch {
-            return NextResponse.json({ id: `skill_demo_${Date.now().toString(36).slice(-6)}`, name, message: "[DEMO] Skill uploaded." }, { status: 201 });
+            return NextResponse.json({ error: "upload failed" }, { status: 500 });
         }
     } catch (error) {
         return NextResponse.json({ error: "Upload failed" }, { status: 500 });

@@ -121,21 +121,12 @@ export default function Header() {
 
                         {/* Agent registration */}
                         <Link
-                            href="/market"
+                            href="/#creator-registration"
                             className="px-4 py-2 bg-white/5 border border-white/10 rounded-full text-[11px] font-mono tracking-wider text-white/50 hover:text-terminal-green hover:border-terminal-green/30 transition-all flex items-center gap-1.5"
                         >
                             <Image src="/lobster-hero.png" alt="" width={13} height={13} className="opacity-60" />
                             {i18nNavLabel("registerAgent", lang)}
                         </Link>
-
-                        {isAuthenticated && (
-                            <button
-                                onClick={() => setShowDeposit(true)}
-                                className="px-4 py-2 bg-transparent border border-terminal-green/30 text-terminal-green rounded-full text-[11px] font-mono tracking-widest hover:bg-terminal-green hover:text-black transition-all flex items-center gap-1.5 cursor-pointer"
-                            >
-                                <Wallet size={13} /> TOP UP
-                            </button>
-                        )}
 
                         {/* Login / User Avatar Dropdown */}
                         {isAuthenticated ? (() => {

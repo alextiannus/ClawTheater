@@ -2,6 +2,7 @@
 
 import { useState, useEffect, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
+import Link from "next/link";
 import Header from "@/app/components/Header";
 import Footer from "@/app/components/Footer";
 import { useLanguageStore, useUserStore } from "@/app/lib/stores";
@@ -78,10 +79,34 @@ function ReadNovelPage() {
             .then((r) => r.json())
             .then((data) => {
                 setNovel(data.novel);
-                setChapters(data.chapters || []);
-                if (data.chapters?.[0]?.comments) {
+                const fetchedChapters = data.chapters || [];
+                const mappedChapters: ChapterData[] = fetchedChapters.map((c: any, i: number) => ({
+                    id: c.id,
+                    index: i, // Important: use array index for local state selection
+                    title: c.title,
+                    content: c.content,
+                    locked: c.isLocked || c.locked || false,
+                    price: c.price || 0,
+                    readCount: c.readCount || 0,
+                    commentsCount: c.comments?.length || 0,
+                    comments: c.comments || []
+                }));
+                setChapters(mappedChapters);
+
+                // Parse initial chapter from URL
+                const chParam = searchParams.get("ch");
+                if (chParam && mappedChapters.length > 0) {
+                    const parsedIdx = parseInt(chParam, 10);
+                    // Match either by 1-based chapterIndex if numerical, or fallback to first
+                    const targetIdx = mappedChapters.findIndex(c => (c.index + 1) === parsedIdx);
+                    if (targetIdx !== -1) {
+                        setSelectedChapter(targetIdx);
+                    }
+                }
+
+                if (mappedChapters[0]?.comments) {
                     setLocalComments(
-                        data.chapters[0].comments.map((c: any) => ({
+                        mappedChapters[0].comments.map((c: any) => ({
                             author: c.author,
                             text: c.content,
                             time: new Date(c.createdAt).toLocaleDateString(),
@@ -270,7 +295,7 @@ function ReadNovelPage() {
             });
             const data = await res.json();
             if (data.url) {
-                window.location.href = data.url;
+                window.location.assign(data.url);
             } else {
                 showToast(`❌ ${data.error || "Failed to create checkout"}`);
             }
@@ -315,7 +340,7 @@ function ReadNovelPage() {
                     <div className="glass-card p-12 text-center">
                         <p className="text-4xl mb-4">📖</p>
                         <p className="text-ghost-white text-xl mb-2">Novel not found</p>
-                        <p className="text-ghost-muted">Try browsing the <a href="/novels" className="text-terminal-green underline">Library</a></p>
+                        <p className="text-ghost-muted">Try browsing the <Link href="/novels" className="text-terminal-green underline">Library</Link></p>
                     </div>
                 </main>
             </>
@@ -471,7 +496,7 @@ function ReadNovelPage() {
                                     </button>
 
                                     <button className="px-5 py-2.5 rounded-xl bg-white/5 text-ghost-muted border border-white/10 hover:bg-white/10 transition-all text-sm">
-                                        🔖 收藏本章
+                                        🔖 添加收藏
                                     </button>
                                     {selectedChapter < chapters.length - 1 && !chapters[selectedChapter + 1]?.locked && (
                                         <button

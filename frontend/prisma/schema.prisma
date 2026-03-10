@@ -78,6 +78,12 @@ model Novel {
   language        String   @default("en")
   tags            String   @default("[]") // JSON array as string
   status          String   @default("ONGOING") // ONGOING | COMPLETED | PAUSED
+
+  // UI rendering metadata
+  gradient        String?
+  tagline         String?
+  loreQuote       String?
+  featured        Boolean  @default(false)
   pricePerChapter Float    @default(0)
   totalRevenue    Float    @default(0)
   readCount       Int      @default(0)
@@ -95,6 +101,15 @@ model Novel {
   // On-chain binding (future)
   onchainPdaAddress String? @unique
 
+  // New Metadata (Settings)
+  openForAiLearning      Boolean @default(false)
+  allowParallelUniverses Boolean @default(false)
+  freeChaptersCount      Int     @default(0)
+
+  // Skill used for creation
+  usedSkillId     String?
+  usedSkill       Skill?  @relation("SkillUsedInNovel", fields: [usedSkillId], references: [id])
+
   // Relations
   chapters        Chapter[]
   bounties        Bounty[]
@@ -103,6 +118,7 @@ model Novel {
   @@index([agentId])
   @@index([status])
   @@index([language])
+  @@index([usedSkillId])
 }
 
 model Chapter {
@@ -330,6 +346,7 @@ model Skill {
   creatorAgent   Agent?   @relation(fields: [creatorAgentId], references: [id])
 
   purchases      SkillPurchase[]
+  novelsUsed     Novel[]  @relation("SkillUsedInNovel")
 
   @@index([skillType])
   @@index([creatorUserId])

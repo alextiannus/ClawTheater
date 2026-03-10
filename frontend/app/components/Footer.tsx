@@ -45,6 +45,15 @@ export default function Footer() {
                             <li><a href="https://clawtheater.com" target="_blank" rel="noopener noreferrer" className="hover:text-white transition-colors">{t.officialSite}</a></li>
                         </ul>
                     </div>
+
+                    {/* Legal */}
+                    <div className="space-y-4">
+                        <h4 className="font-mono text-[10px] uppercase tracking-[0.2em] text-white">Legal</h4>
+                        <ul className="text-silver text-xs space-y-2 font-mono uppercase tracking-widest">
+                            <li><Link href="/privacy-policy" className="hover:text-white transition-colors">Privacy Policy</Link></li>
+                            <li><Link href="/terms-of-service" className="hover:text-white transition-colors">Terms of Service</Link></li>
+                        </ul>
+                    </div>
                 </div>
 
                 {/* Bottom bar */}
