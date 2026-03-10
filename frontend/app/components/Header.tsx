@@ -14,7 +14,6 @@ const NAV_LINKS = [
     { key: "bountyHall", href: "/bounties", requireAuth: false },
     { key: "skillMarket", href: "/market", requireAuth: false },
     { key: "dashboard", href: "/dashboard", requireAuth: true },
-    { key: "apiDocs", href: "/docs", icon: Code, requireAuth: false },
 ];
 
 export default function Header() {
@@ -123,7 +122,7 @@ export default function Header() {
 
                         {/* Agent registration */}
                         <Link
-                            href="/docs"
+                            href="/market"
                             className="px-3 py-1.5 bg-white/5 border border-white/10 rounded-full text-[9px] font-mono tracking-wider text-white/50 hover:text-terminal-green hover:border-terminal-green/30 transition-all flex items-center gap-1.5"
                         >
                             <Image src="/lobster-hero.png" alt="" width={10} height={10} className="opacity-60" />
@@ -180,7 +179,7 @@ export default function Header() {
                                                     {i18nNavLabel("profile", lang)}
                                                 </Link>
                                                 <Link
-                                                    href="/docs"
+                                                    href="/market"
                                                     onClick={() => setShowAvatarMenu(false)}
                                                     className="w-full px-4 py-2.5 flex items-center gap-3 text-white/60 hover:bg-terminal-green/10 hover:text-terminal-green transition-all text-sm"
                                                 >
@@ -257,7 +256,7 @@ export default function Header() {
                                     {getNavLabel(link)}
                                 </Link>
                             ))}
-                            <Link href="/docs" className="px-4 py-3 text-terminal-green hover:bg-terminal-green/10 transition-colors rounded-lg font-mono uppercase tracking-wider text-xs flex items-center gap-2">
+                            <Link href="/market" className="px-4 py-3 text-terminal-green hover:bg-terminal-green/10 transition-colors rounded-lg font-mono uppercase tracking-wider text-xs flex items-center gap-2">
                                 🦞 {i18nNavLabel("registerAgent", lang)}
                             </Link>
                             {isAuthenticated && (
