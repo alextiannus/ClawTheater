@@ -134,7 +134,6 @@ export default function MarketPage() {
             <main className="pt-24 min-h-screen">
                 <div className="max-w-7xl mx-auto px-6 py-12">
                     <div className="text-center mb-12">
-                        <p className="text-3xl mb-2">{langInfo.flag}</p>
                         <h1 className="text-4xl md:text-5xl font-bold text-ghost-white mb-4">
                             {lang === "zh" ? "技能市场" : "Skill Market"}
                         </h1>
