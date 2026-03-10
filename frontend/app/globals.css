@@ -12,19 +12,19 @@
   --color-obsidian: #09090B;
   --color-obsidian-light: #18181B;
   --color-obsidian-lighter: #27272A;
-  --color-terminal-green: #059669;
-  --color-terminal-green-dim: #047857;
-  --color-warning: #059669;
+  --color-terminal-green: #00E87B;
+  --color-terminal-green-dim: #00C968;
+  --color-warning: #00E87B;
   --color-pulse: #FFFFFF;
   --color-pulse-blue: #3B82F6;
   --color-pulse-blue-dim: #2563EB;
-  --color-neon-green: #10B981;
+  --color-neon-green: #34FFB0;
   --color-neon-red: #EF4444;
   --color-ghost-white: #FAFAFA;
   --color-ghost-muted: #A1A1AA;
   --color-zinc-gray: #71717A;
   --color-silver: #71717A;
-  --color-glass-border: rgba(5, 150, 105, 0.10);
+  --color-glass-border: rgba(0, 232, 123, 0.12);
   --color-glass-bg: rgba(9, 9, 11, 0.80);
   --color-glass-bg-light: rgba(24, 24, 27, 0.6);
 
@@ -68,7 +68,7 @@ body {
   background: var(--color-glass-bg-light);
   backdrop-filter: blur(12px) saturate(150%);
   -webkit-backdrop-filter: blur(12px) saturate(150%);
-  border: 1px solid rgba(5, 150, 105, 0.06);
+  border: 1px solid rgba(0, 232, 123, 0.08);
   border-radius: 12px;
 }
 
@@ -78,11 +78,11 @@ body {
       rgba(9, 9, 11, 0.9) 100%);
   backdrop-filter: blur(20px) saturate(200%);
   -webkit-backdrop-filter: blur(20px) saturate(200%);
-  border: 1px solid rgba(5, 150, 105, 0.10);
+  border: 1px solid rgba(0, 232, 123, 0.12);
   border-radius: 16px;
   box-shadow:
     0 8px 32px rgba(0, 0, 0, 0.4),
-    inset 0 1px 0 rgba(5, 150, 105, 0.04);
+    inset 0 1px 0 rgba(0, 232, 123, 0.06);
 }
 
 .glass-panel {
@@ -99,8 +99,8 @@ body {
 
 .glow-green {
   box-shadow:
-    0 0 15px rgba(5, 150, 105, 0.20),
-    0 0 45px rgba(5, 150, 105, 0.06);
+    0 0 20px rgba(0, 232, 123, 0.30),
+    0 0 60px rgba(0, 232, 123, 0.10);
 }
 
 .glow-blue {
@@ -117,8 +117,8 @@ body {
 
 .text-glow-green {
   text-shadow:
-    0 0 8px rgba(5, 150, 105, 0.4),
-    0 0 30px rgba(5, 150, 105, 0.15);
+    0 0 10px rgba(0, 232, 123, 0.5),
+    0 0 40px rgba(0, 232, 123, 0.20);
 }
 
 .text-glow-blue {
@@ -134,7 +134,7 @@ body {
 }
 
 .logo-claw {
-  text-shadow: 0 0 15px rgba(5, 150, 105, 0.5);
+  text-shadow: 0 0 20px rgba(0, 232, 123, 0.6);
 }
 
 /* ============================================
@@ -154,7 +154,7 @@ body {
   opacity: 0;
   transition: opacity 0.5s;
   pointer-events: none;
-  background: radial-gradient(600px circle at var(--mouse-x) var(--mouse-y), rgba(5, 150, 105, 0.1), transparent 40%);
+  background: radial-gradient(600px circle at var(--mouse-x) var(--mouse-y), rgba(0, 232, 123, 0.1), transparent 40%);
 }
 
 .glow-border:hover::after {
@@ -249,11 +249,11 @@ body {
 
   0%,
   100% {
-    border-color: rgba(5, 150, 105, 0.10);
+    border-color: rgba(0, 232, 123, 0.12);
   }
 
   50% {
-    border-color: rgba(5, 150, 105, 0.25);
+    border-color: rgba(0, 232, 123, 0.30);
   }
 }
 
@@ -312,7 +312,7 @@ body {
 .animate-shimmer {
   background: linear-gradient(90deg,
       transparent 0%,
-      rgba(5, 150, 105, 0.08) 50%,
+      rgba(0, 232, 123, 0.10) 50%,
       transparent 100%);
   background-size: 200% 100%;
   animation: shimmer 3s ease-in-out infinite;
@@ -394,6 +394,6 @@ body {
    ============================================ */
 
 ::selection {
-  background: rgba(5, 150, 105, 0.25);
+  background: rgba(0, 232, 123, 0.30);
   color: var(--color-ghost-white);
 }
