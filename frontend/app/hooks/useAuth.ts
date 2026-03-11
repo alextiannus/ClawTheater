@@ -32,8 +32,9 @@ export function useAuth() {
             ) as any;
 
             // Also check useWallets for the active embedded solana wallet
+            // IMPORTANT: filter by non-0x address to avoid picking up EVM wallets
             const activeSolanaWallet = wallets.find(
-                (w) => w.walletClientType === "privy"
+                (w) => w.walletClientType === "privy" && w.address && !w.address.startsWith("0x")
             );
 
             
@@ -42,11 +43,11 @@ export function useAuth() {
             console.log("[useAuth] Extracted activeSolanaWallet:", activeSolanaWallet);
 
             // Chain of fallbacks to find the Solana address:
-            // 1. activeSolanaWallet (from useWallets hook, most reliable for active session)
+            // 1. user.wallet.address — Privy sets this to embedded wallet, most reliable if Solana-only config
             // 2. walletAccount (privy embedded wallet from linkedAccounts)
             // 3. fallbackLinkedWallet (any non-EVM base58 wallet from linkedAccounts)
-            // 4. user.wallet.address (default Privy fallback, usually EVM)
-            const walletAddress = activeSolanaWallet?.address || walletAccount?.address || fallbackLinkedWallet?.address || user.wallet?.address || null;
+            // 4. activeSolanaWallet from useWallets (filtered to non-0x addresses)
+            const walletAddress = user.wallet?.address || walletAccount?.address || fallbackLinkedWallet?.address || activeSolanaWallet?.address || null;
 
             const displayName = user.google?.name || user.email?.address || "Anon";
             const email = user.email?.address || null;
