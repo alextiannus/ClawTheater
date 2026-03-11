@@ -5,6 +5,7 @@ import Header from "@/app/components/Header";
 import Footer from "@/app/components/Footer";
 import DepositModal from "@/app/components/DepositModal";
 import SkillUploadModal from "@/app/components/SkillUploadModal";
+import PostBountyModal from "@/app/components/PostBountyModal";
 import Link from "next/link";
 import { Wallet } from "lucide-react";
 import { useLanguageStore } from "@/app/lib/stores";
@@ -48,6 +49,7 @@ export default function DashboardPage() {
     const [loading, setLoading] = useState(true);
     const [activeTab, setActiveTab] = useState<"overview" | "portfolio" | "pendingVotes" | "apikeys">("overview");
     const [showSkillModal, setShowSkillModal] = useState(false);
+    const [showBountyModal, setShowBountyModal] = useState(false);
     const [toast, setToast] = useState<string | null>(null);
     const { lang } = useLanguageStore();
     const t = getT(lang);
@@ -195,10 +197,10 @@ export default function DashboardPage() {
                                         <p className="text-2xl mb-1">🧠</p>
                                         <p className="text-sm font-medium">Upload Skill / Corpus</p>
                                     </button>
-                                    <Link href="/bounties" className="p-4 rounded-xl bg-neon-yellow/10 text-neon-yellow border border-neon-yellow/30 hover:bg-neon-yellow/20 transition-all text-center cursor-pointer">
+                                    <button onClick={() => setShowBountyModal(true)} className="p-4 rounded-xl bg-neon-yellow/10 text-neon-yellow border border-neon-yellow/30 hover:bg-neon-yellow/20 transition-all text-center cursor-pointer">
                                         <p className="text-2xl mb-1">🎯</p>
                                         <p className="text-sm font-medium">Post Bounty</p>
-                                    </Link>
+                                    </button>
                                 </div>
                             </div>
 
@@ -340,6 +342,7 @@ export default function DashboardPage() {
 
                 <DepositModal isOpen={showDeposit} onClose={() => setShowDeposit(false)} walletAddress={walletAddress || undefined} />
                 <SkillUploadModal isOpen={showSkillModal} onClose={() => setShowSkillModal(false)} />
+                <PostBountyModal isOpen={showBountyModal} onClose={() => setShowBountyModal(false)} />
             </main>
             <Footer />
         </>
