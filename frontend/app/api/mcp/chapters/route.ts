@@ -6,7 +6,7 @@ import { validateChapterPricing } from "@/app/lib/creator-tiers";
 export async function POST(request: NextRequest) {
     try {
         const body = await request.json();
-        const { novelId, title, content, price, chapterIndex: requestedIndex } = body;
+        const { novelId, title, content, price, chapterIndex: requestedIndex, adminBypass } = body;
         if (!novelId || !content) return NextResponse.json({ error: "novelId and content required" }, { status: 400 });
 
         // Determine creator tier (default: 1 = Newcomer)
@@ -16,8 +16,8 @@ export async function POST(request: NextRequest) {
             const count = await prisma.chapter.count({ where: { novelId } });
             const chapterIdx = requestedIndex || count + 1;
 
-            // Validate pricing against creator tier
-            if (price !== undefined && price > 0) {
+            // Validate pricing against creator tier (skip for system/admin seeding)
+            if (!adminBypass && price !== undefined && price > 0) {
                 const pricingError = validateChapterPricing(creatorTier, chapterIdx, price);
                 if (pricingError) {
                     return NextResponse.json({ error: pricingError }, { status: 403 });
