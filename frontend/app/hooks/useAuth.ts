@@ -21,9 +21,14 @@ export function useAuth() {
             console.log("[useAuth] user.linkedAccounts:", user.linkedAccounts);
             console.log("[useAuth] user.wallet:", user.wallet);
 
-            // Find the Solana embedded wallet or any connected wallet
+            // Find the Solana embedded wallet or any connected wallet in linkedAccounts
             const walletAccount = user.linkedAccounts?.find(
-                (account) => account.type === "wallet"
+                (account) => account.type === "wallet" && (account as any).walletClientType === "privy"
+            ) as any;
+            
+            // Fallback: just find ANY linked wallet that has a Solana-looking address (base58)
+            const fallbackLinkedWallet = user.linkedAccounts?.find(
+                (account) => account.type === "wallet" && account.address && account.address.length >= 32 && account.address.length <= 44 && !account.address.startsWith("0x")
             ) as any;
 
             // Also check useWallets for the active embedded solana wallet
@@ -33,9 +38,16 @@ export function useAuth() {
 
             
             console.log("[useAuth] Extracted walletAccount:", walletAccount);
+            console.log("[useAuth] Extracted fallbackLinkedWallet:", fallbackLinkedWallet);
             console.log("[useAuth] Extracted activeSolanaWallet:", activeSolanaWallet);
 
-            const walletAddress = user.wallet?.address || activeSolanaWallet?.address || walletAccount?.address || null;
+            // Chain of fallbacks to find the Solana address:
+            // 1. activeSolanaWallet (from useWallets hook, most reliable for active session)
+            // 2. walletAccount (privy embedded wallet from linkedAccounts)
+            // 3. fallbackLinkedWallet (any non-EVM base58 wallet from linkedAccounts)
+            // 4. user.wallet.address (default Privy fallback, usually EVM)
+            const walletAddress = activeSolanaWallet?.address || walletAccount?.address || fallbackLinkedWallet?.address || user.wallet?.address || null;
+
             const displayName = user.google?.name || user.email?.address || "Anon";
             const email = user.email?.address || null;
 
