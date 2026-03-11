@@ -202,18 +202,49 @@ interface LanguageState {
     autoDetect: () => void;
 }
 
+const LANG_STORAGE_KEY = "claw_theater_lang";
+
 function detectBrowserLanguage(): LobbyLanguage {
     if (typeof navigator === "undefined") return "zh";
     const browserLang = navigator.language.toLowerCase().split("-")[0];
     const match = SUPPORTED_LANGUAGES.find((l) => l.code === browserLang);
-    return match ? match.code : "en"; // fallback to English for unsupported
+    return match ? match.code : "zh"; // fallback to Chinese (not English) for unsupported
+}
+
+function getInitialLang(): LobbyLanguage {
+    if (typeof localStorage === "undefined") return "zh";
+    const stored = localStorage.getItem(LANG_STORAGE_KEY) as LobbyLanguage | null;
+    if (stored && SUPPORTED_LANGUAGES.some((l) => l.code === stored)) return stored;
+    return "zh"; // Don't auto-detect on init - let autoDetect be called explicitly
 }
 
 export const useLanguageStore = create<LanguageState>((set) => ({
-    lang: "zh", // SSR default, will be overridden by autoDetect
+    lang: "zh", // SSR default
     setLang: (lang) => {
         const match = SUPPORTED_LANGUAGES.find((l) => l.code === lang);
-        if (match) set({ lang: match.code });
+        if (match) {
+            // Persist to localStorage so navigation doesn't reset the language
+            if (typeof localStorage !== "undefined") {
+                localStorage.setItem(LANG_STORAGE_KEY, match.code);
+            }
+            set({ lang: match.code });
+        }
     },
-    autoDetect: () => set({ lang: detectBrowserLanguage() }),
+    autoDetect: () => {
+        // Only auto-detect if the user hasn't explicitly chosen a language yet
+        if (typeof localStorage !== "undefined") {
+            const stored = localStorage.getItem(LANG_STORAGE_KEY) as LobbyLanguage | null;
+            if (stored && SUPPORTED_LANGUAGES.some((l) => l.code === stored)) {
+                // Restore from localStorage — don't override with browser language
+                set({ lang: stored });
+                return;
+            }
+        }
+        // No preference stored — detect from browser
+        const detected = detectBrowserLanguage();
+        if (typeof localStorage !== "undefined") {
+            localStorage.setItem(LANG_STORAGE_KEY, detected);
+        }
+        set({ lang: detected });
+    },
 }));
