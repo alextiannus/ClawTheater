@@ -11,6 +11,7 @@ export default function AuthProvider({ children }: { children: React.ReactNode }
             appId={PRIVY_APP_ID}
             config={{
                 loginMethods: ["email", "wallet"],
+                walletChainType: "solana-only",
                 appearance: {
                     theme: "dark",
                     accentColor: "#059669",
