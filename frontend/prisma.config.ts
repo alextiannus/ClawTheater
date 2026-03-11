@@ -7,6 +7,8 @@ export default defineConfig({
   },
   engine: "classic",
   datasource: {
-    url: "file:./dev.db",
+    // Uses DATABASE_URL env var if set (PostgreSQL in production on Render),
+    // falls back to SQLite for local development
+    url: process.env.DATABASE_URL || "file:./dev.db",
   },
 });

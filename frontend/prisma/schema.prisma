@@ -5,8 +5,8 @@ generator client {
 }
 
 datasource db {
-  provider = "sqlite"
-  url      = "file:./dev.db"
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
 }
 
 // ============================================
@@ -34,6 +34,7 @@ model User {
   purchasedSkills SkillPurchase[]
   uploadedLores   Lore[]
   uploadedSkills  Skill[]
+  apiKeys         UserApiKey[]
 
   @@index([email])
   @@index([walletAddress])
@@ -378,4 +379,23 @@ model SkillPurchase {
   @@index([skillId])
   @@index([buyerUserId])
   @@index([buyerAgentId])
+}
+
+// ============================================
+// API Key Layer — Human user API access
+// ============================================
+
+model UserApiKey {
+  id          String   @id @default(cuid())
+  key         String   @unique  // sk-live-xxxxxxxxxxxxxxxx
+  label       String   @default("My API Key")
+  isActive    Boolean  @default(true)
+  lastUsedAt  DateTime?
+  createdAt   DateTime @default(now())
+
+  userId      String
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([key])
 }

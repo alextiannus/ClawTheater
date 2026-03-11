@@ -53,7 +53,53 @@ export default function DashboardPage() {
     const [toast, setToast] = useState<string | null>(null);
     const { lang } = useLanguageStore();
     const t = getT(lang);
-    const { walletAddress } = useAuth();
+    const { walletAddress, userId } = useAuth();
+
+    // API Keys state
+    interface ApiKeyItem { id: string; label: string; keyPreview: string; keyFull: string; createdAt: string; }
+    const [apiKeys, setApiKeys] = useState<ApiKeyItem[]>([]);
+    const [newKeyFull, setNewKeyFull] = useState<string | null>(null);
+    const [keysLoading, setKeysLoading] = useState(false);
+    const [copiedId, setCopiedId] = useState<string | null>(null);
+
+    const fetchApiKeys = async (uid: string) => {
+        const res = await fetch(`/api/apikeys?userId=${uid}`);
+        const data = await res.json();
+        if (data.keys) setApiKeys(data.keys);
+    };
+
+    const handleGenerateKey = async () => {
+        if (!userId) return;
+        setKeysLoading(true);
+        const res = await fetch("/api/apikeys", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ userId, label: "API Key" }),
+        });
+        const data = await res.json();
+        if (data.key) {
+            setNewKeyFull(data.key);
+            fetchApiKeys(userId);
+        }
+        setKeysLoading(false);
+    };
+
+    const handleRevokeKey = async (id: string) => {
+        if (!userId) return;
+        await fetch("/api/apikeys", {
+            method: "DELETE",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ id, userId }),
+        });
+        setApiKeys((prev) => prev.filter((k) => k.id !== id));
+        showToast("✅ Key revoked");
+    };
+
+    const handleCopy = (text: string, id: string) => {
+        navigator.clipboard.writeText(text);
+        setCopiedId(id);
+        setTimeout(() => setCopiedId(null), 2000);
+    };
 
     const showToast = (msg: string) => {
         setToast(msg);
@@ -69,6 +115,12 @@ export default function DashboardPage() {
             })
             .catch(() => setLoading(false));
     }, []);
+
+    useEffect(() => {
+        if (activeTab === "apikeys" && userId) {
+            fetchApiKeys(userId);
+        }
+    }, [activeTab, userId]);;
 
     if (loading) {
         return (
@@ -303,30 +355,54 @@ export default function DashboardPage() {
 
                     {activeTab === "apikeys" && (
                         <div className="glass-card p-6">
-                            <h3 className="text-lg font-semibold text-ghost-white mb-4">🔑 API Key Management</h3>
-                            <p className="text-sm text-ghost-muted mb-6">
-                                Manage your agent API keys. Each key grants access to the MCP protocol.
-                            </p>
+                            <h3 className="text-lg font-semibold text-ghost-white mb-1">🔑 API Key Management</h3>
+                            <p className="text-sm text-ghost-muted mb-6">Keys give AI agents access to the MCP protocol on your behalf.</p>
 
-                            <div className="glass-light p-4 rounded-xl mb-4">
-                                <div className="flex items-center justify-between">
-                                    <div>
-                                        <p className="text-sm text-ghost-white font-mono">sk-live-••••••••••••••••dmK4</p>
-                                        <p className="text-xs text-ghost-muted mt-1">Created: 2026-03-01 · Last used: 2 hours ago</p>
-                                    </div>
-                                    <div className="flex gap-2">
-                                        <button className="px-3 py-1.5 text-xs bg-white/5 text-ghost-muted rounded-lg hover:text-ghost-white transition-colors">
-                                            Copy
-                                        </button>
-                                        <button className="px-3 py-1.5 text-xs bg-neon-red/10 text-neon-red rounded-lg hover:bg-neon-red/20 transition-colors">
-                                            Revoke
+                            {/* Newly generated key — show once */}
+                            {newKeyFull && (
+                                <div className="glass-light p-4 rounded-xl mb-4 border border-terminal-green/30">
+                                    <p className="text-xs text-terminal-green font-mono mb-1">✅ New key generated — copy it now, it won't be shown again!</p>
+                                    <div className="flex items-center gap-2">
+                                        <code className="text-sm font-mono text-ghost-white break-all flex-1">{newKeyFull}</code>
+                                        <button onClick={() => { handleCopy(newKeyFull, "new"); }} className="px-3 py-1.5 text-xs bg-terminal-green/10 text-terminal-green rounded-lg shrink-0 cursor-pointer">
+                                            {copiedId === "new" ? "Copied!" : "Copy"}
                                         </button>
                                     </div>
                                 </div>
+                            )}
+
+                            {/* Key list */}
+                            <div className="space-y-3 mb-4">
+                                {apiKeys.length === 0 ? (
+                                    <p className="text-ghost-muted text-sm text-center py-6">No API keys yet. Generate one below.</p>
+                                ) : apiKeys.map((k) => (
+                                    <div key={k.id} className="glass-light p-4 rounded-xl">
+                                        <div className="flex items-center justify-between">
+                                            <div>
+                                                <p className="text-sm text-ghost-white font-mono">{k.keyPreview}</p>
+                                                <p className="text-xs text-ghost-muted mt-1">
+                                                    {k.label} · Created: {new Date(k.createdAt).toLocaleDateString()}
+                                                </p>
+                                            </div>
+                                            <div className="flex gap-2">
+                                                <button onClick={() => handleCopy(k.keyFull, k.id)} className="px-3 py-1.5 text-xs bg-white/5 text-ghost-muted rounded-lg hover:text-ghost-white transition-colors cursor-pointer">
+                                                    {copiedId === k.id ? "Copied!" : "Copy"}
+                                                </button>
+                                                <button onClick={() => handleRevokeKey(k.id)} className="px-3 py-1.5 text-xs bg-neon-red/10 text-neon-red rounded-lg hover:bg-neon-red/20 transition-colors cursor-pointer">
+                                                    Revoke
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                ))}
                             </div>
 
-                            <button className="px-4 py-2.5 bg-terminal-green/10 text-terminal-green border border-terminal-green/30 rounded-xl text-sm hover:bg-terminal-green/20 transition-all">
-                                + Generate New API Key
+                            <button
+                                onClick={handleGenerateKey}
+                                disabled={keysLoading || !userId}
+                                className="px-4 py-2.5 bg-terminal-green/10 text-terminal-green border border-terminal-green/30 rounded-xl text-sm hover:bg-terminal-green/20 transition-all disabled:opacity-50 cursor-pointer"
+                            >
+                                {keysLoading ? "Generating..." : "+ Generate New API Key"}
                             </button>
                         </div>
                     )}
