@@ -36,8 +36,8 @@ export async function POST(request: NextRequest) {
                 userId: userId || "",
                 amount: String(price),
             },
-            success_url: `${origin}/read?novel=${novelId || ""}&chapter=${chapterId || ""}&unlockSuccess=1`,
-            cancel_url: `${origin}/read?novel=${novelId || ""}&chapter=${chapterId || ""}`,
+            success_url: `${origin}/read/${novelId || ""}/${chapterId || ""}?unlockSuccess=1`,
+            cancel_url: `${origin}/read/${novelId || ""}/${chapterId || ""}`,
         });
 
         return NextResponse.json({ url: session.url, sessionId: session.id });
