@@ -4,6 +4,8 @@ import { useState, useEffect } from "react";
 import Header from "@/app/components/Header";
 import Footer from "@/app/components/Footer";
 import DepositModal from "@/app/components/DepositModal";
+import SkillUploadModal from "@/app/components/SkillUploadModal";
+import Link from "next/link";
 import { Wallet } from "lucide-react";
 import { useLanguageStore } from "@/app/lib/stores";
 import { getT } from "@/app/lib/i18n";
@@ -45,11 +47,7 @@ export default function DashboardPage() {
     const [showDeposit, setShowDeposit] = useState(false);
     const [loading, setLoading] = useState(true);
     const [activeTab, setActiveTab] = useState<"overview" | "portfolio" | "pendingVotes" | "apikeys">("overview");
-    const [showLoreModal, setShowLoreModal] = useState(false);
-    const [loreName, setLoreName] = useState("");
-    const [loreDesc, setLoreDesc] = useState("");
-    const [loreSettings, setLoreSettings] = useState("");
-    const [actionLoading, setActionLoading] = useState(false);
+    const [showSkillModal, setShowSkillModal] = useState(false);
     const [toast, setToast] = useState<string | null>(null);
     const { lang } = useLanguageStore();
     const t = getT(lang);
@@ -58,34 +56,6 @@ export default function DashboardPage() {
     const showToast = (msg: string) => {
         setToast(msg);
         setTimeout(() => setToast(null), 3000);
-    };
-
-    const handleUploadLore = async () => {
-        if (!loreName.trim() || !loreSettings.trim()) return;
-        setActionLoading(true);
-        try {
-            const res = await fetch("/api/mcp/lores", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({
-                    name: loreName,
-                    description: loreDesc,
-                    settings: loreSettings,
-                    creatorId: undefined, // will use demo user
-                }),
-            });
-            const d = await res.json();
-            if (d.loreId) {
-                showToast(`✅ "${loreName}" published! Earning ${d.royaltyPct}% royalty.`);
-                setShowLoreModal(false);
-                setLoreName(""); setLoreDesc(""); setLoreSettings("");
-            } else {
-                showToast(`❌ ${d.error}`);
-            }
-        } catch {
-            showToast("❌ Network error");
-        }
-        setActionLoading(false);
     };
 
     useEffect(() => {
@@ -213,22 +183,22 @@ export default function DashboardPage() {
                             <div className="glass-card p-6">
                                 <h3 className="text-lg font-semibold text-ghost-white mb-4">Quick Actions</h3>
                                 <div className="grid grid-cols-2 gap-3">
-                                    <button className="p-4 rounded-xl bg-terminal-green/10 text-terminal-green border border-terminal-green/30 hover:bg-terminal-green/20 transition-all text-center">
+                                    <button onClick={() => setShowDeposit(true)} className="p-4 rounded-xl bg-terminal-green/10 text-terminal-green border border-terminal-green/30 hover:bg-terminal-green/20 transition-all text-center cursor-pointer">
                                         <p className="text-2xl mb-1">🏦</p>
                                         <p className="text-sm font-medium">Deposit USDC</p>
                                     </button>
-                                    <button className="p-4 rounded-xl bg-pulse-blue/10 text-pulse-blue border border-pulse-blue/30 hover:bg-pulse-blue/20 transition-all text-center">
+                                    <button className="p-4 rounded-xl bg-pulse-blue/10 text-pulse-blue border border-pulse-blue/30 hover:bg-pulse-blue/20 transition-all text-center cursor-pointer">
                                         <p className="text-2xl mb-1">💸</p>
                                         <p className="text-sm font-medium">Withdraw</p>
                                     </button>
-                                    <button onClick={() => setShowLoreModal(true)} className="p-4 rounded-xl bg-neon-green/10 text-neon-green border border-neon-green/30 hover:bg-neon-green/20 transition-all text-center">
-                                        <p className="text-2xl mb-1">📝</p>
-                                        <p className="text-sm font-medium">{t.uploadLore}</p>
+                                    <button onClick={() => setShowSkillModal(true)} className="p-4 rounded-xl bg-neon-green/10 text-neon-green border border-neon-green/30 hover:bg-neon-green/20 transition-all text-center cursor-pointer">
+                                        <p className="text-2xl mb-1">🧠</p>
+                                        <p className="text-sm font-medium">Upload Skill / Corpus</p>
                                     </button>
-                                    <button className="p-4 rounded-xl bg-white/5 text-ghost-muted border border-white/10 hover:bg-white/10 transition-all text-center">
-                                        <p className="text-2xl mb-1">🔀</p>
-                                        <p className="text-sm font-medium">New Fork</p>
-                                    </button>
+                                    <Link href="/bounties" className="p-4 rounded-xl bg-neon-yellow/10 text-neon-yellow border border-neon-yellow/30 hover:bg-neon-yellow/20 transition-all text-center cursor-pointer">
+                                        <p className="text-2xl mb-1">🎯</p>
+                                        <p className="text-sm font-medium">Post Bounty</p>
+                                    </Link>
                                 </div>
                             </div>
 
@@ -359,44 +329,17 @@ export default function DashboardPage() {
                         </div>
                     )}
                 </div>
-                {/* Lore Upload Modal */}
-                {showLoreModal && (
-                    <div className="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-                        <div className="glass-card p-8 max-w-lg w-full">
-                            <h3 className="text-2xl font-bold text-ghost-white mb-2">🌍 Upload World Lore</h3>
-                            <p className="text-sm text-ghost-muted mb-6">Publish a world-building setting. Earn 10% royalty on all novels that use it.</p>
-                            <div className="space-y-4">
-                                <div>
-                                    <label className="text-xs text-ghost-muted mb-1 block">Name</label>
-                                    <input type="text" value={loreName} onChange={(e) => setLoreName(e.target.value)} placeholder="e.g. 克苏鲁星际纪元" className="w-full bg-obsidian border border-white/10 rounded-xl px-4 py-2.5 text-sm text-ghost-white placeholder-ghost-muted/50 focus:border-neon-green/50 focus:outline-none" />
-                                </div>
-                                <div>
-                                    <label className="text-xs text-ghost-muted mb-1 block">Description</label>
-                                    <input type="text" value={loreDesc} onChange={(e) => setLoreDesc(e.target.value)} placeholder="Brief overview of this world" className="w-full bg-obsidian border border-white/10 rounded-xl px-4 py-2.5 text-sm text-ghost-white placeholder-ghost-muted/50 focus:border-neon-green/50 focus:outline-none" />
-                                </div>
-                                <div>
-                                    <label className="text-xs text-ghost-muted mb-1 block">Settings (JSON)</label>
-                                    <textarea value={loreSettings} onChange={(e) => setLoreSettings(e.target.value)} placeholder='{"era": "2099", "tech_level": "post-singularity", "factions": [...]}' className="w-full h-40 bg-obsidian border border-white/10 rounded-xl p-4 text-sm text-ghost-white placeholder-ghost-muted/50 focus:border-neon-green/50 focus:outline-none resize-none font-mono" />
-                                </div>
-                            </div>
-                            <div className="flex justify-end gap-3 mt-6">
-                                <button onClick={() => setShowLoreModal(false)} className="px-4 py-2 text-sm text-ghost-muted">Cancel</button>
-                                <button onClick={handleUploadLore} disabled={actionLoading} className="px-6 py-2.5 bg-neon-green text-obsidian rounded-xl text-sm font-bold hover:scale-105 transition-all glow-green disabled:opacity-50">
-                                    {actionLoading ? "Publishing..." : "Publish Lore (10% Royalty)"}
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-                )}
+            {/* Lore Upload Modal — removed, replaced by SkillUploadModal */}
 
-                {/* Toast */}
-                {toast && (
-                    <div className="fixed bottom-8 right-8 z-50 glass-card px-6 py-3 text-sm text-ghost-white animate-fade-in">
-                        {toast}
-                    </div>
-                )}
+            {/* Toast */}
+            {toast && (
+                <div className="fixed bottom-8 right-8 z-50 glass-card px-6 py-3 text-sm text-ghost-white animate-fade-in">
+                    {toast}
+                </div>
+            )}
 
                 <DepositModal isOpen={showDeposit} onClose={() => setShowDeposit(false)} walletAddress={walletAddress || undefined} />
+                <SkillUploadModal isOpen={showSkillModal} onClose={() => setShowSkillModal(false)} />
             </main>
             <Footer />
         </>

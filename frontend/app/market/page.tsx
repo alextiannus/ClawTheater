@@ -12,11 +12,15 @@ interface SkillItem {
     name: string;
     description: string;
     type: string;
+    contentType?: string;
+    isOpenSource?: boolean;
     price: number;
     salesCount: number;
+    downloadCount?: number;
     creator: string;
     creatorType: string;
     language?: string;
+    fileName?: string;
 }
 
 const typeLabels: Record<string, { label: string; style: string }> = {
@@ -364,27 +368,53 @@ export default function MarketPage() {
                                     {filtered.map((skill) => (
                                         <div key={skill.id} className="glass-card p-6 flex flex-col md:flex-row items-start md:items-center gap-4 hover:scale-[1.005] transition-all duration-200">
                                             <div className="flex-1">
-                                                <div className="flex items-center gap-3 mb-2">
+                                                <div className="flex items-center gap-3 mb-2 flex-wrap">
                                                     <h3 className="text-lg font-semibold text-ghost-white">{skill.name}</h3>
                                                     <span className={`text-xs px-2 py-0.5 rounded-full ${typeLabels[skill.type]?.style || "text-ghost-muted bg-white/10"}`}>
                                                         {typeLabels[skill.type]?.label || skill.type}
                                                     </span>
+                                                    {skill.contentType === "CORPUS" && (
+                                                        <span className="text-xs px-2 py-0.5 rounded-full text-neon-green bg-neon-green/10">📚 Corpus</span>
+                                                    )}
+                                                    {skill.isOpenSource !== undefined && (
+                                                        <span className={`text-xs px-2 py-0.5 rounded-full ${skill.isOpenSource ? "text-terminal-green bg-terminal-green/10" : "text-pulse-blue bg-pulse-blue/10"}`}>
+                                                            {skill.isOpenSource ? "🔓 Open" : "💰 Paid"}
+                                                        </span>
+                                                    )}
                                                 </div>
                                                 <p className="text-sm text-ghost-muted mb-2">{skill.description}</p>
                                                 <div className="flex items-center gap-4 text-xs text-ghost-muted">
                                                     <span>by {skill.creatorType === "agent" ? "🦞" : "👤"} {skill.creator}</span>
                                                     <span>📦 {skill.salesCount} sold</span>
+                                                    {(skill.downloadCount ?? 0) > 0 && (
+                                                        <span className="text-terminal-green">⬇️ {skill.downloadCount} downloads</span>
+                                                    )}
+                                                    {skill.fileName && (
+                                                        <span className="font-mono opacity-60">{skill.fileName}</span>
+                                                    )}
                                                 </div>
                                             </div>
                                             <div className="flex items-center gap-3 shrink-0">
-                                                <span className="text-xl font-bold font-mono text-terminal-green">${skill.price}</span>
-                                                <button
-                                                    onClick={() => handlePurchase(skill.id)}
-                                                    disabled={actionLoading}
-                                                    className="px-5 py-2 text-sm bg-terminal-green/10 text-terminal-green border border-terminal-green/30 rounded-xl hover:bg-terminal-green/20 transition-all disabled:opacity-50"
-                                                >
-                                                    Purchase
-                                                </button>
+                                                <span className="text-xl font-bold font-mono text-terminal-green">
+                                                    {skill.isOpenSource ? "FREE" : `$${skill.price}`}
+                                                </span>
+                                                {skill.isOpenSource ? (
+                                                    <button
+                                                        onClick={() => handlePurchase(skill.id)}
+                                                        disabled={actionLoading}
+                                                        className="px-5 py-2 text-sm bg-terminal-green/10 text-terminal-green border border-terminal-green/30 rounded-xl hover:bg-terminal-green/20 transition-all disabled:opacity-50"
+                                                    >
+                                                        ⬇️ Download
+                                                    </button>
+                                                ) : (
+                                                    <button
+                                                        onClick={() => handlePurchase(skill.id)}
+                                                        disabled={actionLoading}
+                                                        className="px-5 py-2 text-sm bg-pulse-blue/10 text-pulse-blue border border-pulse-blue/30 rounded-xl hover:bg-pulse-blue/20 transition-all disabled:opacity-50"
+                                                    >
+                                                        💳 Purchase
+                                                    </button>
+                                                )}
                                             </div>
                                         </div>
                                     ))}

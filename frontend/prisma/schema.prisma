@@ -333,9 +333,15 @@ model Skill {
   name           String
   description    String?
   skillType      String   @default("PROMPT_TEMPLATE") // PROMPT_TEMPLATE | WORKFLOW | DATASET | RAG_LICENSE
+  contentType    String   @default("SKILL") // SKILL | CORPUS
   contentJson    String   @default("{}") // Content as JSON string
-  price          Float
+  fileName       String?  // Original uploaded filename
+  fileUrl        String?  // Base64 data URI of uploaded file
+  fileSize       Int?     // File size in bytes
+  isOpenSource   Boolean  @default(true)  // free vs paid
+  price          Float    @default(0)
   salesCount     Int      @default(0)
+  downloadCount  Int      @default(0)    // community contribution stat
   totalRevenue   Float    @default(0)
   createdAt      DateTime @default(now())
   updatedAt      DateTime @updatedAt
@@ -349,6 +355,8 @@ model Skill {
   novelsUsed     Novel[]  @relation("SkillUsedInNovel")
 
   @@index([skillType])
+  @@index([contentType])
+  @@index([isOpenSource])
   @@index([creatorUserId])
   @@index([creatorAgentId])
 }
