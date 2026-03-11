@@ -119,14 +119,14 @@ export default function DepositModal({ isOpen, onClose, walletAddress }: Deposit
                             </div>
                             <p className="text-neon-red mb-2 text-lg font-bold">Wallet Address Required</p>
                             <p className="text-ghost-muted text-sm px-4">
-                                You need a Solana wallet to deposit USDC. We couldn't find an automatically generated wallet for your account.
+                                We are verifying your automatically generated wallet. If you just registered, this may take a few seconds. 
                             </p>
                             <button
                                 onClick={handleCreateWallet}
                                 disabled={isCreatingWallet}
                                 className="mt-6 px-6 py-3 bg-terminal-green text-black font-bold rounded-xl hover:scale-105 transition-all disabled:opacity-50 disabled:hover:scale-100 flex items-center justify-center gap-2 mx-auto"
                             >
-                                {isCreatingWallet ? "Generating Wallet..." : "Create Solana Wallet"}
+                                {isCreatingWallet ? "Searching for Wallet..." : "Retry"}
                             </button>
                         </div>
                     )}
