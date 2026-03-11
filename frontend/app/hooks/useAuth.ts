@@ -1,6 +1,6 @@
 "use client";
 
-import { usePrivy } from "@privy-io/react-auth";
+import { usePrivy, useWallets } from "@privy-io/react-auth";
 import { useUserStore } from "../lib/stores";
 import { useEffect, useRef } from "react";
 
@@ -10,6 +10,7 @@ import { useEffect, useRef } from "react";
  */
 export function useAuth() {
     const { ready, authenticated, user, login, logout: privyLogout } = usePrivy();
+    const { wallets } = useWallets();
     const store = useUserStore();
     const syncedRef = useRef(false);
     const syncedWalletRef = useRef<string | null>(null);
@@ -24,10 +25,17 @@ export function useAuth() {
             const walletAccount = user.linkedAccounts?.find(
                 (account) => account.type === "wallet"
             ) as any;
+
+            // Also check useWallets for the active embedded solana wallet
+            const activeSolanaWallet = wallets.find(
+                (w) => w.walletClientType === "privy"
+            );
+
             
             console.log("[useAuth] Extracted walletAccount:", walletAccount);
+            console.log("[useAuth] Extracted activeSolanaWallet:", activeSolanaWallet);
 
-            const walletAddress = user.wallet?.address || walletAccount?.address || null;
+            const walletAddress = user.wallet?.address || activeSolanaWallet?.address || walletAccount?.address || null;
             const displayName = user.google?.name || user.email?.address || "Anon";
             const email = user.email?.address || null;
 
@@ -74,7 +82,7 @@ export function useAuth() {
             store.logout();
         }
         // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [ready, authenticated, user]);
+    }, [ready, authenticated, user, wallets.length]);
 
     const handleLogin = () => login();
 
