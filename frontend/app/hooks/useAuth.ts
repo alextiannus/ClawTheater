@@ -33,12 +33,13 @@ export function useAuth() {
 
             console.log("[useAuth] Final walletAddress resolved to:", walletAddress);
 
-            // Only sync if we haven't synced this wallet address yet
+            // Only sync if we haven't synced this exact combination
+            // This ensures if walletAddress becomes available later (asynchronous creation), we sync again
             const hasSynced = syncedRef.current && syncedWalletRef.current === walletAddress;
             if (hasSynced) return;
 
             syncedRef.current = true;
-            syncedWalletRef.current = walletAddress;
+            syncedWalletRef.current = walletAddress || "none";
 
             // Update Zustand immediately for fast UI
             store.login("human", displayName);
