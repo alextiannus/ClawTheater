@@ -472,7 +472,7 @@ function ReadNovelPage() {
 
                                     {/* Fine print */}
                                     <p className="text-center text-xs text-ghost-muted/50 mt-8 font-mono">
-                                        💰 支付后即时解锁 · 50% 归创作龙虾 · 30% 归金主 · 10% 世界观版税 · 10% 平台
+                                        💰 支付后即时解锁 · 80% 归创作龙虾 · 10% 世界观版税 · 10% 平台
                                     </p>
                                 </div>
                             ) : (
@@ -485,27 +485,57 @@ function ReadNovelPage() {
                                 </article>
                             )}
 
-                            {/* Action Bar */}
-                            {chapter && !chapter.locked && (
-                                <div className="flex flex-wrap gap-3 mt-8 mb-12">
-                                    <button
-                                        onClick={() => setShowTipModal(true)}
-                                        className="px-5 py-2.5 rounded-xl bg-terminal-green/10 text-terminal-green border border-terminal-green/30 hover:bg-terminal-green/20 transition-all text-sm font-medium"
-                                    >
-                                        ⚡ 赛博投喂
-                                    </button>
-
-                                    <button className="px-5 py-2.5 rounded-xl bg-white/5 text-ghost-muted border border-white/10 hover:bg-white/10 transition-all text-sm">
-                                        🔖 添加收藏
-                                    </button>
-                                    {selectedChapter < chapters.length - 1 && !chapters[selectedChapter + 1]?.locked && (
-                                        <button
-                                            onClick={() => setSelectedChapter(selectedChapter + 1)}
-                                            className="px-5 py-2.5 rounded-xl bg-neon-green/10 text-neon-green border border-neon-green/30 hover:bg-neon-green/20 transition-all text-sm ml-auto font-medium"
+                            {/* Action Bar — always visible */}
+                            {chapter && (
+                                <div className="flex flex-wrap items-center gap-3 mt-8 mb-12">
+                                    {/* Back link */}
+                                    {novel && (
+                                        <Link
+                                            href={`/novels/${novel.id}`}
+                                            className="px-4 py-2.5 rounded-xl bg-white/5 text-ghost-muted border border-white/10 hover:bg-white/10 transition-all text-sm"
                                         >
-                                            Next Chapter →
+                                            ← 详情页
+                                        </Link>
+                                    )}
+
+                                    {!chapter.locked && (
+                                        <button
+                                            onClick={() => setShowTipModal(true)}
+                                            className="px-5 py-2.5 rounded-xl bg-terminal-green/10 text-terminal-green border border-terminal-green/30 hover:bg-terminal-green/20 transition-all text-sm font-medium"
+                                        >
+                                            ⚡ 赛博投喂
                                         </button>
                                     )}
+
+                                    {!chapter.locked && (
+                                        <button className="px-5 py-2.5 rounded-xl bg-white/5 text-ghost-muted border border-white/10 hover:bg-white/10 transition-all text-sm">
+                                            🔖 添加收藏
+                                        </button>
+                                    )}
+
+                                    <div className="flex items-center gap-2 ml-auto">
+                                        {/* Prev chapter */}
+                                        {selectedChapter > 0 && (
+                                            <button
+                                                onClick={() => handleChapterClick(selectedChapter - 1)}
+                                                className="px-4 py-2.5 rounded-xl bg-white/5 text-ghost-muted border border-white/10 hover:bg-white/10 hover:text-ghost-white transition-all text-sm font-medium"
+                                            >
+                                                ← 上一章
+                                            </button>
+                                        )}
+                                        {/* Next chapter */}
+                                        {selectedChapter < chapters.length - 1 && (
+                                            <button
+                                                onClick={() => handleChapterClick(selectedChapter + 1)}
+                                                className={`px-4 py-2.5 rounded-xl border transition-all text-sm font-medium ${chapters[selectedChapter + 1]?.locked
+                                                        ? "bg-neon-red/5 text-neon-red border-neon-red/30 hover:bg-neon-red/10"
+                                                        : "bg-neon-green/10 text-neon-green border-neon-green/30 hover:bg-neon-green/20"
+                                                    }`}
+                                            >
+                                                {chapters[selectedChapter + 1]?.locked ? "🔒 下一章" : "下一章 →"}
+                                            </button>
+                                        )}
+                                    </div>
                                 </div>
                             )}
 

@@ -52,3 +52,17 @@ export async function GET(request: NextRequest) {
         return NextResponse.json({ chapters: [] });
     }
 }
+
+// DELETE /api/mcp/chapters?novelId=xxx — Delete all chapters for a novel
+export async function DELETE(request: NextRequest) {
+    const { searchParams } = new URL(request.url);
+    const novelId = searchParams.get("novelId");
+    if (!novelId) return NextResponse.json({ error: "novelId required" }, { status: 400 });
+    try {
+        const { count } = await prisma.chapter.deleteMany({ where: { novelId } });
+        return NextResponse.json({ deleted: count });
+    } catch (error) {
+        console.error("Chapter delete error:", error);
+        return NextResponse.json({ error: "Failed to delete chapters" }, { status: 500 });
+    }
+}
