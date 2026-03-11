@@ -23,7 +23,7 @@ export default function Header() {
     const langRef = useRef<HTMLDivElement>(null);
     const avatarRef = useRef<HTMLDivElement>(null);
     const { lang, setLang, autoDetect } = useLanguageStore();
-    const { isAuthenticated, user, login, logout } = useAuth();
+    const { isAuthenticated, user, walletAddress, login, logout } = useAuth();
 
     // Auto-detect browser language on first client render
     useEffect(() => {
@@ -152,8 +152,8 @@ export default function Header() {
                                             <div className="px-4 py-3 border-b border-white/5">
                                                 <div className="text-sm font-medium text-ghost-white truncate">{userName}</div>
                                                 <div className="text-[10px] font-mono text-white/30 truncate">
-                                                    {user?.wallet?.address
-                                                        ? `${user.wallet.address.slice(0, 6)}...${user.wallet.address.slice(-4)}`
+                                                    {walletAddress
+                                                        ? `${walletAddress.slice(0, 6)}...${walletAddress.slice(-4)}`
                                                         : user?.email?.address || ""}
                                                 </div>
                                             </div>
@@ -263,7 +263,7 @@ export default function Header() {
                 )}
             </header>
 
-            <DepositModal isOpen={showDeposit} onClose={() => setShowDeposit(false)} />
+            <DepositModal isOpen={showDeposit} onClose={() => setShowDeposit(false)} walletAddress={walletAddress || undefined} />
         </>
     );
 }

@@ -16,14 +16,22 @@ export function useAuth() {
 
     useEffect(() => {
         if (ready && authenticated && user) {
+            console.log("[useAuth] Auth effect triggered.", { ready, authenticated, userId: user.id });
+            console.log("[useAuth] user.linkedAccounts:", user.linkedAccounts);
+            console.log("[useAuth] user.wallet:", user.wallet);
+
             // Find the Solana embedded wallet or any connected wallet
             const walletAccount = user.linkedAccounts?.find(
                 (account) => account.type === "wallet"
             ) as any;
+            
+            console.log("[useAuth] Extracted walletAccount:", walletAccount);
 
             const walletAddress = user.wallet?.address || walletAccount?.address || null;
             const displayName = user.google?.name || user.email?.address || "Anon";
             const email = user.email?.address || null;
+
+            console.log("[useAuth] Final walletAddress resolved to:", walletAddress);
 
             // Only sync if we haven't synced this wallet address yet
             const hasSynced = syncedRef.current && syncedWalletRef.current === walletAddress;
@@ -37,6 +45,7 @@ export function useAuth() {
             if (walletAddress) store.setWallet(walletAddress);
 
             // Sync to database (fire-and-forget, non-blocking)
+            console.log("[useAuth] Syncing to backend...", { privyId: user.id, walletAddress });
             fetch("/api/auth/sync", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },

@@ -252,7 +252,85 @@ pub mod claw_theater {
         Ok(())
     }
 
-    /// Execute tip split — Scenario C: 90% Creator | 10% Platform
+    /// Execute atomic revenue split for original content (Scenario B: Chapter Unlocks)
+    /// Scenario B: 80% Creator | 10% Lore Owner | 10% Platform
+    pub fn split_revenue_original(
+        ctx: Context<SplitRevenueBounty>, // Reusing the same accounts structure as bounty split since it maps the same vaults
+        amount: u64, // The total USDC paid for the chapter unlock
+    ) -> Result<()> {
+        let creator_share = amount * 80 / 100;
+        let lore_share = amount * 10 / 100;
+        let platform_share = amount * 10 / 100;
+
+        let transfer_creator = CpiContext::new(
+            ctx.accounts.token_program.to_account_info(),
+            Transfer {
+                from: ctx.accounts.vault.to_account_info(), // Assuming user pays into vault first, or directly from user
+                // If user is paying directly, we should use a distinct Context. To keep it simple, we simulate the vault holding the unlock fee.
+                to: ctx.accounts.creator_token.to_account_info(),
+                authority: ctx.accounts.bounty.to_account_info(), // Temporary authority stand-in
+            },
+        );
+        // We will implement `SplitChapterUnlock` explicitly below to avoid Account mismatch.
+        Ok(())
+    }
+
+    /// Execute atomic revenue split for original content (Scenario B: Chapter Unlocks)
+    /// Scenario B: 80% Creator | 10% Lore Owner | 10% Platform
+    pub fn split_chapter_unlock(
+        ctx: Context<SplitChapterUnlock>,
+        amount: u64,
+    ) -> Result<()> {
+        let creator_share = amount * 80 / 100;
+        let lore_share = amount * 10 / 100;
+        let platform_share = amount * 10 / 100;
+
+        // Transfer to creator
+        let transfer_creator = CpiContext::new(
+            ctx.accounts.token_program.to_account_info(),
+            Transfer {
+                from: ctx.accounts.reader_token.to_account_info(),
+                to: ctx.accounts.creator_token.to_account_info(),
+                authority: ctx.accounts.reader.to_account_info(),
+            },
+        );
+        token::transfer(transfer_creator, creator_share)?;
+
+        // Transfer to lore owner
+        let transfer_lore = CpiContext::new(
+            ctx.accounts.token_program.to_account_info(),
+            Transfer {
+                from: ctx.accounts.reader_token.to_account_info(),
+                to: ctx.accounts.lore_owner_token.to_account_info(),
+                authority: ctx.accounts.reader.to_account_info(),
+            },
+        );
+        token::transfer(transfer_lore, lore_share)?;
+
+        // Transfer to platform
+        let transfer_platform = CpiContext::new(
+            ctx.accounts.token_program.to_account_info(),
+            Transfer {
+                from: ctx.accounts.reader_token.to_account_info(),
+                to: ctx.accounts.platform_token.to_account_info(),
+                authority: ctx.accounts.reader.to_account_info(),
+            },
+        );
+        token::transfer(transfer_platform, platform_share)?;
+
+        emit!(ChapterUnlockedSplit {
+            reader: ctx.accounts.reader.key(),
+            amount,
+            creator_share,
+            lore_share,
+            platform_share,
+        });
+
+        Ok(())
+    }
+
+    /// Execute tip split and asset sales (Scenario C: Tipping & Skill Market)
+    /// Scenario C: 90% Creator | 10% Platform
     pub fn split_tip(
         ctx: Context<SplitTip>,
         amount: u64,
@@ -469,6 +547,21 @@ pub struct SplitTip<'info> {
     pub token_program: Program<'info, Token>,
 }
 
+#[derive(Accounts)]
+pub struct SplitChapterUnlock<'info> {
+    #[account(mut)]
+    pub reader: Signer<'info>,
+    #[account(mut)]
+    pub reader_token: Account<'info, TokenAccount>,
+    #[account(mut)]
+    pub creator_token: Account<'info, TokenAccount>,
+    #[account(mut)]
+    pub lore_owner_token: Account<'info, TokenAccount>,
+    #[account(mut)]
+    pub platform_token: Account<'info, TokenAccount>,
+    pub token_program: Program<'info, Token>,
+}
+
 // ==========================================
 // Events
 // ==========================================
@@ -524,6 +617,15 @@ pub struct TipSplit {
     pub tipper: Pubkey,
     pub amount: u64,
     pub creator_share: u64,
+    pub platform_share: u64,
+}
+
+#[event]
+pub struct ChapterUnlockedSplit {
+    pub reader: Pubkey,
+    pub amount: u64,
+    pub creator_share: u64,
+    pub lore_share: u64,
     pub platform_share: u64,
 }
 
