@@ -1,7 +1,8 @@
 "use client";
 
 import { useState, useCallback, useEffect } from "react";
-import { Wallet, X } from "lucide-react";
+import { Wallet, X, AlertTriangle } from "lucide-react";
+import { usePrivy } from "@privy-io/react-auth";
 
 interface DepositModalProps {
     isOpen: boolean;
@@ -10,9 +11,11 @@ interface DepositModalProps {
 }
 
 export default function DepositModal({ isOpen, onClose, walletAddress }: DepositModalProps) {
+    const { createWallet } = usePrivy();
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
     const [onrampUrl, setOnrampUrl] = useState<string | null>(null);
+    const [isCreatingWallet, setIsCreatingWallet] = useState(false);
 
     const initOnramp = useCallback(async () => {
         if (!isOpen) return;
@@ -57,8 +60,24 @@ export default function DepositModal({ isOpen, onClose, walletAddress }: Deposit
         return () => {
             setOnrampUrl(null);
             setError(null);
+            setIsCreatingWallet(false);
         };
     }, [isOpen, initOnramp]);
+
+    const handleCreateWallet = async () => {
+        setIsCreatingWallet(true);
+        try {
+            await createWallet();
+            // The useAuth hook will detect the new wallet and trigger syncing
+            // We just need to wait a moment and let the UI react to the updated walletAddress prop
+            setTimeout(() => {
+                setIsCreatingWallet(false);
+            }, 2000);
+        } catch (err: any) {
+            setError(err?.message || "Failed to create wallet");
+            setIsCreatingWallet(false);
+        }
+    };
 
     if (!isOpen) return null;
 
@@ -93,16 +112,35 @@ export default function DepositModal({ isOpen, onClose, walletAddress }: Deposit
                         </div>
                     )}
 
-                    {error && (
+                    {error && !walletAddress && (
+                        <div className="text-center py-12">
+                            <div className="flex justify-center mb-4 text-neon-yellow">
+                                <AlertTriangle size={48} />
+                            </div>
+                            <p className="text-neon-red mb-2 text-lg font-bold">Wallet Address Required</p>
+                            <p className="text-ghost-muted text-sm px-4">
+                                You need a Solana wallet to deposit USDC. We couldn't find an automatically generated wallet for your account.
+                            </p>
+                            <button
+                                onClick={handleCreateWallet}
+                                disabled={isCreatingWallet}
+                                className="mt-6 px-6 py-3 bg-terminal-green text-black font-bold rounded-xl hover:scale-105 transition-all disabled:opacity-50 disabled:hover:scale-100 flex items-center justify-center gap-2 mx-auto"
+                            >
+                                {isCreatingWallet ? "Generating Wallet..." : "Create Solana Wallet"}
+                            </button>
+                        </div>
+                    )}
+
+                    {error && walletAddress && (
                         <div className="text-center py-12">
                             <p className="text-4xl mb-4">⚠️</p>
-                            <p className="text-neon-red mb-2">Error</p>
-                            <p className="text-ghost-muted text-sm">{error}</p>
+                            <p className="text-neon-red mb-2 font-bold">Error Initializing Deposit</p>
+                            <p className="text-ghost-muted text-sm px-4">{error}</p>
                             <button
                                 onClick={initOnramp}
-                                className="mt-4 px-4 py-2 bg-terminal-green/10 text-terminal-green rounded-xl text-sm hover:bg-terminal-green/20 transition-all cursor-pointer"
+                                className="mt-6 px-6 py-2 border border-terminal-green text-terminal-green rounded-xl text-sm hover:bg-terminal-green/10 transition-all cursor-pointer inline-block"
                             >
-                                Retry
+                                Retry Connection
                             </button>
                         </div>
                     )}
