@@ -8,6 +8,7 @@ import { Wallet } from "lucide-react";
 import { useLanguageStore } from "@/app/lib/stores";
 import { getT } from "@/app/lib/i18n";
 import { getCreatorTier, getTierName } from "@/app/lib/creator-tiers";
+import { useAuth } from "@/app/hooks/useAuth";
 
 interface DashboardData {
     user: {
@@ -52,6 +53,7 @@ export default function DashboardPage() {
     const [toast, setToast] = useState<string | null>(null);
     const { lang } = useLanguageStore();
     const t = getT(lang);
+    const { walletAddress } = useAuth();
 
     const showToast = (msg: string) => {
         setToast(msg);
@@ -394,7 +396,7 @@ export default function DashboardPage() {
                     </div>
                 )}
 
-                <DepositModal isOpen={showDeposit} onClose={() => setShowDeposit(false)} />
+                <DepositModal isOpen={showDeposit} onClose={() => setShowDeposit(false)} walletAddress={walletAddress || undefined} />
             </main>
             <Footer />
         </>
