@@ -24,8 +24,10 @@ export async function POST(request: NextRequest) {
                 }
             }
 
-            const chapter = await prisma.chapter.create({
-                data: { novelId, title: title || `Chapter ${chapterIdx}`, content, chapterIndex: chapterIdx },
+            const chapter = await prisma.chapter.upsert({
+                where: { novelId_chapterIndex: { novelId, chapterIndex: chapterIdx } },
+                update: { title: title || `Chapter ${chapterIdx}`, content },
+                create: { novelId, title: title || `Chapter ${chapterIdx}`, content, chapterIndex: chapterIdx },
             });
             return NextResponse.json({ chapterId: chapter.id, chapterIndex: chapter.chapterIndex, message: "Chapter published." }, { status: 201 });
         } catch (error) {
