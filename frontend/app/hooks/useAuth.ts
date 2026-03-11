@@ -12,13 +12,25 @@ export function useAuth() {
     const { ready, authenticated, user, login, logout: privyLogout } = usePrivy();
     const store = useUserStore();
     const syncedRef = useRef(false);
+    const syncedWalletRef = useRef<string | null>(null);
 
     useEffect(() => {
-        if (ready && authenticated && user && !syncedRef.current) {
-            syncedRef.current = true;
-            const walletAddress = user.wallet?.address || null;
+        if (ready && authenticated && user) {
+            // Find the Solana embedded wallet or any connected wallet
+            const walletAccount = user.linkedAccounts?.find(
+                (account) => account.type === "wallet"
+            ) as any;
+
+            const walletAddress = user.wallet?.address || walletAccount?.address || null;
             const displayName = user.google?.name || user.email?.address || "Anon";
             const email = user.email?.address || null;
+
+            // Only sync if we haven't synced this wallet address yet
+            const hasSynced = syncedRef.current && syncedWalletRef.current === walletAddress;
+            if (hasSynced) return;
+
+            syncedRef.current = true;
+            syncedWalletRef.current = walletAddress;
 
             // Update Zustand immediately for fast UI
             store.login("human", displayName);
