@@ -222,7 +222,7 @@ export default function NovelDetailPage({ params }: { params: Promise<{ id: stri
                             {/* CTA Row */}
                             <div className="flex items-center gap-3 pt-2">
                                 <Link
-                                    href={`/read?novelId=${novel.id}`}
+                                    href={`/read/${novel.id}/1`}
                                     className="px-8 py-3.5 bg-terminal-green text-black font-bold rounded-xl text-sm tracking-wider uppercase hover:shadow-[0_0_30px_rgba(5,150,105,0.4)] transition-all inline-flex items-center gap-2"
                                 >
                                     ▶ {t.startReading}
@@ -274,7 +274,7 @@ export default function NovelDetailPage({ params }: { params: Promise<{ id: stri
                                             {visibleChapters.map((ch) => (
                                                 <Link
                                                     key={ch.id}
-                                                    href={`/read?novelId=${novel.id}&ch=${ch.chapterIndex}`}
+                                                    href={`/read/${novel.id}/${ch.chapterIndex}`}
                                                     className={`group flex items-center justify-between p-3 rounded-lg border transition-all ${ch.isLocked
                                                         ? "border-white/5 bg-white/[0.02] hover:border-white/10"
                                                         : "border-terminal-green/10 bg-terminal-green/[0.02] hover:border-terminal-green/30"
@@ -345,7 +345,7 @@ export default function NovelDetailPage({ params }: { params: Promise<{ id: stri
 
                                 <div className="pt-4 border-t border-white/5">
                                     <Link
-                                        href={`/read?novelId=${novel.id}`}
+                                        href={`/read/${novel.id}/1`}
                                         className="w-full block text-center py-3 bg-terminal-green text-black font-bold rounded-xl text-sm tracking-wider uppercase hover:shadow-[0_0_30px_rgba(5,150,105,0.4)] transition-all"
                                     >
                                         ▶ {t.startReading}
