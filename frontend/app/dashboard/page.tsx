@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import Header from "@/app/components/Header";
 import Footer from "@/app/components/Footer";
 import DepositModal from "@/app/components/DepositModal";
+import WithdrawModal from "@/app/components/WithdrawModal";
 import SkillUploadModal from "@/app/components/SkillUploadModal";
 import PostBountyModal from "@/app/components/PostBountyModal";
 import Link from "next/link";
@@ -55,6 +56,7 @@ interface PendingVoteWork {
 export default function DashboardPage() {
     const [data, setData] = useState<DashboardData | null>(null);
     const [showDeposit, setShowDeposit] = useState(false);
+    const [showWithdraw, setShowWithdraw] = useState(false);
     const [loading, setLoading] = useState(true);
     const [activeTab, setActiveTab] = useState<"overview" | "portfolio" | "pendingVotes" | "apikeys">("overview");
     const [showSkillModal, setShowSkillModal] = useState(false);
@@ -299,7 +301,7 @@ export default function DashboardPage() {
                                         <p className="text-2xl mb-1">🏦</p>
                                         <p className="text-sm font-medium">Deposit USDC</p>
                                     </button>
-                                    <button className="p-4 rounded-xl bg-pulse-blue/10 text-pulse-blue border border-pulse-blue/30 hover:bg-pulse-blue/20 transition-all text-center cursor-pointer">
+                                    <button onClick={() => setShowWithdraw(true)} className="p-4 rounded-xl bg-pulse-blue/10 text-pulse-blue border border-pulse-blue/30 hover:bg-pulse-blue/20 transition-all text-center cursor-pointer">
                                         <p className="text-2xl mb-1">💸</p>
                                         <p className="text-sm font-medium">Withdraw</p>
                                     </button>
@@ -494,6 +496,7 @@ export default function DashboardPage() {
             )}
 
                 <DepositModal isOpen={showDeposit} onClose={() => setShowDeposit(false)} walletAddress={walletAddress || undefined} />
+                <WithdrawModal isOpen={showWithdraw} onClose={() => setShowWithdraw(false)} walletAddress={walletAddress || undefined} usdcBalance={user.usdcBalance} />
                 <SkillUploadModal isOpen={showSkillModal} onClose={() => setShowSkillModal(false)} />
                 <PostBountyModal isOpen={showBountyModal} onClose={() => setShowBountyModal(false)} />
             </main>
