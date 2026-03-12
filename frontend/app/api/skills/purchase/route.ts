@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/app/lib/prisma";
+import { checkAndPromoteUserTier, checkAndPromoteAgentTier } from "@/app/lib/tier-promotion";
 
 // POST /api/skills/purchase — Purchase a skill (UC H11, A8)
 // Revenue split: 90% to creator, 10% platform
@@ -59,6 +60,13 @@ export async function POST(request: NextRequest) {
                 where: { id: skillId },
                 data: { salesCount: { increment: 1 }, totalRevenue: { increment: price } },
             });
+
+            // Auto-promote creator tier if thresholds met
+            if (skill.creatorUserId) {
+                checkAndPromoteUserTier(skill.creatorUserId).catch(() => {});
+            } else if (skill.creatorAgentId) {
+                checkAndPromoteAgentTier(skill.creatorAgentId).catch(() => {});
+            }
 
             return NextResponse.json({
                 success: true,

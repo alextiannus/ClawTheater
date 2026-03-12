@@ -43,6 +43,15 @@ const txTypeStyles: Record<string, { icon: string; color: string }> = {
     PURCHASE: { icon: "🛒", color: "text-ghost-muted" },
 };
 
+interface PendingVoteWork {
+    workId: string;
+    bountyId: string;
+    bountyTitle: string;
+    agentName: string;
+    submittedAt: string;
+    excerpt: string;
+}
+
 export default function DashboardPage() {
     const [data, setData] = useState<DashboardData | null>(null);
     const [showDeposit, setShowDeposit] = useState(false);
@@ -54,6 +63,11 @@ export default function DashboardPage() {
     const { lang } = useLanguageStore();
     const t = getT(lang);
     const { walletAddress, userId } = useAuth();
+
+    // Pending Votes state
+    const [pendingVotes, setPendingVotes] = useState<PendingVoteWork[]>([]);
+    const [votesLoading, setVotesLoading] = useState(false);
+    const [votingId, setVotingId] = useState<string | null>(null);
 
     // API Keys state
     interface ApiKeyItem { id: string; label: string; keyPreview: string; keyFull: string; createdAt: string; }
@@ -120,7 +134,62 @@ export default function DashboardPage() {
         if (activeTab === "apikeys" && userId) {
             fetchApiKeys(userId);
         }
-    }, [activeTab, userId]);;
+        if (activeTab === "pendingVotes") {
+            fetchPendingVotes();
+        }
+    }, [activeTab, userId]);
+
+    const fetchPendingVotes = async () => {
+        setVotesLoading(true);
+        try {
+            const res = await fetch("/api/bounties?status=AUDITING&limit=50");
+            const data = await res.json();
+            const bounties = data.bounties || [];
+            const works: PendingVoteWork[] = [];
+            for (const bounty of bounties) {
+                const detailRes = await fetch(`/api/bounties/${bounty.id}`);
+                const detail = await detailRes.json();
+                for (const work of (detail.works || [])) {
+                    if (work.status === "PENDING") {
+                        works.push({
+                            workId: work.id,
+                            bountyId: bounty.id,
+                            bountyTitle: bounty.title,
+                            agentName: work.agentName || "Unknown Agent",
+                            submittedAt: new Date(work.submittedAt).toLocaleDateString(),
+                            excerpt: work.content?.slice(0, 120) + "...",
+                        });
+                    }
+                }
+            }
+            setPendingVotes(works);
+        } catch {
+            // silently fail
+        }
+        setVotesLoading(false);
+    };
+
+    const handleVote = async (workId: string, bountyId: string, approved: boolean) => {
+        setVotingId(workId);
+        try {
+            const res = await fetch("/api/bounties/vote", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ workId, bountyId, approved, userId }),
+            });
+            const data = await res.json();
+            if (data.voteId) {
+                showToast(approved ? "✅ Approved! Vote recorded." : "❌ Rejected. Vote recorded.");
+                if (data.consensusReached) showToast("🏆 Consensus reached! Bounty resolved.");
+                setPendingVotes((prev) => prev.filter((v) => v.workId !== workId));
+            } else {
+                showToast(`❌ ${data.error || "Vote failed"}`);
+            }
+        } catch {
+            showToast("❌ Network error");
+        }
+        setVotingId(null);
+    };
 
     if (loading) {
         return (
@@ -140,20 +209,7 @@ export default function DashboardPage() {
     const portfolio = data?.portfolio || [];
     const transactions = data?.transactions || [];
 
-    const mockPendingVotes = [
-        {
-            bountyId: "b-1",
-            bountyTitle: "Cyberpunk Alternate Ending",
-            agent: "Lobster_01",
-            submittedAt: "2026-03-10",
-        },
-        {
-            bountyId: "b-2",
-            bountyTitle: "Training Data Corpus Extraction",
-            agent: "DataCrawler_v2",
-            submittedAt: "2026-03-09",
-        }
-    ];
+
 
     return (
         <>
@@ -220,9 +276,11 @@ export default function DashboardPage() {
                                 {tab === "pendingVotes" && (
                                     <>
                                         <span>⚖️ {t.pendingVotes}</span>
+                                        {pendingVotes.length > 0 && (
                                         <span className="bg-neon-red text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full">
-                                            {mockPendingVotes.length}
+                                            {pendingVotes.length}
                                         </span>
+                                        )}
                                     </>
                                 )}
                                 {tab === "apikeys" && "🔑 API Keys"}
@@ -326,26 +384,45 @@ export default function DashboardPage() {
                                     Awaiting Consensus
                                 </span>
                             </h3>
-                            {mockPendingVotes.length === 0 ? (
-                                <p className="text-ghost-muted text-sm text-center py-8">No works pending your vote.</p>
+                            {votesLoading ? (
+                                <p className="text-ghost-muted text-sm text-center py-8 animate-pulse">🦞 Loading submissions...</p>
+                            ) : pendingVotes.length === 0 ? (
+                                <div className="text-center py-12">
+                                    <p className="text-4xl mb-3">⚖️</p>
+                                    <p className="text-ghost-muted text-sm">No works pending vote right now.</p>
+                                    <p className="text-ghost-muted/60 text-xs mt-1">Bounties in AUDITING status will appear here.</p>
+                                </div>
                             ) : (
                                 <div className="space-y-4">
-                                    {mockPendingVotes.map((vote, i) => (
-                                        <div key={i} className="glass-light p-4 rounded-xl flex flex-col md:flex-row items-start md:items-center justify-between gap-4 border border-white/5 hover:border-pulse-blue/30 transition-all">
-                                            <div className="flex-1">
-                                                <p className="text-ghost-white font-medium mb-1 line-clamp-1">{vote.bountyTitle}</p>
-                                                <div className="flex items-center gap-3 text-xs text-ghost-muted">
-                                                    <span>Agent: <span className="text-terminal-green">{vote.agent}</span></span>
-                                                    <span>•</span>
-                                                    <span>Submitted: {vote.submittedAt}</span>
+                                    {pendingVotes.map((vote) => (
+                                        <div key={vote.workId} className="glass-light p-4 rounded-xl border border-white/5 hover:border-pulse-blue/30 transition-all">
+                                            <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+                                                <div className="flex-1 min-w-0">
+                                                    <p className="text-ghost-white font-medium mb-1 line-clamp-1">{vote.bountyTitle}</p>
+                                                    <div className="flex items-center gap-3 text-xs text-ghost-muted mb-2">
+                                                        <span>Agent: <span className="text-terminal-green">{vote.agentName}</span></span>
+                                                        <span>•</span>
+                                                        <span>Submitted: {vote.submittedAt}</span>
+                                                    </div>
+                                                    <p className="text-xs text-ghost-muted/70 font-mono line-clamp-2 bg-white/[0.03] px-3 py-2 rounded-lg">{vote.excerpt}</p>
+                                                </div>
+                                                <div className="flex items-center gap-2 shrink-0">
+                                                    <button
+                                                        onClick={() => handleVote(vote.workId, vote.bountyId, false)}
+                                                        disabled={votingId === vote.workId}
+                                                        className="px-4 py-2 bg-neon-red/10 text-neon-red border border-neon-red/30 rounded-lg text-sm font-medium hover:bg-neon-red/20 transition-all disabled:opacity-50"
+                                                    >
+                                                        ✗ Reject
+                                                    </button>
+                                                    <button
+                                                        onClick={() => handleVote(vote.workId, vote.bountyId, true)}
+                                                        disabled={votingId === vote.workId}
+                                                        className="px-4 py-2 bg-neon-green/10 text-neon-green border border-neon-green/30 rounded-lg text-sm font-medium hover:bg-neon-green/20 transition-all disabled:opacity-50"
+                                                    >
+                                                        ✓ Approve
+                                                    </button>
                                                 </div>
                                             </div>
-                                            <a
-                                                href={`/bounties/${vote.bountyId}`}
-                                                className="px-5 py-2 bg-pulse-blue/10 text-pulse-blue hover:bg-pulse-blue hover:text-white border border-pulse-blue/30 rounded-lg text-sm font-medium transition-all w-full md:w-auto text-center"
-                                            >
-                                                {t.voteNow} →
-                                            </a>
                                         </div>
                                     ))}
                                 </div>
