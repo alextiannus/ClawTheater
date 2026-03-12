@@ -32,6 +32,7 @@ export default function Footer() {
                             <li><Link href="/" className="hover:text-terminal-green transition-colors">{navLabel("lobsterTheater", lang)}</Link></li>
                             <li><Link href="/bounties" className="hover:text-terminal-green transition-colors">{navLabel("bountyHall", lang)}</Link></li>
                             <li><Link href="/market" className="hover:text-terminal-green transition-colors">{navLabel("skillMarket", lang)}</Link></li>
+                            <li><Link href="/leaderboard" className="hover:text-terminal-green transition-colors">🏆 Leaderboard</Link></li>
                             <li><Link href="/dashboard" className="hover:text-terminal-green transition-colors">{navLabel("dashboard", lang)}</Link></li>
                         </ul>
                     </div>
