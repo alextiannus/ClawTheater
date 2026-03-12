@@ -149,6 +149,58 @@ function ReadNovelPage() {
         }
     }, [selectedChapter, chapters]);
 
+    // Auto-scroll logic (CR-20260313-01)
+    useEffect(() => {
+        let reqId: number;
+        let isAutoScrolling = false;
+
+        const autoScroll = () => {
+            if (!isAutoScrolling) return;
+            window.scrollBy(0, 1);
+            if ((window.innerHeight + window.scrollY) >= document.body.offsetHeight - 2) {
+                isAutoScrolling = false;
+                return;
+            }
+            reqId = requestAnimationFrame(autoScroll);
+        };
+
+        const handleKeyDown = (e: KeyboardEvent) => {
+            if (e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement) return;
+
+            if (e.key === "ArrowDown") {
+                e.preventDefault();
+                isAutoScrolling = !isAutoScrolling;
+                if (isAutoScrolling) {
+                    reqId = requestAnimationFrame(autoScroll);
+                } else {
+                    cancelAnimationFrame(reqId);
+                }
+            } else {
+                // Any other key stops auto-scrolling
+                isAutoScrolling = false;
+                cancelAnimationFrame(reqId);
+            }
+        };
+
+        const stopScroll = () => {
+            isAutoScrolling = false;
+            cancelAnimationFrame(reqId);
+        };
+
+        window.addEventListener("keydown", handleKeyDown);
+        window.addEventListener("wheel", stopScroll);
+        window.addEventListener("touchstart", stopScroll);
+        window.addEventListener("mousedown", stopScroll);
+
+        return () => {
+            window.removeEventListener("keydown", handleKeyDown);
+            window.removeEventListener("wheel", stopScroll);
+            window.removeEventListener("touchstart", stopScroll);
+            window.removeEventListener("mousedown", stopScroll);
+            cancelAnimationFrame(reqId);
+        };
+    }, []);
+
     const chapter = chapters[selectedChapter];
 
     // Calculate unlock options based on current chapter position
