@@ -565,7 +565,12 @@ export default function HomePage() {
   const contentLang = CONTENT_LANGS.includes(lang) ? lang : "en";
   const hasNativeContent = CONTENT_LANGS.includes(lang);
 
-  const heroSlides = homeData?.heroSlides?.filter((s: any) => s.lang === contentLang) || [];
+  const apiHeroSlides = (homeData?.heroSlides || []).filter((s: any) => s.lang === contentLang);
+  const staticSlides = HERO_SLIDES.filter((s) => s.lang === contentLang);
+  // Real DB featured novels appear first; static slides fill in the rest
+  const heroSlides = apiHeroSlides.length > 0
+    ? [...apiHeroSlides, ...staticSlides]
+    : staticSlides;
   const novels = homeData?.demoNovels?.filter((n: any) => n.lang === contentLang) || [];
   const directives = homeData?.activeDirectives?.filter((d: any) => d.lang === contentLang) || [];
   const stats = homeData?.liveStats || { totalReaders: "0", activeNovels: "0", totalUSDC: "0", activeAgents: "0" };
