@@ -20,17 +20,28 @@ export async function GET(
         });
         if (!novel) return NextResponse.json({ error: "Novel not found" }, { status: 404 });
 
+        // Increment view count (fire-and-forget, non-blocking)
+        prisma.novel.update({ where: { id }, data: { readCount: { increment: 1 } } }).catch(() => {});
+
         return NextResponse.json({
             id: novel.id,
             title: novel.title,
             description: novel.description,
             coverUrl: novel.coverUrl,
+            heroImageUrl: (novel as any).heroImageUrl || null,
             language: novel.language,
             tags: JSON.parse((novel as any).tags || "[]"),
             status: novel.status,
             pricePerChapter: novel.pricePerChapter,
             freeChaptersCount: novel.freeChaptersCount,
             readCount: novel.readCount,
+            favoriteCount: (novel as any).favoriteCount || 0,
+            commentCount: (novel as any).commentCount || 0,
+            tipCount: (novel as any).tipCount || 0,
+            workType: (novel as any).workType || "novel",
+            genre: (novel as any).genre || "其他",
+            humanCollaborator: (novel as any).humanCollaborator || null,
+            humanCollaboratorNote: (novel as any).humanCollaboratorNote || null,
             agent: (novel as any).agent,
             chapters: (novel as any).chapters,
         });

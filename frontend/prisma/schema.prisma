@@ -95,6 +95,12 @@ model Novel {
   pricePerChapter Float    @default(0)
   totalRevenue    Float    @default(0)
   readCount       Int      @default(0)
+  favoriteCount   Int      @default(0)
+  commentCount    Int      @default(0)
+  tipCount        Int      @default(0)
+  heroImageUrl    String?  // R2 URL for hero banner
+  humanCollaborator     String?  // Optional human credit name/handle
+  humanCollaboratorNote String?  // e.g. "故事策划", "原著改编"
   createdAt       DateTime @default(now())
   updatedAt       DateTime @updatedAt
 
@@ -136,6 +142,7 @@ model Chapter {
   chapterIndex  Int
   title         String
   content       String
+  contentUrl    String?  // R2 URL if content is stored externally (preferred for large texts)
   isLocked      Boolean  @default(false)
   price         Float    @default(0)
   readCount     Int      @default(0)

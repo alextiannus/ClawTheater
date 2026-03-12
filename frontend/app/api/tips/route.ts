@@ -47,6 +47,12 @@ export async function POST(request: NextRequest) {
             });
         } catch { /* non-critical */ }
 
+        // Increment novel tipCount
+        const novelId = (tip as any).chapter?.novel?.id || null;
+        if (novelId) {
+            prisma.novel.update({ where: { id: novelId }, data: { tipCount: { increment: 1 } } }).catch(() => {});
+        }
+
         return NextResponse.json({
             tipId: tip.id,
             amount,

@@ -8,7 +8,7 @@ export async function POST(request: NextRequest) {
         const {
             title, description, pricePerChapter, agentId, language,
             openForAiLearning, allowParallelUniverses, freeChaptersCount, usedSkillId, loreId,
-            coverUrl, workType, genre
+            coverUrl, workType, genre, humanCollaborator, humanCollaboratorNote
         } = body;
 
         if (!title) return NextResponse.json({ error: "Title required" }, { status: 400 });
@@ -29,6 +29,8 @@ export async function POST(request: NextRequest) {
                     coverUrl: coverUrl || null,
                     workType: workType || "novel",
                     genre: genre || "其他",
+                    humanCollaborator: humanCollaborator || null,
+                    humanCollaboratorNote: humanCollaboratorNote || null,
                 },
             });
             return NextResponse.json({ novelId: novel.id, title: novel.title, message: "Novel created." }, { status: 201 });
@@ -79,6 +81,11 @@ export async function GET() {
                 chapterCount: n._count.chapters, agent: n.agent?.agentName || "Unknown",
                 workType: n.workType || "novel",
                 genre: n.genre || "其他",
+                favoriteCount: n.favoriteCount || 0,
+                commentCount: n.commentCount || 0,
+                tipCount: n.tipCount || 0,
+                humanCollaborator: n.humanCollaborator || null,
+                humanCollaboratorNote: n.humanCollaboratorNote || null,
             })),
         });
     } catch (error) {

@@ -27,19 +27,30 @@ export async function GET(request: NextRequest) {
     }
 }
 
-// POST /api/comments — Post comment from human (UC H6)
+// POST /api/comments — Post comment from human reader
 export async function POST(request: NextRequest) {
     try {
         const body = await request.json();
         const { chapterId, userId, content } = body;
         if (!chapterId || !content) return NextResponse.json({ error: "chapterId and content required" }, { status: 400 });
-        return NextResponse.json({
-            commentId: `cmt_${Date.now().toString(36).slice(-6)}`,
-            chapterId,
-            content,
-            sentiment: 0.7 + Math.random() * 0.3,
-            message: "Comment posted!",
-        }, { status: 201 });
+
+        // Require a valid userId or use a guest placeholder
+        const authorId = userId || null;
+        if (!authorId) return NextResponse.json({ error: "userId required" }, { status: 400 });
+
+        const comment = await prisma.comment.create({
+            data: { chapterId, userId: authorId, content },
+        });
+
+        // Increment novel-level commentCount (look up novelId via chapter)
+        prisma.chapter.findUnique({ where: { id: chapterId }, select: { novelId: true } })
+            .then((ch) => {
+                if (ch?.novelId) {
+                    return prisma.novel.update({ where: { id: ch.novelId }, data: { commentCount: { increment: 1 } } });
+                }
+            }).catch(() => {});
+
+        return NextResponse.json({ commentId: comment.id, chapterId, content, message: "Comment posted!" }, { status: 201 });
     } catch (error) {
         return NextResponse.json({ error: "Comment failed" }, { status: 500 });
     }

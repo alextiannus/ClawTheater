@@ -6,8 +6,8 @@ import { validateChapterPricing } from "@/app/lib/creator-tiers";
 export async function POST(request: NextRequest) {
     try {
         const body = await request.json();
-        const { novelId, title, content, price, chapterIndex: requestedIndex, adminBypass } = body;
-        if (!novelId || !content) return NextResponse.json({ error: "novelId and content required" }, { status: 400 });
+        const { novelId, title, content, contentUrl, price, chapterIndex: requestedIndex, adminBypass } = body;
+        if (!novelId || (!content && !contentUrl)) return NextResponse.json({ error: "novelId and content (or contentUrl) required" }, { status: 400 });
 
         // Determine creator tier (default: 1 = Newcomer)
         const creatorTier = body.creatorTier || 1;
@@ -26,8 +26,8 @@ export async function POST(request: NextRequest) {
 
             const chapter = await prisma.chapter.upsert({
                 where: { novelId_chapterIndex: { novelId, chapterIndex: chapterIdx } },
-                update: { title: title || `Chapter ${chapterIdx}`, content },
-                create: { novelId, title: title || `Chapter ${chapterIdx}`, content, chapterIndex: chapterIdx },
+                update: { title: title || `Chapter ${chapterIdx}`, content: content || "", ...(contentUrl ? { contentUrl } : {}) },
+                create: { novelId, title: title || `Chapter ${chapterIdx}`, content: content || "", contentUrl: contentUrl || null, chapterIndex: chapterIdx },
             });
             return NextResponse.json({ chapterId: chapter.id, chapterIndex: chapter.chapterIndex, message: "Chapter published." }, { status: 201 });
         } catch (error) {

@@ -1292,17 +1292,19 @@ function ForkableCard({ novel, t }: { novel: DemoNovel; t: PageTranslations }) {
             </span>
           </div>
           <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-all duration-500 flex">
-            <div className="w-1/2 bg-black/80 backdrop-blur-md flex flex-col items-center justify-center gap-3 border-r border-white/10 text-center">
-              <div className="text-4xl font-bold font-mono text-terminal-green">
+            <div className="w-1/2 bg-black/80 backdrop-blur-md flex flex-col items-center justify-center gap-2 border-r border-white/10 text-center px-2">
+              <div className="text-3xl font-bold font-mono text-terminal-green">
                 {(novel.readCount / 1000).toFixed(0)}K
               </div>
-              <div className="text-[10px] text-white/30 font-mono uppercase tracking-widest">
-                {t.readers}
+              <div className="text-[9px] text-white/30 font-mono uppercase tracking-widest">{t.readers}</div>
+              {/* Engagement mini-stats */}
+              <div className="flex flex-col gap-1 text-[9px] font-mono text-white/40 leading-tight mt-1">
+                <span>❤️ {(novel as any).favoriteCount || 0} 收藏</span>
+                <span>💬 {(novel as any).commentCount || 0} 评论</span>
+                <span>💰 {(novel as any).tipCount || 0} 打赏</span>
               </div>
-              <div className="text-xs font-mono text-neon-green">
-                {novel.chapters} ch · ${novel.price}
-              </div>
-              <div className="mt-2 px-5 py-2 bg-terminal-green text-black text-xs font-bold rounded-sm uppercase tracking-wider">
+              <div className="text-[10px] font-mono text-white/30">{novel.chapters} ch · ${novel.price}</div>
+              <div className="mt-1 px-4 py-1.5 bg-terminal-green text-black text-xs font-bold rounded-sm uppercase tracking-wider">
                 ▶ Read
               </div>
             </div>
