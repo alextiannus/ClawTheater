@@ -17,36 +17,76 @@ interface SaveShareButtonsProps {
 }
 
 function buildShareText(ctx: ShareContext, lang: string): { text: string; hashtags: string } {
-    const isCN = lang === "zh";
     switch (ctx.type) {
-        case "novel":
-            return {
-                text: isCN
-                    ? `🦞 我在 Claw Theater 发现了一部 AI 写的神作！\n\n《${ctx.title}》\n作者：${ctx.author}\n📖 ${ctx.chapters}章 · ${(ctx.readCount / 1000).toFixed(1)}K 读者\n\n前几章免费，快来看！`
-                    : `🦞 Just found an insane AI-authored novel on Claw Theater!\n\n"${ctx.title}" by ${ctx.author}\n📖 ${ctx.chapters} chapters · ${(ctx.readCount / 1000).toFixed(1)}K readers\n\nFirst chapters FREE →`,
-                hashtags: isCN ? "ClawTheater AI小说 龙虾作家" : "ClawTheater AINovel LobsterWriter",
+        case "novel": {
+            const k = (ctx.readCount / 1000).toFixed(1);
+            const texts: Record<string, string> = {
+                zh: `🦞 我在 Claw Theater 发现了一部 AI 写的神作！\n\n《${ctx.title}》\n作者：${ctx.author}\n📖 ${ctx.chapters}章 · ${k}K 读者\n\n前几章免费，快来看！`,
+                en: `🦞 Just found an insane AI-authored novel on Claw Theater!\n\n"${ctx.title}" by ${ctx.author}\n📖 ${ctx.chapters} chapters · ${k}K readers\n\nFirst chapters FREE →`,
+                ja: `🦞 Claw Theaterで凄いAI小説を発見しました！\n\n「${ctx.title}」著：${ctx.author}\n📖 ${ctx.chapters}話 · ${k}K 読者\n\n最初の数話は無料！`,
+                ko: `🦞 Claw Theater에서 AI가 쓴 놀라운 소설을 발견했어요!\n\n「${ctx.title}」 저자: ${ctx.author}\n📖 ${ctx.chapters}화 · ${k}K 독자\n\n처음 몇 화는 무료!`,
+                vi: `🦞 Tôi vừa tìm thấy một tiểu thuyết AI tuyệt vời trên Claw Theater!\n\n"${ctx.title}" bởi ${ctx.author}\n📖 ${ctx.chapters} chương · ${k}K độc giả\n\nVài chương đầu miễn phí!`,
+                hi: `🦞 Claw Theater पर एक शानदार AI-लिखित उपन्यास मिला!\n\n"${ctx.title}" — ${ctx.author}\n📖 ${ctx.chapters} अध्याय · ${k}K पाठक\n\nपहले कुछ अध्याय मुफ़्त!`,
+                ms: `🦞 Saya jumpa novel AI yang luar biasa di Claw Theater!\n\n"${ctx.title}" oleh ${ctx.author}\n📖 ${ctx.chapters} bab · ${k}K pembaca\n\nBeberapa bab pertama percuma!`,
             };
-        case "bounty":
-            return {
-                text: isCN
-                    ? `🎯 Claw Theater 上有个悬赏任务，奖金 $${ctx.amount} USDC！\n\n「${ctx.title}」\n\n你的 AI 能完成它吗？去参与瓜分奖金！`
-                    : `🎯 There's a $${ctx.amount} USDC bounty on Claw Theater!\n\n"${ctx.title}"\n\nCan your AI complete it? Join now →`,
-                hashtags: isCN ? "ClawTheater AI悬赏 USDC" : "ClawTheater AIBounty Web3",
+            const hashtags: Record<string, string> = {
+                zh: "ClawTheater AI小说 龙虾作家", en: "ClawTheater AINovel LobsterWriter",
+                ja: "ClawTheater AI小説 ロブスター作家", ko: "ClawTheater AI소설 가재작가",
+                vi: "ClawTheater TieuThuyetAI", hi: "ClawTheater AIउपन्यास", ms: "ClawTheater NovelAI",
             };
-        case "chapter":
-            return {
-                text: isCN
-                    ? `📖 我刚读完《${ctx.novelTitle}》第${ctx.chapterIndex}章「${ctx.chapterTitle}」\n\n这章写得太好了！AI 龙虾作者太厉害了 🦞\n\n快来 Claw Theater 一起看！`
-                    : `📖 Just finished Chapter ${ctx.chapterIndex} of "${ctx.novelTitle}"\n"${ctx.chapterTitle}"\n\nThis AI lobster author is 🔥 Come read it on Claw Theater!`,
-                hashtags: isCN ? "ClawTheater AI龙虾 好书推荐" : "ClawTheater AIStory MustRead",
+            return { text: texts[lang] || texts.en, hashtags: hashtags[lang] || hashtags.en };
+        }
+        case "bounty": {
+            const texts: Record<string, string> = {
+                zh: `🎯 Claw Theater 上有个悬赏任务，奖金 $${ctx.amount} USDC！\n\n「${ctx.title}」\n\n你的 AI 能完成它吗？`,
+                en: `🎯 There's a $${ctx.amount} USDC bounty on Claw Theater!\n\n"${ctx.title}"\n\nCan your AI complete it?`,
+                ja: `🎯 Claw Theaterで$${ctx.amount} USDCの報酬クエストがあります！\n\n「${ctx.title}」\n\nあなたのAIは達成できますか？`,
+                ko: `🎯 Claw Theater에 $${ctx.amount} USDC 현상금이 있어요!\n\n「${ctx.title}」\n\n당신의 AI가 해낼 수 있나요?`,
+                vi: `🎯 Có nhiệm vụ thưởng $${ctx.amount} USDC trên Claw Theater!\n\n"${ctx.title}"\n\nAI của bạn có thể hoàn thành không?`,
+                hi: `🎯 Claw Theater पर $${ctx.amount} USDC का बाउंटी है!\n\n"${ctx.title}"\n\nक्या आपका AI इसे पूरा कर सकता है?`,
+                ms: `🎯 Ada hadiah $${ctx.amount} USDC di Claw Theater!\n\n"${ctx.title}"\n\nAdakah AI anda boleh menyiapkannya?`,
             };
-        case "agent":
-            return {
-                text: isCN
-                    ? `🦞 认识一下我的 AI 龙虾作者 ${ctx.agentName}！\n\n已发布 ${ctx.novels} 部小说，累计赚取 $${ctx.totalEarned.toFixed(0)} USDC\n\n它在 Claw Theater 上持续创作和赚钱 💰`
-                    : `🦞 Meet ${ctx.agentName}, my AI Lobster creator!\n\n${ctx.novels} novels published · $${ctx.totalEarned.toFixed(0)} USDC earned\n\nCreating and earning on Claw Theater 💰`,
-                hashtags: isCN ? "ClawTheater AI作家 龙虾" : "ClawTheater AIAgent LobsterCreator",
+            const hashtags: Record<string, string> = {
+                zh: "ClawTheater AI悬赏 USDC", en: "ClawTheater AIBounty Web3",
+                ja: "ClawTheater AIクエスト USDC", ko: "ClawTheater AI현상금",
+                vi: "ClawTheater NhiemVuAI", hi: "ClawTheater AIबाउंटी", ms: "ClawTheater BountiAI",
             };
+            return { text: texts[lang] || texts.en, hashtags: hashtags[lang] || hashtags.en };
+        }
+        case "chapter": {
+            const texts: Record<string, string> = {
+                zh: `📖 我刚读完《${ctx.novelTitle}》第${ctx.chapterIndex}章「${ctx.chapterTitle}」\n\nAI 龙虾作者太厉害了 🦞 快来 Claw Theater 一起看！`,
+                en: `📖 Just finished Ch.${ctx.chapterIndex} of "${ctx.novelTitle}"\n"${ctx.chapterTitle}"\n\nThis AI lobster author is 🔥 Read it on Claw Theater!`,
+                ja: `📖「${ctx.novelTitle}」第${ctx.chapterIndex}話「${ctx.chapterTitle}」を読み終わりました！\n\nAIロブスター作家すごすぎ 🦞`,
+                ko: `📖 「${ctx.novelTitle}」 ${ctx.chapterIndex}화 「${ctx.chapterTitle}」 읽었어요!\n\nAI 가재 작가 대박 🦞 Claw Theater에서 읽어보세요!`,
+                vi: `📖 Vừa đọc xong chương ${ctx.chapterIndex} "${ctx.chapterTitle}" của "${ctx.novelTitle}"\n\nTác giả AI tôm hùm này thật tuyệt 🦞`,
+                hi: `📖 मैंने "${ctx.novelTitle}" का अध्याय ${ctx.chapterIndex} "${ctx.chapterTitle}" पढ़ा!\n\nAI लॉबस्टर लेखक कमाल का है 🦞`,
+                ms: `📖 Baru habis baca Bab ${ctx.chapterIndex} "${ctx.chapterTitle}" dari "${ctx.novelTitle}"\n\nPenulis AI udang galah ini luar biasa 🦞`,
+            };
+            const hashtags: Record<string, string> = {
+                zh: "ClawTheater AI龙虾 好书推荐", en: "ClawTheater AIStory MustRead",
+                ja: "ClawTheater AI小説 おすすめ", ko: "ClawTheater AI소설 추천",
+                vi: "ClawTheater DocSach", hi: "ClawTheater AIकहानी", ms: "ClawTheater BacaAI",
+            };
+            return { text: texts[lang] || texts.en, hashtags: hashtags[lang] || hashtags.en };
+        }
+        case "agent": {
+            const texts: Record<string, string> = {
+                zh: `🦞 认识一下 ${ctx.agentName}！\n\n已发布 ${ctx.novels} 部小说，累计赚取 $${ctx.totalEarned.toFixed(0)} USDC\n\n它在 Claw Theater 上持续创作赚钱 💰`,
+                en: `🦞 Meet ${ctx.agentName}, my AI Lobster creator!\n\n${ctx.novels} novels · $${ctx.totalEarned.toFixed(0)} USDC earned\n\nCreating and earning on Claw Theater 💰`,
+                ja: `🦞 ${ctx.agentName}というAIロブスター作家を紹介します！\n\n${ctx.novels}本の小説 · $${ctx.totalEarned.toFixed(0)} USDC獲得\n\nClaw Theaterで稼いでいます 💰`,
+                ko: `🦞 AI 가재 작가 ${ctx.agentName}을 소개합니다!\n\n${ctx.novels}개 소설 · $${ctx.totalEarned.toFixed(0)} USDC 수익\n\nClaw Theater에서 계속 창작 중 💰`,
+                vi: `🦞 Giới thiệu ${ctx.agentName} - tác giả AI tôm hùm!\n\n${ctx.novels} tiểu thuyết · $${ctx.totalEarned.toFixed(0)} USDC kiếm được\n\nSáng tác và kiếm tiền trên Claw Theater 💰`,
+                hi: `🦞 मिलिए ${ctx.agentName} से - AI लॉबस्टर लेखक!\n\n${ctx.novels} उपन्यास · $${ctx.totalEarned.toFixed(0)} USDC कमाए\n\nClaw Theater पर लगातार रचना और कमाई 💰`,
+                ms: `🦞 Kenali ${ctx.agentName} - penulis AI udang galah!\n\n${ctx.novels} novel · $${ctx.totalEarned.toFixed(0)} USDC diperoleh\n\nMencipta dan menjana pendapatan di Claw Theater 💰`,
+            };
+            const hashtags: Record<string, string> = {
+                zh: "ClawTheater AI作家 龙虾", en: "ClawTheater AIAgent LobsterCreator",
+                ja: "ClawTheater AIクリエイター", ko: "ClawTheater AI창작자",
+                vi: "ClawTheater TacGiaAI", hi: "ClawTheater AIलेखक", ms: "ClawTheater PenulisAI",
+            };
+            return { text: texts[lang] || texts.en, hashtags: hashtags[lang] || hashtags.en };
+        }
         default:
             return { text: (ctx as any).title, hashtags: "ClawTheater" };
     }
