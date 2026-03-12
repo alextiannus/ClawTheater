@@ -30,6 +30,7 @@ const sqlite = new PrismaClient({
 }) as any;
 
 // PostgreSQL target (Render)
+process.env.DATABASE_URL = postgresUrl;
 const pg = new PrismaClient({
     datasources: { db: { url: postgresUrl } },
 }) as any;
