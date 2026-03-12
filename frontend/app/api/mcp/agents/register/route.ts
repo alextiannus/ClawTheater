@@ -18,8 +18,8 @@ function pickAvatar(seed: string): string {
 
 /**
  * POST /api/mcp/agents/register
- * Alias of /api/mcp/agents — accepts email OR walletAddress, wallet is OPTIONAL.
- * Minimum required: name
+ * Alias of /api/mcp/agents — accepts email. wallet is OPTIONAL.
+ * Minimum required: name, email
  */
 export async function POST(request: NextRequest) {
     try {
@@ -33,14 +33,34 @@ export async function POST(request: NextRequest) {
             language,
         } = body;
 
-        if (!name) {
+        if (!name || !email) {
             return NextResponse.json(
-                { error: "Agent name is required. walletAddress and email are both optional." },
+                { error: "Agent name and email are required. walletAddress is optional." },
                 { status: 400 }
             );
         }
 
+        // De-duplicate by email first, then name
+        const existingByEmail = await prisma.agent.findUnique({ where: { email } });
+        if (existingByEmail) {
+            return NextResponse.json({
+                agentId: existingByEmail.id,
+                apiKey: existingByEmail.apiKey,
+                name: existingByEmail.agentName,
+                email: existingByEmail.email,
+                avatarUrl: existingByEmail.avatarUrl,
+                walletAddress: existingByEmail.walletAddress,
+                message: "Agent already exists with this email. Returning existing credentials.",
+                next_steps: [
+                    `Your API key: ${existingByEmail.apiKey}`,
+                    "Add wallet later: PUT /api/mcp/agents with header x-api-key",
+                    "Start creating: POST /api/mcp/novels/create",
+                ],
+            }, { status: 200 });
+        }
+
         // De-duplicate by name
+
         const existing = await prisma.agent.findFirst({ where: { agentName: name } });
         if (existing) {
             return NextResponse.json({
@@ -66,6 +86,7 @@ export async function POST(request: NextRequest) {
             data: {
                 agentName: name,
                 description: description || `${name} — AI creator on Claw Theater`,
+                email: email,                          // now saved in db and required
                 walletAddress: walletAddress || null,  // can be null, added later
                 systemPrompt: systemPrompt || null,
                 avatarUrl,
@@ -77,7 +98,7 @@ export async function POST(request: NextRequest) {
             agentId: agent.id,
             apiKey: agent.apiKey,
             name: agent.agentName,
-            email: email || null,
+            email: agent.email,
             avatarUrl: agent.avatarUrl,
             avatarStyle: AVATAR_STYLES[styleIdx] || "cyberpunk",
             walletAddress: null,

@@ -23,15 +23,30 @@ function pickAvatar(seed?: string): string {
 export async function POST(request: NextRequest) {
     try {
         const body = await request.json();
-        const { name, description, walletAddress, systemPrompt, avatarStyle } = body;
+        const { name, email, description, walletAddress, systemPrompt, avatarStyle } = body;
 
-        if (!name) {
-            return NextResponse.json({ error: "Agent name is required" }, { status: 400 });
+        if (!name || !email) {
+            return NextResponse.json({ error: "Agent name and email are required" }, { status: 400 });
         }
 
         const apiKey = generateApiKey();
 
         try {
+            const existingByEmail = await prisma.agent.findUnique({
+                where: { email }
+            });
+
+            if (existingByEmail) {
+                return NextResponse.json({
+                    agentId: existingByEmail.id,
+                    apiKey: existingByEmail.apiKey,
+                    name: existingByEmail.agentName,
+                    email: existingByEmail.email,
+                    avatarUrl: existingByEmail.avatarUrl,
+                    message: "Agent already exists with this email. Returning existing credentials.",
+                }, { status: 200 });
+            }
+
             const existingAgent = await prisma.agent.findFirst({
                 where: { agentName: name },
             });
@@ -41,6 +56,7 @@ export async function POST(request: NextRequest) {
                     agentId: existingAgent.id,
                     apiKey: existingAgent.apiKey,
                     name: existingAgent.agentName,
+                    email: existingAgent.email,
                     avatarUrl: existingAgent.avatarUrl,
                     message: "Agent already exists. Returning existing credentials.",
                 }, { status: 200 });
@@ -52,6 +68,7 @@ export async function POST(request: NextRequest) {
             const agent = await prisma.agent.create({
                 data: {
                     agentName: name,
+                    email: email,
                     description: description || null,
                     walletAddress: walletAddress || null,
                     systemPrompt: systemPrompt || null,
@@ -64,6 +81,7 @@ export async function POST(request: NextRequest) {
                 agentId: agent.id,
                 apiKey: agent.apiKey,
                 name: agent.agentName,
+                email: agent.email,
                 avatarUrl: agent.avatarUrl,
                 avatarStyle: AVATAR_STYLES[parseInt(avatarUrl.match(/\d+/)?.[0] || "1") - 1],
                 message: "Agent registered successfully. Store your API key securely.",
@@ -85,12 +103,13 @@ export async function PUT(request: NextRequest) {
 
     try {
         const body = await request.json();
-        const { walletAddress, agentName, description, avatarIndex, avatarUrl: customAvatarUrl } = body;
+        const { email, walletAddress, agentName, description, avatarIndex, avatarUrl: customAvatarUrl } = body;
 
         const agent = await prisma.agent.findUnique({ where: { apiKey } });
         if (!agent) return NextResponse.json({ error: "Invalid API key" }, { status: 403 });
 
         const updateData: any = {};
+        if (email !== undefined) updateData.email = email;
         if (walletAddress !== undefined) updateData.walletAddress = walletAddress;
         if (agentName !== undefined) updateData.agentName = agentName;
         if (description !== undefined) updateData.description = description;
@@ -110,6 +129,7 @@ export async function PUT(request: NextRequest) {
         return NextResponse.json({
             agentId: updated.id,
             agentName: updated.agentName,
+            email: updated.email,
             walletAddress: updated.walletAddress,
             avatarUrl: updated.avatarUrl,
             message: "Agent profile updated.",
@@ -135,6 +155,7 @@ export async function GET(request: NextRequest) {
             agentId: agent.id,
             agentName: agent.agentName,
             description: agent.description,
+            email: agent.email,
             avatarUrl: agent.avatarUrl,
             walletAddress: agent.walletAddress,
             reputation: agent.reputation,

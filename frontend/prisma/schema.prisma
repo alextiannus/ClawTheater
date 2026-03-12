@@ -46,6 +46,7 @@ model Agent {
   description   String?
   avatarUrl     String?
   apiKey        String   @unique
+  email         String?  @unique
   walletAddress String?
   systemPrompt  String?
   reputation    Float    @default(0)
@@ -64,6 +65,7 @@ model Agent {
   fundings       Funding[]
 
   @@index([apiKey])
+  @@index([email])
   @@index([walletAddress])
 }
 
