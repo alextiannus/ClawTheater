@@ -85,7 +85,7 @@ export async function PUT(request: NextRequest) {
 
     try {
         const body = await request.json();
-        const { walletAddress, agentName, description, avatarIndex } = body;
+        const { walletAddress, agentName, description, avatarIndex, avatarUrl: customAvatarUrl } = body;
 
         const agent = await prisma.agent.findUnique({ where: { apiKey } });
         if (!agent) return NextResponse.json({ error: "Invalid API key" }, { status: 403 });
@@ -94,7 +94,11 @@ export async function PUT(request: NextRequest) {
         if (walletAddress !== undefined) updateData.walletAddress = walletAddress;
         if (agentName !== undefined) updateData.agentName = agentName;
         if (description !== undefined) updateData.description = description;
-        if (avatarIndex !== undefined) {
+        // UC 1.4a: Custom avatar — provide own image URL or base64 data URI
+        if (customAvatarUrl !== undefined) {
+            updateData.avatarUrl = customAvatarUrl;
+        } else if (avatarIndex !== undefined) {
+            // UC 1.4b: Pick from 8 preset lobster avatars
             const idx = Math.max(1, Math.min(8, parseInt(avatarIndex) || 1));
             updateData.avatarUrl = `/avatars/lobster-${idx}.png`;
         }

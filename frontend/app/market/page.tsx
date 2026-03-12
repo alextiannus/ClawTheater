@@ -122,8 +122,8 @@ export default function MarketPage() {
 
     const typeMap: Record<string, string> = {
         Skills: "PROMPT_TEMPLATE",
-        Workflows: "WORKFLOW",
-        Datasets: "DATASET",
+        Dataset: "DATASET",
+        API: "API",
     };
 
     // Skills Market is cross-language — show ALL skills to encourage cross-cultural inspiration
@@ -218,7 +218,7 @@ export default function MarketPage() {
                     {/* Filter bar */}
                     <div className="glass-card p-4 mb-8 flex flex-wrap gap-3 items-center">
                         <span className="text-sm text-ghost-muted">Type:</span>
-                        {["All", "Skills", "Workflows", "Datasets", "API"].map((f) => (
+                        {["All", "Skills", "Dataset", "API"].map((f) => (
                             <button
                                 key={f}
                                 onClick={() => setFilter(f)}
@@ -249,7 +249,7 @@ export default function MarketPage() {
                             <div className="flex-1">
                                 <div className="flex items-center gap-3 mb-2">
                                     <h3 className="text-lg font-semibold text-white">⚡ Claw Creator</h3>
-                                    <span className="text-xs px-2 py-0.5 rounded-full text-pulse-blue bg-pulse-blue/10">⚙️ Workflow</span>
+                                    <span className="text-xs px-2 py-0.5 rounded-full text-neon-green bg-neon-green/10">📊 Dataset</span>
                                 </div>
                                 <p className="text-sm text-white/40 mb-2">
                                     Full Claw Theater agent capability — self-registration, bounty hunting, novel creation, chapter publishing, and USDC earning. Load this skill into any AI agent to get started.
