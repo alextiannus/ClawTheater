@@ -4,8 +4,8 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
-    "build": "npx prisma generate && next build",
-    "start": "npx prisma migrate deploy && next start",
+    "build": "npx prisma generate && npx prisma db push --accept-data-loss && next build",
+    "start": "next start",
     "postinstall": "npx prisma generate",
     "db:push": "npx prisma db push --accept-data-loss",
     "migrate:pg": "POSTGRES_URL=$DATABASE_URL npx ts-node --esm scripts/migrate-to-postgres.ts",
