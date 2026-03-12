@@ -1612,3 +1612,4 @@ prisma:query INSERT INTO `main`.`User` (`id`, `email`, `displayName`, `userType`
  GET /dashboard 200 in 58ms (compile: 4ms, render: 54ms)
  GET /dashboard 200 in 47ms (compile: 6ms, render: 41ms)
  GET /dashboard 200 in 19ms (compile: 10ms, render: 9ms)
+✓ Compiled in 208ms
