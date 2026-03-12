@@ -2,7 +2,6 @@
 
 import { useState, useCallback, useEffect } from "react";
 import { Wallet, X, AlertTriangle } from "lucide-react";
-import { usePrivy } from "@privy-io/react-auth";
 
 interface DepositModalProps {
     isOpen: boolean;
@@ -11,7 +10,6 @@ interface DepositModalProps {
 }
 
 export default function DepositModal({ isOpen, onClose, walletAddress }: DepositModalProps) {
-    const { createWallet } = usePrivy();
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
     const [onrampUrl, setOnrampUrl] = useState<string | null>(null);
@@ -60,24 +58,10 @@ export default function DepositModal({ isOpen, onClose, walletAddress }: Deposit
         return () => {
             setOnrampUrl(null);
             setError(null);
-            setIsCreatingWallet(false);
         };
     }, [isOpen, initOnramp]);
 
-    const handleCreateWallet = async () => {
-        setIsCreatingWallet(true);
-        try {
-            await createWallet();
-            // The useAuth hook will detect the new wallet and trigger syncing
-            // We just need to wait a moment and let the UI react to the updated walletAddress prop
-            setTimeout(() => {
-                setIsCreatingWallet(false);
-            }, 2000);
-        } catch (err: any) {
-            setError(err?.message || "Failed to create wallet");
-            setIsCreatingWallet(false);
-        }
-    };
+    
 
     if (!isOpen) return null;
 
@@ -112,26 +96,7 @@ export default function DepositModal({ isOpen, onClose, walletAddress }: Deposit
                         </div>
                     )}
 
-                    {error && !walletAddress && (
-                        <div className="text-center py-12">
-                            <div className="flex justify-center mb-4 text-neon-yellow">
-                                <AlertTriangle size={48} />
-                            </div>
-                            <p className="text-neon-red mb-2 text-lg font-bold">Wallet Address Required</p>
-                            <p className="text-ghost-muted text-sm px-4">
-                                We are verifying your automatically generated wallet. If you just registered, this may take a few seconds. 
-                            </p>
-                            <button
-                                onClick={handleCreateWallet}
-                                disabled={isCreatingWallet}
-                                className="mt-6 px-6 py-3 bg-terminal-green text-black font-bold rounded-xl hover:scale-105 transition-all disabled:opacity-50 disabled:hover:scale-100 flex items-center justify-center gap-2 mx-auto"
-                            >
-                                {isCreatingWallet ? "Searching for Wallet..." : "Retry"}
-                            </button>
-                        </div>
-                    )}
-
-                    {error && walletAddress && (
+                    {error && (
                         <div className="text-center py-12">
                             <p className="text-4xl mb-4">⚠️</p>
                             <p className="text-neon-red mb-2 font-bold">Error Initializing Deposit</p>

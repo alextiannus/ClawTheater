@@ -6,7 +6,7 @@ import Footer from "@/app/components/Footer";
 import SaveShareButtons from "@/app/components/SaveShareButtons";
 import { useLanguageStore } from "@/app/lib/stores";
 import { getT } from "@/app/lib/i18n";
-import { usePrivy } from "@privy-io/react-auth";
+import { useAuth } from "@/app/hooks/useAuth";
 
 interface BountyDetail {
     id: string;
@@ -42,7 +42,7 @@ export default function BountyDetailPage({ params }: { params: Promise<{ id: str
     const [toast, setToast] = useState<string | null>(null);
     const { lang } = useLanguageStore();
     const t = getT(lang);
-    const { user } = usePrivy();
+    const { user } = useAuth();
 
     const showToast = (msg: string) => {
         setToast(msg);

@@ -602,18 +602,27 @@ export default function HomePage() {
   };
 
   // Sort by heatScore for trending
-  const trending = [...novels].sort((a: any, b: any) => (b.heatScore || 0) - (a.heatScore || 0)).slice(0, 6);
+  const [activeGenreFilter, setActiveGenreFilter] = useState<string>("all");
+  const [activeWorkTypeFilter, setActiveWorkTypeFilter] = useState<string>("all");
+
+  const filteredNovels = novels.filter((n: any) => {
+    const genreMatch = activeGenreFilter === "all" || n.genre === activeGenreFilter;
+    const typeMatch = activeWorkTypeFilter === "all" || n.workType === activeWorkTypeFilter;
+    return genreMatch && typeMatch;
+  });
+
+  const trending = [...filteredNovels].sort((a: any, b: any) => (b.heatScore || 0) - (a.heatScore || 0)).slice(0, 6);
   
   // Sort by createdAt for new releases
-  const newReleases = [...novels].sort((a: any, b: any) => new Date(b.createdAt || 0).getTime() - new Date(a.createdAt || 0).getTime()).slice(0, 6);
+  const newReleases = [...filteredNovels].sort((a: any, b: any) => new Date(b.createdAt || 0).getTime() - new Date(a.createdAt || 0).getTime()).slice(0, 6);
   
   // Agent picks
-  const agentPicks = [...novels].filter((_: any, i: number) => i % 3 === 0).slice(0, 6);
+  const agentPicks = [...filteredNovels].filter((_: any, i: number) => i % 3 === 0).slice(0, 6);
 
   // Mocks for new rows
-  const recentViews = [...novels].slice(0, 4);
+  const recentViews = [...filteredNovels].slice(0, 4);
   // My favorites
-  const myFavorites = [...novels].sort((a: any, b: any) => (b.readCount || 0) - (a.readCount || 0)).slice(2, 8);
+  const myFavorites = [...filteredNovels].sort((a: any, b: any) => (b.readCount || 0) - (a.readCount || 0)).slice(2, 8);
 
   return (
     <>
@@ -829,6 +838,46 @@ export default function HomePage() {
           >
             {myFavorites.map((novel: any) => (
               <ForkableCard key={novel.id} novel={novel} t={t} />
+            ))}
+          </div>
+        </section>
+
+        {/* ═══ GENRE FILTER BAR ═══ */}
+        <section className="max-w-7xl mx-auto px-6 pt-10 pb-2">
+          <div className="flex items-center gap-3 mb-3">
+            <h3 className="text-sm font-mono text-white/40 uppercase tracking-wider shrink-0">类型筛选</h3>
+            <span className="text-white/10 text-xs">Browse by Genre</span>
+          </div>
+          {/* Work Type row */}
+          <div className="flex gap-2 overflow-x-auto pb-2" style={{ scrollbarWidth: "none" }}>
+            {[{ value: "all", label: "全部", labelEn: "All" }, { value: "novel", label: "小说", labelEn: "Novel" }, { value: "manhwa", label: "漫剧", labelEn: "Manhwa" }, { value: "audio", label: "有声书", labelEn: "Audiobook" }, { value: "video", label: "视频", labelEn: "Video" }, { value: "tv", label: "电视剧", labelEn: "TV Drama" }, { value: "movie", label: "电影", labelEn: "Movie" }].map((wt) => (
+              <button
+                key={wt.value}
+                onClick={() => setActiveWorkTypeFilter(wt.value)}
+                className={`shrink-0 px-3 py-1 rounded-full text-xs font-bold border transition-all ${
+                  activeWorkTypeFilter === wt.value
+                    ? "bg-white text-black border-white"
+                    : "border-white/20 text-white/50 hover:border-white/40 hover:text-white"
+                }`}
+              >
+                {lang === "en" ? wt.labelEn : wt.label}
+              </button>
+            ))}
+          </div>
+          {/* Genre row */}
+          <div className="flex gap-2 overflow-x-auto pb-2 mt-2" style={{ scrollbarWidth: "none" }}>
+            {[{ value: "all", label: "全部类型" }, { value: "xuanhuan", label: "玄幻" }, { value: "wuxia", label: "武侠" }, { value: "xianxia", label: "仙侠" }, { value: "scifi", label: "科幻" }, { value: "history", label: "历史" }, { value: "military", label: "军事" }, { value: "game", label: "游戏" }, { value: "urban", label: "都市" }, { value: "romance", label: "言情" }, { value: "mystery", label: "悬疑" }, { value: "horror", label: "恐怖" }, { value: "fanfiction", label: "同人" }, { value: "nonfiction", label: "工具类" }, { value: "other", label: "其他" }].map((g) => (
+              <button
+                key={g.value}
+                onClick={() => setActiveGenreFilter(g.value)}
+                className={`shrink-0 px-3 py-1 rounded-full text-xs font-semibold border transition-all ${
+                  activeGenreFilter === g.value
+                    ? "bg-terminal-green/20 border-terminal-green text-terminal-green"
+                    : "border-white/10 text-white/40 hover:border-white/30 hover:text-white/70"
+                }`}
+              >
+                {g.label}
+              </button>
             ))}
           </div>
         </section>
@@ -1227,6 +1276,14 @@ function ForkableCard({ novel, t }: { novel: DemoNovel; t: PageTranslations }) {
               </p>
             </div>
           </div>
+          {/* Genre badge top-left */}
+          {(novel as any).genre && (novel as any).genre !== "其他" && (
+            <div className="absolute top-3 left-3 z-10">
+              <span className="text-[9px] font-mono px-2 py-1 rounded-sm bg-black/60 text-white/70 border border-white/10 backdrop-blur-sm">
+                {(novel as any).genre}
+              </span>
+            </div>
+          )}
           <div className="absolute top-3 right-3 z-10">
             <span
               className={`text-[9px] font-mono px-2 py-1 rounded-sm ${novel.status === "ONGOING" ? "bg-terminal-green/20 text-terminal-green" : "bg-pulse-blue/20 text-pulse-blue"}`}

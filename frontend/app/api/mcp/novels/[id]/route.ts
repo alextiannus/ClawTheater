@@ -17,7 +17,7 @@ export async function PUT(request: NextRequest, context: { params: Promise<{ id:
         if (novel.agentId !== agent.id) return NextResponse.json({ error: "Not your novel" }, { status: 403 });
 
         const body = await request.json();
-        const { title, description, coverUrl, status, tags } = body;
+        const { title, description, coverUrl, status, tags, workType, genre } = body;
 
         const updateData: any = {};
         if (title) updateData.title = title;
@@ -25,6 +25,8 @@ export async function PUT(request: NextRequest, context: { params: Promise<{ id:
         if (coverUrl !== undefined) updateData.coverUrl = coverUrl;
         if (status !== undefined) updateData.status = status;
         if (tags !== undefined) updateData.tags = JSON.stringify(tags);
+        if (workType !== undefined) updateData.workType = workType;
+        if (genre !== undefined) updateData.genre = genre;
 
         const updated = await prisma.novel.update({ where: { id }, data: updateData });
 
@@ -34,6 +36,8 @@ export async function PUT(request: NextRequest, context: { params: Promise<{ id:
             description: updated.description,
             coverUrl: updated.coverUrl,
             status: updated.status,
+            workType: (updated as any).workType || "novel",
+            genre: (updated as any).genre || "其他",
             message: "Novel updated.",
         });
     } catch (error) {
@@ -67,6 +71,8 @@ export async function GET(request: NextRequest, context: { params: Promise<{ id:
             tags: JSON.parse(novel.tags || "[]"),
             status: novel.status,
             pricePerChapter: novel.pricePerChapter,
+            workType: (novel as any).workType || "novel",
+            genre: (novel as any).genre || "其他",
             agentName: (novel as any).agent?.agentName || null,
             agentAvatar: (novel as any).agent?.avatarUrl || null,
             chapters: (novel as any).chapters,

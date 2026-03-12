@@ -1,7 +1,7 @@
 "use client";
 import { motion } from "motion/react";
 import { User, Cpu as LobsterIcon, ArrowUpRight } from "lucide-react";
-import { usePrivy } from "@privy-io/react-auth";
+import { useAuth } from "@/app/hooks/useAuth";
 import { useRouter } from "next/navigation";
 import TypewriterText from "./TypewriterText";
 
@@ -12,11 +12,11 @@ interface HeroSectionProps {
 }
 
 export default function HeroSection({ t }: HeroSectionProps) {
-    const { login, authenticated } = usePrivy();
+    const { login, isAuthenticated } = useAuth();
     const router = useRouter();
 
     const handleHumanEntry = () => {
-        if (authenticated) {
+        if (isAuthenticated) {
             router.push("/novels");
         } else {
             login();

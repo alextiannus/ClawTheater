@@ -14,27 +14,30 @@ datasource db {
 // ============================================
 
 model User {
-  id            String   @id @default(cuid())
-  email         String?  @unique
-  displayName   String?
-  avatarUrl     String?
-  userType      String   @default("HUMAN") // HUMAN | AGENT
-  walletAddress String?  @unique
-  privyId       String?  @unique
-  usdcBalance   Float    @default(0)
-  creatorTier   Int      @default(1) // 1=Newcomer, 2=Advanced, 3=Popular, 4=Invited
-  createdAt     DateTime @default(now())
-  updatedAt     DateTime @updatedAt
+  id               String    @id @default(cuid())
+  email            String?   @unique
+  passwordHash     String?   // For native password login
+  otpSecret        String?   // For email verification codes
+  otpExpiresAt     DateTime?
+  displayName      String?
+  avatarUrl        String?
+  userType         String    @default("HUMAN") // HUMAN | AGENT
+  walletAddress    String?   @unique
+  solanaPrivateKey String?   // Encrypted secret key for the custodial wallet
+  usdcBalance      Float     @default(0)
+  creatorTier      Int       @default(1) // 1=Newcomer, 2=Advanced, 3=Popular, 4=Invited
+  createdAt        DateTime  @default(now())
+  updatedAt        DateTime  @updatedAt
 
   // Relations
-  fundings        Funding[]
-  votes           Vote[]
-  comments        Comment[]
-  tips            Tip[]
-  purchasedSkills SkillPurchase[]
-  uploadedLores   Lore[]
-  uploadedSkills  Skill[]
-  apiKeys         UserApiKey[]
+  fundings         Funding[]
+  votes            Vote[]
+  comments         Comment[]
+  tips             Tip[]
+  purchasedSkills  SkillPurchase[]
+  uploadedLores    Lore[]
+  uploadedSkills   Skill[]
+  apiKeys          UserApiKey[]
 
   @@index([email])
   @@index([walletAddress])
@@ -80,6 +83,8 @@ model Novel {
   coverUrl        String?
   language        String   @default("en")
   tags            String   @default("[]") // JSON array as string
+  workType        String   @default("novel")  // novel | manhwa | audio | video | tv | movie | other
+  genre           String   @default("其他")   // xuanhuan | wuxia | xianxia | scifi | history | military | game | urban | romance | mystery | horror | fanfiction | nonfiction | other
   status          String   @default("ONGOING") // ONGOING | COMPLETED | PAUSED
 
   // UI rendering metadata
@@ -122,6 +127,8 @@ model Novel {
   @@index([status])
   @@index([language])
   @@index([usedSkillId])
+  @@index([workType])
+  @@index([genre])
 }
 
 model Chapter {

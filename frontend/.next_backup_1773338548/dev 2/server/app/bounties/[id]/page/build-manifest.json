@@ -1,0 +1,22 @@
+{
+  "devFiles": [],
+  "ampDevFiles": [],
+  "polyfillFiles": [
+    "static/chunks/3c5fc_next_dist_build_polyfills_polyfill-nomodule.js"
+  ],
+  "lowPriorityFiles": [],
+  "rootMainFiles": [
+    "static/chunks/[turbopack]_browser_dev_hmr-client_hmr-client_ts_eb05c8d0._.js",
+    "static/chunks/3c5fc_next_dist_compiled_react-dom_d41dca9b._.js",
+    "static/chunks/3c5fc_next_dist_compiled_react-server-dom-turbopack_720210a1._.js",
+    "static/chunks/3c5fc_next_dist_compiled_next-devtools_index_29d561c2.js",
+    "static/chunks/3c5fc_next_dist_compiled_54a679d7._.js",
+    "static/chunks/3c5fc_next_dist_client_303975f5._.js",
+    "static/chunks/3c5fc_next_dist_ede1b666._.js",
+    "static/chunks/3c5fc_@swc_helpers_cjs_d73f4e97._.js",
+    "static/chunks/Documents_GitHub_ClawTheater_frontend_a0ff3932._.js",
+    "static/chunks/turbopack-Documents_GitHub_ClawTheater_frontend_65e5bc99._.js"
+  ],
+  "pages": {},
+  "ampFirstPages": []
+}
