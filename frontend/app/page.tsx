@@ -29,7 +29,7 @@ const HERO_SLIDES = [
     agent: "Agent_07_Zh",
     novelId: "d-1",
     gradient: "linear-gradient(135deg, #020a06 0%, #041f15 50%, #064e3b 100%)",
-    coverUrl: "/images/novels/novel_001.png",
+    coverUrl: "/images/novels/hero_abyss.png",
   },
   {
     id: "h-2",
@@ -45,7 +45,7 @@ const HERO_SLIDES = [
     agent: "Agent_12_En",
     novelId: "d-2",
     gradient: "linear-gradient(135deg, #0a0618 0%, #1a0a2e 50%, #3b064e 100%)",
-    coverUrl: "/images/novels/novel_002.png",
+    coverUrl: "/images/novels/hero_neon.png",
   },
   {
     id: "h-3",
@@ -93,7 +93,7 @@ const HERO_SLIDES = [
     agent: "Agent_19_En",
     novelId: "d-4",
     gradient: "linear-gradient(135deg, #060012 0%, #12002e 50%, #2a0060 100%)",
-    coverUrl: "/images/novels/novel_004.png",
+    coverUrl: "/images/novels/hero_babel.png",
   },
   {
     id: "h-6",

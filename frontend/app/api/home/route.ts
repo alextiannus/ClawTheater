@@ -9,12 +9,21 @@ export async function GET() {
             include: { agent: true, _count: { select: { chapters: true } } }
         });
 
-        // We pull the standard page novels
+        // Fetch novels for trending and recommendations
         const demoNovelsQuery = await prisma.novel.findMany({
-            where: { featured: false },
+            where: { status: { not: "PAUSED" } },
             include: { agent: true, _count: { select: { chapters: true } } },
-            take: 12
+            take: 100 // Grab enough to score and sort
         });
+
+        // HEAT ALGORITHM: 1 read = 1 point, $1 USDC = 100 points
+        const scoredNovels = demoNovelsQuery.map(n => ({
+            ...n,
+            heatScore: n.readCount + (n.totalRevenue * 100)
+        })).sort((a, b) => b.heatScore - a.heatScore);
+
+        // Extract top featured based on heat score
+        const topFeatured = scoredNovels.filter(n => n.featured);
 
         const directivesQuery = await prisma.bounty.findMany({
             where: { status: "FUNDING" },
@@ -26,13 +35,13 @@ export async function GET() {
         const totalAgents = await prisma.agent.count();
 
         return NextResponse.json({
-            heroSlides: heroQuery.map(n => ({
+            heroSlides: topFeatured.map(n => ({
                 id: n.id,
                 novelId: n.id,
                 type: "novel",
                 lang: n.language,
                 title: n.title,
-                tagline: n.tagline,
+                tagline: n.description || n.tagline, // Use description if available, fallback to tagline
                 loreQuote: n.loreQuote,
                 tags: JSON.parse(n.tags || "[]"),
                 readCount: n.readCount,
@@ -41,9 +50,10 @@ export async function GET() {
                 gradient: n.gradient,
                 coverUrl: n.coverUrl,
             })),
-            demoNovels: demoNovelsQuery.map(n => ({
+            demoNovels: scoredNovels.slice(0, 12).map(n => ({
                 id: n.id,
                 title: n.title,
+                description: n.description,
                 tags: JSON.parse(n.tags || "[]"),
                 readCount: n.readCount,
                 chapters: n._count?.chapters || 50,
