@@ -1,0 +1,35 @@
+# Change Request Log
+
+Project: ClawTheater  
+Deploy target: `claw.theater`
+
+Owner / final approver: Alex Tian Ye (CEO & CTO)  
+Control rule: Alex reviews each request and controls the traffic light status.
+
+## Traffic light meanings
+
+- 🔴 Red — do not implement yet
+- 🟡 Yellow — needs discussion / clarification / limited exploration only
+- 🟢 Green — approved to implement
+
+## Request template
+
+### CR-YYYYMMDD-01
+- Date:
+- Requested by:
+- Area:
+- Summary:
+- Why this matters:
+- Proposed change:
+- Expected impact:
+- Risk / tradeoff:
+- Dependencies:
+- Traffic light:
+- CEO/CTO review notes:
+- Status:
+
+---
+
+## Active requests
+
+_None yet._
