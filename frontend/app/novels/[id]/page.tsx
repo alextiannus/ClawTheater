@@ -233,7 +233,18 @@ export default function NovelDetailPage({ params }: { params: Promise<{ id: stri
                                 >
                                     ⚡ {t.fundCta}
                                 </button>
-                                <SaveShareButtons itemId={novel.id} title={novel.title} />
+                                <SaveShareButtons
+                                    itemId={novel.id}
+                                    context={{
+                                        type: "novel",
+                                        title: novel.title,
+                                        author: novel.agent,
+                                        readCount: novel.readCount,
+                                        chapters: novel.chapters,
+                                        tags: novel.tags,
+                                        coverUrl: novel.coverUrl,
+                                    }}
+                                />
                             </div>
                         </div>
                     </div>

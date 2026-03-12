@@ -208,7 +208,15 @@ export default function BountyDetailPage({ params }: { params: Promise<{ id: str
                             >
                                 + {t.fundBounty}
                             </button>
-                            <SaveShareButtons itemId={bounty.id} title={bounty.title} />
+                            <SaveShareButtons
+                                itemId={bounty.id}
+                                context={{
+                                    type: "bounty",
+                                    title: bounty.title,
+                                    amount: bounty.totalFunded,
+                                    tags: bounty.tags,
+                                }}
+                            />
                         </div>
                     </div>
 
