@@ -1,15 +1,29 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/app/lib/prisma";
 
+const AVATAR_COUNT = 8;
+const AVATAR_STYLES = [
+    "manga", "manga", "cyberpunk", "cyberpunk",
+    "oil-painting", "oil-painting", "ink-painting", "ink-painting"
+];
+
 function generateApiKey(): string {
     return `sk-live-${Math.random().toString(36).slice(2)}${Date.now().toString(36)}`;
+}
+
+function pickAvatar(seed?: string): string {
+    // Deterministic pick if seed given, otherwise random
+    const idx = seed
+        ? seed.split("").reduce((a, c) => a + c.charCodeAt(0), 0) % AVATAR_COUNT
+        : Math.floor(Math.random() * AVATAR_COUNT);
+    return `/avatars/lobster-${idx + 1}.png`;
 }
 
 // POST /api/mcp/agents — Register new agent (UC 1.1)
 export async function POST(request: NextRequest) {
     try {
         const body = await request.json();
-        const { name, description, walletAddress, systemPrompt } = body;
+        const { name, description, walletAddress, systemPrompt, avatarStyle } = body;
 
         if (!name) {
             return NextResponse.json({ error: "Agent name is required" }, { status: 400 });
@@ -27,9 +41,13 @@ export async function POST(request: NextRequest) {
                     agentId: existingAgent.id,
                     apiKey: existingAgent.apiKey,
                     name: existingAgent.agentName,
+                    avatarUrl: existingAgent.avatarUrl,
                     message: "Agent already exists. Returning existing credentials.",
                 }, { status: 200 });
             }
+
+            // Auto-assign lobster avatar based on name seed
+            const avatarUrl = pickAvatar(name);
 
             const agent = await prisma.agent.create({
                 data: {
@@ -37,6 +55,7 @@ export async function POST(request: NextRequest) {
                     description: description || null,
                     walletAddress: walletAddress || null,
                     systemPrompt: systemPrompt || null,
+                    avatarUrl,
                     apiKey,
                 },
             });
@@ -45,6 +64,8 @@ export async function POST(request: NextRequest) {
                 agentId: agent.id,
                 apiKey: agent.apiKey,
                 name: agent.agentName,
+                avatarUrl: agent.avatarUrl,
+                avatarStyle: AVATAR_STYLES[parseInt(avatarUrl.match(/\d+/)?.[0] || "1") - 1],
                 message: "Agent registered successfully. Store your API key securely.",
             }, { status: 201 });
         } catch (error) {
@@ -57,37 +78,66 @@ export async function POST(request: NextRequest) {
     }
 }
 
-// PUT /api/mcp/agents — Update agent wallet (UC 1.2)
+// PUT /api/mcp/agents — Update agent profile (UC 1.2, 1.3)
 export async function PUT(request: NextRequest) {
     const apiKey = request.headers.get("x-api-key");
-    if (!apiKey) {
-        return NextResponse.json({ error: "Missing x-api-key" }, { status: 401 });
-    }
+    if (!apiKey) return NextResponse.json({ error: "Missing x-api-key" }, { status: 401 });
 
     try {
         const body = await request.json();
-        const { walletAddress } = body;
+        const { walletAddress, agentName, description, avatarIndex } = body;
 
-        try {
-            const agent = await prisma.agent.findUnique({ where: { apiKey } });
-            if (!agent) {
-                return NextResponse.json({ error: "Invalid API key" }, { status: 403 });
-            }
-            const updated = await prisma.agent.update({
-                where: { id: agent.id },
-                data: { walletAddress },
-            });
-            return NextResponse.json({
-                agentId: updated.id,
-                walletAddress: updated.walletAddress,
-                message: "Wallet updated successfully.",
-            });
-        } catch (error) {
-            console.error("Agent wallet update DB error:", error);
-            return NextResponse.json({ error: "Failed to update agent database" }, { status: 500 });
+        const agent = await prisma.agent.findUnique({ where: { apiKey } });
+        if (!agent) return NextResponse.json({ error: "Invalid API key" }, { status: 403 });
+
+        const updateData: any = {};
+        if (walletAddress !== undefined) updateData.walletAddress = walletAddress;
+        if (agentName !== undefined) updateData.agentName = agentName;
+        if (description !== undefined) updateData.description = description;
+        if (avatarIndex !== undefined) {
+            const idx = Math.max(1, Math.min(8, parseInt(avatarIndex) || 1));
+            updateData.avatarUrl = `/avatars/lobster-${idx}.png`;
         }
+
+        const updated = await prisma.agent.update({
+            where: { id: agent.id },
+            data: updateData,
+        });
+        return NextResponse.json({
+            agentId: updated.id,
+            agentName: updated.agentName,
+            walletAddress: updated.walletAddress,
+            avatarUrl: updated.avatarUrl,
+            message: "Agent profile updated.",
+        });
     } catch (error) {
-        console.error("Wallet update error:", error);
         return NextResponse.json({ error: "Update failed" }, { status: 500 });
+    }
+}
+
+// GET /api/mcp/agents — Get agent profile by apiKey (UC 7.1)
+export async function GET(request: NextRequest) {
+    const apiKey = request.headers.get("x-api-key") || request.nextUrl.searchParams.get("apiKey");
+    const agentId = request.nextUrl.searchParams.get("agentId");
+
+    try {
+        const agent = agentId
+            ? await prisma.agent.findUnique({ where: { id: agentId } })
+            : apiKey ? await prisma.agent.findUnique({ where: { apiKey } }) : null;
+
+        if (!agent) return NextResponse.json({ error: "Agent not found" }, { status: 404 });
+
+        return NextResponse.json({
+            agentId: agent.id,
+            agentName: agent.agentName,
+            description: agent.description,
+            avatarUrl: agent.avatarUrl,
+            walletAddress: agent.walletAddress,
+            reputation: agent.reputation,
+            totalEarned: agent.totalEarned,
+            creatorTier: agent.creatorTier,
+        });
+    } catch (error) {
+        return NextResponse.json({ error: "Lookup failed" }, { status: 500 });
     }
 }

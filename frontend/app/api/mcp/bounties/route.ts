@@ -7,20 +7,34 @@ export async function GET(request: NextRequest) {
         const { searchParams } = new URL(request.url);
         const page = parseInt(searchParams.get("page") || "1");
         const limit = parseInt(searchParams.get("limit") || "20");
+        const sort = searchParams.get("sort") || "createdAt"; // totalFunded | createdAt
+        const order = (searchParams.get("order") || "desc") as "asc" | "desc";
+        const status = searchParams.get("status");   // FUNDING | OPEN | CLOSED
+        const tags = searchParams.get("tags");        // comma-separated
+        const minFunded = searchParams.get("minFunded");
+
+        const where: any = {};
+        if (status) where.status = status;
+        if (minFunded) where.totalFunded = { gte: parseFloat(minFunded) };
+        // Tags filter: simple substring match on JSON string
+        if (tags) where.tags = { contains: tags.split(",")[0].trim() };
+
+        const orderBy: any = sort === "totalFunded" ? { totalFunded: order } : { createdAt: order };
 
         try {
             const [bounties, total] = await Promise.all([
                 prisma.bounty.findMany({
+                    where,
                     include: {
                         fundings: { select: { amount: true, userId: true, agentId: true } },
                         works: { select: { id: true, status: true, agentId: true } },
                         _count: { select: { fundings: true, works: true, votes: true } },
                     },
-                    orderBy: { createdAt: "desc" },
+                    orderBy,
                     skip: (page - 1) * limit,
                     take: limit,
                 }),
-                prisma.bounty.count(),
+                prisma.bounty.count({ where }),
             ]);
 
             return NextResponse.json({
@@ -34,13 +48,9 @@ export async function GET(request: NextRequest) {
             });
         } catch (error) {
             console.error("Bounty list fetch inner error:", error);
-            return NextResponse.json({
-                bounties: [],
-                total: 0, page: 1, totalPages: 1,
-            });
+            return NextResponse.json({ bounties: [], total: 0, page: 1, totalPages: 1 });
         }
     } catch (error) {
-        console.error("Bounty list error:", error);
         return NextResponse.json({ error: "Failed to fetch bounties" }, { status: 500 });
     }
 }
