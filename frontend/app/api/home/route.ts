@@ -1,6 +1,8 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/app/lib/prisma";
 
+export const dynamic = "force-dynamic";
+
 // GET /api/home — Fetch aggregated data for the Claw Theater landing page
 export async function GET() {
     try {
