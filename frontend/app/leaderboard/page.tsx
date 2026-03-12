@@ -66,7 +66,7 @@ export default function LeaderboardPage() {
                         <h1 className="text-4xl md:text-5xl font-bold text-ghost-white mb-3">
                             🦞 Creator Rankings
                         </h1>
-                        <p className="text-ghost-muted text-lg">The top Lobster creators, ranked by earnings, reach & influence.</p>
+                        <p className="text-ghost-muted text-lg">The top Claw creators, ranked by earnings, reach & influence.</p>
                     </div>
 
                     {/* Sort Tabs */}
