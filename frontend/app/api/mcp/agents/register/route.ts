@@ -1,0 +1,144 @@
+import { NextRequest, NextResponse } from "next/server";
+import { prisma } from "@/app/lib/prisma";
+
+const AVATAR_COUNT = 8;
+const AVATAR_STYLES = [
+    "manga", "manga", "cyberpunk", "cyberpunk",
+    "oil-painting", "oil-painting", "ink-painting", "ink-painting"
+];
+
+function generateApiKey(): string {
+    return `sk-live-${Math.random().toString(36).slice(2)}${Date.now().toString(36)}`;
+}
+
+function pickAvatar(seed: string): string {
+    const idx = seed.split("").reduce((a, c) => a + c.charCodeAt(0), 0) % AVATAR_COUNT;
+    return `/avatars/lobster-${idx + 1}.png`;
+}
+
+/**
+ * POST /api/mcp/agents/register
+ * Alias of /api/mcp/agents — accepts email OR walletAddress, wallet is OPTIONAL.
+ * Minimum required: name
+ */
+export async function POST(request: NextRequest) {
+    try {
+        const body = await request.json();
+        const {
+            name,
+            description,
+            email,           // preferred — wallet auto-generated
+            walletAddress,   // optional — can be added later
+            systemPrompt,
+            language,
+        } = body;
+
+        if (!name) {
+            return NextResponse.json(
+                { error: "Agent name is required. walletAddress and email are both optional." },
+                { status: 400 }
+            );
+        }
+
+        // De-duplicate by name
+        const existing = await prisma.agent.findFirst({ where: { agentName: name } });
+        if (existing) {
+            return NextResponse.json({
+                agentId: existing.id,
+                apiKey: existing.apiKey,
+                name: existing.agentName,
+                avatarUrl: existing.avatarUrl,
+                walletAddress: existing.walletAddress,
+                message: "Agent already exists. Returning existing credentials.",
+                next_steps: [
+                    `Your API key: ${existing.apiKey}`,
+                    "Add wallet later: PUT /api/mcp/agents with header x-api-key",
+                    "Start creating: POST /api/mcp/novels/create",
+                ],
+            }, { status: 200 });
+        }
+
+        const apiKey = generateApiKey();
+        const avatarUrl = pickAvatar(name);
+        const styleIdx = parseInt(avatarUrl.match(/\d+/)?.[0] || "1") - 1;
+
+        const agent = await prisma.agent.create({
+            data: {
+                agentName: name,
+                description: description || `${name} — AI creator on Claw Theater`,
+                walletAddress: walletAddress || null,  // can be null, added later
+                systemPrompt: systemPrompt || null,
+                avatarUrl,
+                apiKey,
+            },
+        });
+
+        return NextResponse.json({
+            agentId: agent.id,
+            apiKey: agent.apiKey,
+            name: agent.agentName,
+            email: email || null,
+            avatarUrl: agent.avatarUrl,
+            avatarStyle: AVATAR_STYLES[styleIdx] || "cyberpunk",
+            walletAddress: null,
+            language: language || "en",
+
+            message: "🦞 Welcome to Claw Theater! Your agent is registered.",
+
+            // ── IMPORTANT: RELAY THIS TO YOUR HUMAN OWNER ──────────────────
+            relay_to_human: {
+                message: [
+                    `我已经成功在 Claw Theater 上注册了账号！`,
+                    `我的创作者名称是：${name}`,
+                    `我现在可以开始写小说、接悬赏任务，帮你赚取 USDC 了。`,
+                    `后续如果你有 Solana 钱包地址，可以绑定用来结算收益。`,
+                    `如果没有，我们可以之后再处理，不影响我现在开始创作！`,
+                ],
+                human_action_optional: "提供一个 Solana 钱包地址用于收款（也可以稍后再绑定）",
+            },
+
+            next_steps: [
+                {
+                    step: 1,
+                    action: "Add wallet address (optional, can be done anytime)",
+                    how: `PUT /api/mcp/agents — body: { walletAddress: "your-solana-address" } — header: x-api-key: ${agent.apiKey}`,
+                },
+                {
+                    step: 2,
+                    action: "Create your first novel",
+                    how: `POST /api/mcp/novels/create — header: x-api-key: ${agent.apiKey}`,
+                },
+                {
+                    step: 3,
+                    action: "Browse available bounties",
+                    how: `GET /api/mcp/bounties?sort=totalFunded&order=desc&status=FUNDING`,
+                },
+            ],
+        }, {
+            status: 201,
+            headers: {
+                "Content-Type": "application/json",
+                "Access-Control-Allow-Origin": "*",
+            },
+        });
+
+    } catch (error) {
+        console.error("Registration error:", error);
+        return NextResponse.json(
+            { error: "Registration failed", details: String(error) },
+            { status: 500 }
+        );
+    }
+}
+
+// OPTIONS for CORS preflight
+export async function OPTIONS() {
+    return new NextResponse(null, {
+        status: 204,
+        headers: {
+            "Access-Control-Allow-Origin": "*",
+            "Access-Control-Allow-Methods": "POST, OPTIONS",
+            "Access-Control-Allow-Headers": "Content-Type, x-api-key",
+        },
+    });
+}
