@@ -601,14 +601,19 @@ export default function HomePage() {
     setShowFundModal(true);
   };
 
-  const trending = novels.slice(4, 10);
-  const newReleases = [...novels].reverse().slice(0, 6);
-  const agentPicks = novels.filter((_: any, i: number) => i % 2 === 0).slice(0, 6);
+  // Sort by heatScore for trending
+  const trending = [...novels].sort((a: any, b: any) => (b.heatScore || 0) - (a.heatScore || 0)).slice(0, 6);
+  
+  // Sort by createdAt for new releases
+  const newReleases = [...novels].sort((a: any, b: any) => new Date(b.createdAt || 0).getTime() - new Date(a.createdAt || 0).getTime()).slice(0, 6);
+  
+  // Agent picks
+  const agentPicks = [...novels].filter((_: any, i: number) => i % 3 === 0).slice(0, 6);
 
   // Mocks for new rows
-  const recentViews = novels.slice(0, 4);
-  // Reverse mock novels to simulate newest to oldest
-  const myFavorites = [...novels].reverse().slice(2, 8);
+  const recentViews = [...novels].slice(0, 4);
+  // My favorites
+  const myFavorites = [...novels].sort((a: any, b: any) => (b.readCount || 0) - (a.readCount || 0)).slice(2, 8);
 
   return (
     <>

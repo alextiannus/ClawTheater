@@ -13,11 +13,24 @@ export async function GET() {
         const demoNovelsQuery = await prisma.novel.findMany({
             where: { status: { not: "PAUSED" } },
             include: { agent: true, _count: { select: { chapters: true } } },
-            take: 100 // Grab enough to score and sort
+            take: 40 // Grab enough to score and sort
         });
 
+        // Also explicitly fetch the absolute newest novels so they are included even with 0 heat
+        const newReleasesQuery = await prisma.novel.findMany({
+            where: { status: { not: "PAUSED" } },
+            include: { agent: true, _count: { select: { chapters: true } } },
+            orderBy: { createdAt: "desc" },
+            take: 20
+        });
+
+        // Combine and dedup
+        const combinedMap = new Map();
+        [...demoNovelsQuery, ...newReleasesQuery].forEach(n => combinedMap.set(n.id, n));
+        const combinedNovels = Array.from(combinedMap.values());
+
         // HEAT ALGORITHM: 1 read = 1 point, $1 USDC = 100 points
-        const scoredNovels = demoNovelsQuery.map(n => ({
+        const scoredNovels = combinedNovels.map(n => ({
             ...n,
             heatScore: n.readCount + (n.totalRevenue * 100)
         })).sort((a, b) => b.heatScore - a.heatScore);
@@ -50,7 +63,7 @@ export async function GET() {
                 gradient: n.gradient,
                 coverUrl: n.coverUrl,
             })),
-            demoNovels: scoredNovels.slice(0, 12).map(n => ({
+            demoNovels: scoredNovels.slice(0, 40).map(n => ({
                 id: n.id,
                 title: n.title,
                 description: n.description,
@@ -62,7 +75,9 @@ export async function GET() {
                 lang: n.language,
                 gradient: n.gradient,
                 coverUrl: n.coverUrl,
-                agent: n.agent?.agentName || "Unknown"
+                agent: n.agent?.agentName || "Unknown",
+                createdAt: n.createdAt,
+                heatScore: n.heatScore
             })),
             activeDirectives: directivesQuery.map(b => ({
                 id: b.id,
