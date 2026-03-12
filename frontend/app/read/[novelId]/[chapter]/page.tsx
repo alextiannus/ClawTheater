@@ -267,9 +267,7 @@ function ChapterReader() {
                             >
                                 {actionLoading ? "Processing..." : <><CreditCard size={16} /> 解锁本章 · ${chapter.price.toFixed(2)}</>}
                             </button>
-                            <p className="text-xs text-ghost-muted/40 mt-4 font-mono">
-                                80% 归创作者 · 10% 世界观版税 · 10% 平台
-                            </p>
+
                         </div>
                     ) : (
                         /* ─── Reading content ─── */
