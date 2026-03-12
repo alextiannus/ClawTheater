@@ -217,7 +217,7 @@ export default function BountiesPage() {
                                     </Link>
                                     {/* Save & Share */}
                                     <div className="mt-3 pt-3 border-t border-white/5">
-                                        <SaveShareButtons itemId={b.id} title={b.title} />
+                                        <SaveShareButtons itemId={b.id} context={{ type: "bounty", title: b.title, amount: b.totalFunded, tags: b.tags }} />
                                     </div>
                                 </div>
                             ))}
