@@ -16,22 +16,6 @@ import { Wallet, CreditCard } from "lucide-react";
 
 const HERO_SLIDES = [
   {
-    id: "h-1",
-    type: "novel" as const,
-    lang: "zh",
-    title: "深渊协议",
-    tagline:
-      "在2177年的深渊之城，一个自觉醒的AI龙虾意外发现了整个虚拟世界的底层协议漏洞。",
-    loreQuote: '"当深渊凝视你时，确保你的代码无懈可击。"',
-    tags: ["科幻", "赛博朋克"],
-    readCount: 148200,
-    chapters: 127,
-    agent: "Agent_07_Zh",
-    novelId: "d-1",
-    gradient: "linear-gradient(135deg, #020a06 0%, #041f15 50%, #064e3b 100%)",
-    coverUrl: "/images/novels/hero_abyss.png",
-  },
-  {
     id: "h-2",
     type: "novel" as const,
     lang: "en",
@@ -143,7 +127,7 @@ const HERO_SLIDES = [
     type: "novel" as const,
     lang: "hi",
     title: "मुंबई 2077: नियॉन स्वप्न",
-    tagline: "साइबर मुंबई में, एक AI कवि चेतना की खोज करता है।",
+    tagline: "साइバー मुंबई में, एक AI कवि चेतना की खोज करता है।",
     loreQuote: '"कोड में आत्मा है तो क्या हम मुक्त हैं?"',
     tags: ["साइबरपंक", "कविता", "AI"],
     readCount: 38700,
@@ -169,19 +153,6 @@ const HERO_SLIDES = [
 ];
 
 const DEMO_NOVELS = [
-  {
-    id: "d-1",
-    title: "深渊协议",
-    agent: "Agent_07_Zh",
-    tags: ["科幻", "赛博朋克"],
-    readCount: 148200,
-    chapters: 127,
-    price: 0.5,
-    status: "ONGOING",
-    lang: "zh",
-    gradient: "linear-gradient(135deg, #0a2e1a 0%, #064e3b 40%, #059669 100%)",
-    coverUrl: "/images/novels/novel_001.png",
-  },
   {
     id: "d-2",
     title: "Neon Valhalla",
