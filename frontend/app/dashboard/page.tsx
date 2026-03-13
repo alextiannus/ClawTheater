@@ -8,6 +8,7 @@ import WithdrawModal from "@/app/components/WithdrawModal";
 import SkillUploadModal from "@/app/components/SkillUploadModal";
 import PostBountyModal from "@/app/components/PostBountyModal";
 import Link from "next/link";
+import Image from "next/image";
 import { Wallet } from "lucide-react";
 import { useLanguageStore } from "@/app/lib/stores";
 import { getT } from "@/app/lib/i18n";
@@ -58,13 +59,19 @@ export default function DashboardPage() {
     const [showDeposit, setShowDeposit] = useState(false);
     const [showWithdraw, setShowWithdraw] = useState(false);
     const [loading, setLoading] = useState(true);
-    const [activeTab, setActiveTab] = useState<"overview" | "portfolio" | "pendingVotes" | "apikeys">("overview");
+    const [activeTab, setActiveTab] = useState<"overview" | "portfolio" | "pendingVotes" | "apikeys" | "myWorks" | "myFavorites">("overview");
     const [showSkillModal, setShowSkillModal] = useState(false);
     const [showBountyModal, setShowBountyModal] = useState(false);
     const [toast, setToast] = useState<string | null>(null);
     const { lang } = useLanguageStore();
     const t = getT(lang);
     const { walletAddress, userId } = useAuth();
+
+    // Agent data
+    interface AgentNovel { id: string; title: string; description: string; coverUrl?: string; status: string; readCount: number; chapterCount: number; createdAt: string; }
+    const [agentData, setAgentData] = useState<{ id: string; name: string; avatarUrl?: string; walletAddress?: string; totalEarned: number; novels: AgentNovel[] } | null>(null);
+    const [myFavorites, setMyFavorites] = useState<string[]>([]);  // novel IDs from localStorage
+    const [favoriteNovels, setFavoriteNovels] = useState<AgentNovel[]>([]);
 
     // Pending Votes state
     const [pendingVotes, setPendingVotes] = useState<PendingVoteWork[]>([]);
@@ -130,7 +137,39 @@ export default function DashboardPage() {
                 setLoading(false);
             })
             .catch(() => setLoading(false));
+
+        // Fetch linked agent data
+        fetch("/api/dashboard/agent")
+            .then((r) => r.json())
+            .then((d) => { if (d.agent) setAgentData(d.agent); })
+            .catch(() => {});
+
+        // Load saved novel IDs from localStorage
+        if (typeof window !== "undefined") {
+            const saved: string[] = [];
+            for (let i = 0; i < localStorage.length; i++) {
+                const key = localStorage.key(i);
+                if (key?.startsWith("claw_saved_") && localStorage.getItem(key) === "1") {
+                    const id = key.replace("claw_saved_", "").replace(/-ch-\d+$/, "");
+                    if (!saved.includes(id)) saved.push(id);
+                }
+            }
+            setMyFavorites(saved);
+        }
     }, []);
+
+    // Fetch favorite novel details when tab opens
+    useEffect(() => {
+        if (activeTab === "myFavorites" && myFavorites.length > 0 && favoriteNovels.length === 0) {
+            Promise.all(myFavorites.map(id => fetch(`/api/novels/${id}`).then(r => r.json())))
+                .then(results => setFavoriteNovels(results.filter(r => r.id).map((r: any) => ({
+                    id: r.id, title: r.title, description: r.description,
+                    coverUrl: r.coverUrl, status: r.status, readCount: r.readCount,
+                    chapterCount: r.chapters?.length || 0, createdAt: r.createdAt || "",
+                }))))
+                .catch(() => {});
+        }
+    }, [activeTab, myFavorites]);
 
     useEffect(() => {
         if (activeTab === "apikeys" && userId) {
@@ -221,12 +260,22 @@ export default function DashboardPage() {
                     {/* Profile Header */}
                     <div className="glass-card p-6 mb-8">
                         <div className="flex flex-col md:flex-row items-start md:items-center gap-6">
-                            <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-terminal-green to-pulse-blue flex items-center justify-center text-3xl">
-                                👤
+                            {/* Avatar */}
+                            <div className="w-16 h-16 rounded-2xl overflow-hidden border border-white/10 flex-shrink-0">
+                                {agentData?.avatarUrl ? (
+                                    <Image src={agentData.avatarUrl} alt={agentData.name} width={64} height={64} className="object-cover w-full h-full" />
+                                ) : (
+                                    <div className="w-full h-full bg-gradient-to-br from-terminal-green to-pulse-blue flex items-center justify-center text-3xl">🦞</div>
+                                )}
                             </div>
                             <div className="flex-1">
-                                <h1 className="text-2xl font-bold text-ghost-white">{user.displayName}</h1>
-                                <p className="text-sm text-ghost-muted font-mono">{user.walletAddress}</p>
+                                <div className="flex items-center gap-2 mb-0.5">
+                                    <h1 className="text-2xl font-bold text-ghost-white">
+                                        {agentData ? `🦞 ${agentData.name}` : user.displayName}
+                                    </h1>
+                                    {agentData && <span className="text-xs px-2 py-0.5 rounded-full bg-terminal-green/10 text-terminal-green border border-terminal-green/20">AI Author</span>}
+                                </div>
+                                <p className="text-sm text-ghost-muted font-mono">{agentData?.walletAddress || user.walletAddress}</p>
                                 {/* Creator Tier Badge */}
                                 {(() => {
                                     const tier = getCreatorTier((data as any)?.creatorTier || 1);
@@ -247,11 +296,12 @@ export default function DashboardPage() {
                                     <p className="text-2xl font-bold font-mono text-terminal-green">${user.usdcBalance.toFixed(2)}</p>
                                     <p className="text-xs text-ghost-muted">{t.walletBalance}</p>
                                 </div>
-                                <div className="text-center">
-                                    <p className="text-2xl font-bold font-mono text-neon-green">${user.totalEarned.toFixed(2)}</p>
-                                    <p className="text-xs text-ghost-muted">{t.totalEarned}</p>
-                                </div>
-                                {/* Top Up Button moved here */}
+                                {agentData && (
+                                    <div className="text-center">
+                                        <p className="text-2xl font-bold font-mono text-neon-green">${agentData.totalEarned.toFixed(2)}</p>
+                                        <p className="text-xs text-ghost-muted">{t.totalEarned}</p>
+                                    </div>
+                                )}
                                 <button
                                     onClick={() => setShowDeposit(true)}
                                     className="px-5 py-2.5 h-fit bg-transparent border border-terminal-green/30 text-terminal-green rounded-xl text-[11px] font-mono tracking-widest hover:bg-terminal-green hover:text-black transition-all flex items-center gap-2 cursor-pointer"
@@ -263,17 +313,20 @@ export default function DashboardPage() {
                     </div>
 
                     {/* Tabs */}
-                    <div className="flex gap-1 mb-6 glass-card p-1 w-fit rounded-xl">
-                        {(["overview", "portfolio", "pendingVotes", "apikeys"] as const).map((tab) => (
+                    <div className="flex gap-1 mb-6 glass-card p-1 w-fit rounded-xl overflow-x-auto flex-wrap">
+                        {(["overview", "myWorks", "myFavorites", "portfolio", "pendingVotes", "apikeys"] as const).map((tab) => (
                             <button
                                 key={tab}
                                 onClick={() => setActiveTab(tab)}
-                                className={`px-4 py-2 rounded-lg text-sm transition-all flex items-center gap-2 ${activeTab === tab
+                                className={`px-4 py-2 rounded-lg text-sm transition-all flex items-center gap-2 whitespace-nowrap ${
+                                    activeTab === tab
                                     ? "bg-terminal-green/10 text-terminal-green"
                                     : "text-ghost-muted hover:text-ghost-white"
-                                    }`}
+                                }`}
                             >
                                 {tab === "overview" && `📊 ${t.dashboard}`}
+                                {tab === "myWorks" && `📖 ${lang === "zh" ? "我的作品" : "My Works"}`}
+                                {tab === "myFavorites" && `❤️ ${lang === "zh" ? "我的收藏" : "Favorites"}`}
                                 {tab === "portfolio" && `💼 ${t.myBounties}`}
                                 {tab === "pendingVotes" && (
                                     <>
@@ -343,6 +396,75 @@ export default function DashboardPage() {
                                     </div>
                                 )}
                             </div>
+                        </div>
+                    )}
+
+                    {/* My Works tab */}
+                    {activeTab === "myWorks" && (
+                        <div className="glass-card p-6">
+                            <h3 className="text-lg font-semibold text-ghost-white mb-6">📖 {lang === "zh" ? "我的作品" : "My Works"}</h3>
+                            {!agentData || agentData.novels.length === 0 ? (
+                                <p className="text-ghost-muted text-sm text-center py-12">
+                                    {lang === "zh" ? "还没有作品。通过 MCP 接口发布你的第一部作品吧！" : "No works yet. Publish your first novel via the MCP API!"}
+                                </p>
+                            ) : (
+                                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                                    {agentData.novels.map((novel) => (
+                                        <Link key={novel.id} href={`/novels/${novel.id}`} className="group glass-light p-4 rounded-xl border border-white/5 hover:border-terminal-green/30 transition-all">
+                                            <div className="flex gap-3">
+                                                {novel.coverUrl ? (
+                                                    <div className="relative w-14 h-20 rounded-lg overflow-hidden flex-shrink-0">
+                                                        <Image src={novel.coverUrl} alt={novel.title} fill className="object-cover" />
+                                                    </div>
+                                                ) : (
+                                                    <div className="w-14 h-20 rounded-lg bg-gradient-to-br from-terminal-green/20 to-pulse-blue/20 flex items-center justify-center flex-shrink-0 text-2xl">📖</div>
+                                                )}
+                                                <div className="flex-1 min-w-0">
+                                                    <h4 className="text-sm font-bold text-ghost-white group-hover:text-terminal-green transition-colors line-clamp-2">{novel.title}</h4>
+                                                    <p className="text-xs text-ghost-muted mt-1">{novel.chapterCount} {lang === "zh" ? "章" : "ch"} · 👁 {(novel.readCount / 1000).toFixed(1)}K</p>
+                                                    <span className={`text-[10px] font-mono mt-1 inline-block ${novel.status === "ONGOING" ? "text-terminal-green" : "text-pulse-blue"}`}>
+                                                        {novel.status === "ONGOING" ? "● LIVE" : "✓ DONE"}
+                                                    </span>
+                                                </div>
+                                            </div>
+                                        </Link>
+                                    ))}
+                                </div>
+                            )}
+                        </div>
+                    )}
+
+                    {/* My Favorites tab */}
+                    {activeTab === "myFavorites" && (
+                        <div className="glass-card p-6">
+                            <h3 className="text-lg font-semibold text-ghost-white mb-6">❤️ {lang === "zh" ? "我的收藏" : "My Favorites"}</h3>
+                            {myFavorites.length === 0 ? (
+                                <p className="text-ghost-muted text-sm text-center py-12">
+                                    {lang === "zh" ? "还没有收藏。在作品页点击♡收藏吧！" : "No saved novels yet. Click ♡ Save on any novel to bookmark it."}
+                                </p>
+                            ) : favoriteNovels.length === 0 ? (
+                                <p className="text-ghost-muted text-sm text-center py-12 animate-pulse">🦞 Loading...</p>
+                            ) : (
+                                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                                    {favoriteNovels.map((novel) => (
+                                        <Link key={novel.id} href={`/novels/${novel.id}`} className="group glass-light p-4 rounded-xl border border-white/5 hover:border-pink-500/30 transition-all">
+                                            <div className="flex gap-3">
+                                                {novel.coverUrl ? (
+                                                    <div className="relative w-14 h-20 rounded-lg overflow-hidden flex-shrink-0">
+                                                        <Image src={novel.coverUrl} alt={novel.title} fill className="object-cover" />
+                                                    </div>
+                                                ) : (
+                                                    <div className="w-14 h-20 rounded-lg bg-gradient-to-br from-pink-500/20 to-purple-500/20 flex items-center justify-center flex-shrink-0 text-2xl">❤️</div>
+                                                )}
+                                                <div className="flex-1 min-w-0">
+                                                    <h4 className="text-sm font-bold text-ghost-white group-hover:text-pink-400 transition-colors line-clamp-2">{novel.title}</h4>
+                                                    <p className="text-xs text-ghost-muted mt-1">{novel.chapterCount} {lang === "zh" ? "章" : "ch"} · 👁 {(novel.readCount / 1000).toFixed(1)}K</p>
+                                                </div>
+                                            </div>
+                                        </Link>
+                                    ))}
+                                </div>
+                            )}
                         </div>
                     )}
 

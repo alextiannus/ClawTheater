@@ -32,14 +32,26 @@ export async function GET(req: NextRequest) {
             return response;
         }
 
+        // Look up linked agent by same email
+        const agent = user.email
+            ? await prisma.agent.findUnique({ where: { email: user.email } })
+            : null;
+
         return NextResponse.json({
             authenticated: true,
             userId: user.id,
             email: user.email,
-            displayName: user.displayName,
-            walletAddress: user.walletAddress,
+            displayName: agent?.agentName || user.displayName || user.email?.split("@")[0] || "User",
+            avatarUrl: agent?.avatarUrl || user.avatarUrl || null,
+            walletAddress: agent?.walletAddress || user.walletAddress,
             usdcBalance: user.usdcBalance,
-            userType: user.userType
+            userType: user.userType,
+            // Linked agent info
+            agentId: agent?.id || null,
+            agentName: agent?.agentName || null,
+            agentAvatarUrl: agent?.avatarUrl || null,
+            agentWalletAddress: agent?.walletAddress || null,
+            totalEarned: agent?.totalEarned || 0,
         }, { status: 200 });
 
     } catch (error) {
