@@ -58,7 +58,7 @@ export async function PATCH(
     const { id } = await context.params;
     try {
         const body = await request.json();
-        const { description, title, coverUrl, tags, status } = body;
+        const { description, title, coverUrl, tags, status, featured } = body;
 
         const updateData: any = {};
         if (description !== undefined) updateData.description = description;
@@ -66,6 +66,7 @@ export async function PATCH(
         if (coverUrl !== undefined) updateData.coverUrl = coverUrl;
         if (tags !== undefined) updateData.tags = JSON.stringify(tags);
         if (status !== undefined) updateData.status = status;
+        if (featured !== undefined) updateData.featured = featured;
 
         if (Object.keys(updateData).length === 0) {
             return NextResponse.json({ error: "No fields to update" }, { status: 400 });
