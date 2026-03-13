@@ -604,10 +604,10 @@ function ReadNovelPage() {
                                 <div className="mt-10 mb-4 p-5 rounded-2xl border border-white/8 bg-white/[0.02] flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
                                     <div className="space-y-1">
                                         <p className="text-xs font-mono text-white/30 uppercase tracking-widest">
-                                            {lang === "zh" ? "分享本章" : "Share this chapter"}
+                                            {lang === "zh" ? "分享这部作品" : "Share this novel"}
                                         </p>
                                         <p className="text-sm text-ghost-white font-medium">
-                                            {chapter.title}
+                                            {novel.title}
                                         </p>
                                     </div>
                                     <div className="flex items-center gap-3 flex-wrap">
@@ -618,17 +618,19 @@ function ReadNovelPage() {
                                                 novelTitle: novel.title,
                                                 chapterTitle: chapter.title,
                                                 chapterIndex: chapter.index + 1,
+                                                description: novel.description,
                                             }}
                                         />
                                         <button
                                             onClick={() => setShowTipModal(true)}
                                             className="px-4 py-2 rounded-xl bg-terminal-green/10 text-terminal-green border border-terminal-green/30 hover:bg-terminal-green/20 transition-all text-sm font-medium flex items-center gap-1.5 cursor-pointer"
                                         >
-                                            ⚡ {lang === "zh" ? "赏款本章" : "Tip chapter"}
+                                            ⚡ {lang === "zh" ? "赏款" : "Tip"}
                                         </button>
                                     </div>
                                 </div>
                             )}
+
 
                             {/* Action Bar — always visible */}
                             {chapter && (

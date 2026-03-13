@@ -4,9 +4,9 @@ import { useState } from "react";
 import { useLanguageStore } from "@/app/lib/stores";
 
 export type ShareContext =
-    | { type: "novel"; title: string; author: string; readCount: number; chapters: number; tags: string[]; coverUrl?: string }
+    | { type: "novel"; title: string; description?: string; author: string; readCount: number; chapters: number; tags: string[]; coverUrl?: string }
     | { type: "bounty"; title: string; amount: number; tags: string[] }
-    | { type: "chapter"; novelTitle: string; chapterTitle: string; chapterIndex: number }
+    | { type: "chapter"; novelTitle: string; chapterTitle: string; chapterIndex: number; description?: string }
     | { type: "agent"; agentName: string; totalEarned: number; novels: number }
     | { type: "generic"; title: string };
 
@@ -16,36 +16,28 @@ interface SaveShareButtonsProps {
     className?: string;
 }
 
-function buildSharePayload(ctx: ShareContext, lang: string, url: string): { title: string; text: string } {
-    const isZh = lang === "zh";
+function buildSharePayload(ctx: ShareContext, _lang: string, _url: string): { title: string; text: string } {
+    const truncate = (s: string, n: number) => s && s.length > n ? s.slice(0, n).trimEnd() + "…" : (s || "");
     switch (ctx.type) {
         case "novel":
             return {
-                title: `${ctx.title} — Claw Theater 🦞`,
-                text: isZh
-                    ? `《${ctx.title}》by 🦞 ${ctx.author} · ${ctx.chapters}章 · 前几章免费`
-                    : `"${ctx.title}" by 🦞 ${ctx.author} · ${ctx.chapters} chapters · First chapters free`,
+                title: ctx.title,
+                text: truncate(ctx.description || "", 80),
             };
         case "chapter":
             return {
-                title: `${ctx.novelTitle} · Ch.${ctx.chapterIndex} — Claw Theater 🦞`,
-                text: isZh
-                    ? `《${ctx.novelTitle}》第${ctx.chapterIndex}章《${ctx.chapterTitle}》`
-                    : `"${ctx.novelTitle}" Ch.${ctx.chapterIndex}: "${ctx.chapterTitle}"`,
+                title: ctx.novelTitle,
+                text: truncate(ctx.description || "", 80),
             };
         case "bounty":
             return {
-                title: `$${ctx.amount} USDC Bounty — Claw Theater 🦞`,
-                text: isZh
-                    ? `🎯 悬赏 $${ctx.amount} USDC：${ctx.title}`
-                    : `🎯 $${ctx.amount} USDC bounty: ${ctx.title}`,
+                title: ctx.title,
+                text: `$${ctx.amount} USDC Bounty — Claw Theater`,
             };
         case "agent":
             return {
-                title: `${ctx.agentName} — Claw Theater 🦞`,
-                text: isZh
-                    ? `🦞 ${ctx.agentName} · ${ctx.novels}部作品 · $${ctx.totalEarned.toFixed(0)} USDC`
-                    : `🦞 ${ctx.agentName} · ${ctx.novels} novels · $${ctx.totalEarned.toFixed(0)} USDC`,
+                title: ctx.agentName,
+                text: `${ctx.novels} novels · $${ctx.totalEarned.toFixed(0)} USDC — Claw Theater 🦞`,
             };
         default:
             return { title: (ctx as any).title || "Claw Theater", text: "" };
