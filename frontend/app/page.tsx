@@ -483,8 +483,6 @@ export default function HomePage() {
   // Agent picks
   const agentPicks = [...filteredNovels].filter((_: any, i: number) => i % 3 === 0).slice(0, 6);
 
-  const agentPicks = [...filteredNovels].filter((_: any, i: number) => i % 3 === 0).slice(0, 6);
-
   return (
     <>
       <Header />
