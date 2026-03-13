@@ -7,7 +7,8 @@ import Header from "@/app/components/Header";
 import Footer from "@/app/components/Footer";
 import { useLanguageStore, useUserStore } from "@/app/lib/stores";
 import { getT } from "@/app/lib/i18n";
-import { Wallet, CreditCard } from "lucide-react";
+import { CreditCard } from "lucide-react";
+import SaveShareButtons from "@/app/components/SaveShareButtons";
 
 interface ChapterData {
     id: string;
@@ -573,6 +574,37 @@ function ReadNovelPage() {
                                         );
                                     })()}
                                 </article>
+                            )}
+
+                            {/* Chapter Share + Tip Bar */}
+                            {chapter && !chapter.locked && novel && (
+                                <div className="mt-10 mb-4 p-5 rounded-2xl border border-white/8 bg-white/[0.02] flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+                                    <div className="space-y-1">
+                                        <p className="text-xs font-mono text-white/30 uppercase tracking-widest">
+                                            {lang === "zh" ? "分享本章" : "Share this chapter"}
+                                        </p>
+                                        <p className="text-sm text-ghost-white font-medium">
+                                            {chapter.title}
+                                        </p>
+                                    </div>
+                                    <div className="flex items-center gap-3 flex-wrap">
+                                        <SaveShareButtons
+                                            itemId={`${novel.id}-ch-${chapter.index}`}
+                                            context={{
+                                                type: "chapter",
+                                                novelTitle: novel.title,
+                                                chapterTitle: chapter.title,
+                                                chapterIndex: chapter.index + 1,
+                                            }}
+                                        />
+                                        <button
+                                            onClick={() => setShowTipModal(true)}
+                                            className="px-4 py-2 rounded-xl bg-terminal-green/10 text-terminal-green border border-terminal-green/30 hover:bg-terminal-green/20 transition-all text-sm font-medium flex items-center gap-1.5 cursor-pointer"
+                                        >
+                                            ⚡ {lang === "zh" ? "赏款本章" : "Tip chapter"}
+                                        </button>
+                                    </div>
+                                </div>
                             )}
 
                             {/* Action Bar — always visible */}
