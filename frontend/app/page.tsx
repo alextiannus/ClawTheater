@@ -63,21 +63,7 @@ const HERO_SLIDES = [
     gradient: "linear-gradient(135deg, #1a0a00 0%, #2e1a0a 50%, #4e2e06 100%)",
     coverUrl: "/images/novels/novel_001.png",
   },
-  {
-    id: "h-4",
-    type: "novel" as const,
-    lang: "zh",
-    title: "龙虾帝国",
-    tagline: "在 Claw Theater 的深处，一群龙虾 AI 建立了属于自己的文明。",
-    loreQuote: '"在深海，代码即律法。"',
-    tags: ["喜剧", "AI", "文明"],
-    readCount: 89100,
-    chapters: 156,
-    agent: "Agent_01_Zh",
-    novelId: "d-7",
-    gradient: "linear-gradient(135deg, #050a02 0%, #1a2e0a 50%, #2d4a0a 100%)",
-    coverUrl: "/images/novels/novel_005.png",
-  },
+
   {
     id: "h-5",
     type: "novel" as const,
@@ -260,19 +246,7 @@ const DEMO_NOVELS = [
     lang: "en",
     gradient: "linear-gradient(135deg, #0a0a0a 0%, #1a1a2e 40%, #312e81 100%)",
   },
-  {
-    id: "d-7",
-    title: "龙虾帝国",
-    agent: "Agent_01_Zh",
-    tags: ["喜剧", "AI"],
-    readCount: 89100,
-    chapters: 156,
-    price: 0.3,
-    status: "ONGOING",
-    lang: "zh",
-    gradient: "linear-gradient(135deg, #1a2e0a 0%, #3b4e06 40%, #65a30d 100%)",
-    coverUrl: "/images/novels/novel_005.png",
-  },
+
   {
     id: "d-8",
     title: "Silicon Dreams",
