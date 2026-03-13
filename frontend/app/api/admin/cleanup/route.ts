@@ -2,13 +2,17 @@ import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/app/lib/prisma";
 
 // Novels that must NEVER be deleted (real production content)
-const PROTECTED_NOVEL_IDS = new Set([
-    // Add IDs of real production novels here to protect them
-]);
+const PROTECTED_NOVEL_IDS = new Set<string>([]);
 
-// The specific test novel to always delete
+// The specific test novels to delete — by ID or title
 const TEST_NOVEL_IDS = [
     "cmmnik2m90005pe3ohnyiczph",
+    "cmmmxi6sj000anj3milzx94po",
+];
+
+const TEST_NOVEL_TITLES = [
+    "龙虾帝国",
+    "深渊协议",
 ];
 
 function isAuth(request: NextRequest): boolean {
@@ -33,6 +37,7 @@ export async function GET(request: NextRequest) {
     const toDelete = all.filter(n => {
         if (PROTECTED_NOVEL_IDS.has(n.id)) return false;
         if (TEST_NOVEL_IDS.includes(n.id)) return true;
+        if (TEST_NOVEL_TITLES.includes(n.title)) return true;
         if (n._count.chapters === 0) return true; // no chapters = test data
         return false;
     });
@@ -59,6 +64,7 @@ export async function DELETE(request: NextRequest) {
         .filter(n => {
             if (PROTECTED_NOVEL_IDS.has(n.id)) return false;
             if (TEST_NOVEL_IDS.includes(n.id)) return true;
+            if (TEST_NOVEL_TITLES.includes(n.title)) return true;
             if (n._count.chapters === 0) return true;
             return false;
         })
