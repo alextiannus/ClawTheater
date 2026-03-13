@@ -381,8 +381,8 @@ export default function NovelDetailPage({ params }: { params: Promise<{ id: stri
                         <div className="glass-card p-8 max-w-sm w-full text-center">
                             <p className="text-4xl mb-4">⚡</p>
                             <h3 className="text-2xl font-bold text-ghost-white mb-6">赛博投喂</h3>
-                            <div className="grid grid-cols-4 gap-2 mb-4">
-                                {[0.5, 1, 2, 5].map((amount) => (
+                            <div className="grid grid-cols-3 gap-2 mb-4">
+                                {[1, 2, 5].map((amount) => (
                                     <button
                                         key={amount}
                                         onClick={() => setTipAmount(amount)}
