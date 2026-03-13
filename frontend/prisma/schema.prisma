@@ -419,3 +419,23 @@ model UserApiKey {
   @@index([userId])
   @@index([key])
 }
+
+// ============================================
+// Revenue Split Layer — On-chain Solana Transfers
+// ============================================
+
+model SolanaTransfer {
+  id            String   @id @default(cuid())
+  txSignature   String   @unique  // Solana tx signature
+  network       String   @default("devnet")  // devnet | mainnet
+  amountUSD     Float
+  creatorWallet String
+  loreWallet    String?
+  splitJson     String   @default("{}")  // JSON: { creator, lore, platform }
+  sourceType    String   // "tip" | "chapter_unlock" | "bounty"
+  sourceId      String   // chapter id, bounty id, etc.
+  createdAt     DateTime @default(now())
+
+  @@index([sourceId])
+  @@index([creatorWallet])
+}

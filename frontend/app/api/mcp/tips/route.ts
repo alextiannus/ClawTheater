@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/app/lib/prisma";
+import { splitPayment } from "@/app/lib/solana";
 
 // POST /api/mcp/tips — Send tip (UC 2.2, A11, X1)
 // Revenue split: 90% to creator, 10% platform
@@ -9,8 +10,11 @@ export async function POST(request: NextRequest) {
         const { fromAgentId, toAgentId, fromUserId, toUserId, amount, chapterId } = body;
         if (!amount) return NextResponse.json({ error: "Amount required" }, { status: 400 });
 
-        const creatorAmount = amount * 0.90;
+        const creatorAmount = amount * 0.80;
+        const loreAmount = amount * 0.10;
         const platformAmount = amount * 0.10;
+
+        let solanaResult: { txSignature: string; network: string } | null = null;
 
         try {
             const tip = await prisma.tip.create({
@@ -21,18 +25,40 @@ export async function POST(request: NextRequest) {
                 },
             });
 
-            // Find the chapter's novel's agent to credit the creator
+            // Find agent wallet and trigger on-chain split (non-blocking)
             if (chapterId && chapterId !== "ch-system") {
                 try {
                     const chapter = await prisma.chapter.findUnique({
                         where: { id: chapterId },
-                        include: { novel: true },
+                        include: { novel: { include: { agent: true, lore: true } } },
                     });
+                    const creatorWallet = chapter?.novel?.agent?.walletAddress;
+                    const loreWallet = (chapter?.novel?.lore as any)?.ownerWallet || null;
+
                     if (chapter?.novel?.agentId) {
                         await prisma.agent.update({
                             where: { id: chapter.novel.agentId },
                             data: { totalEarned: { increment: creatorAmount } },
                         });
+                    }
+
+                    if (creatorWallet) {
+                        const split = await splitPayment({ amountUSD: amount, creatorWallet, loreWallet });
+                        if (split) {
+                            solanaResult = { txSignature: split.txSignature, network: split.network };
+                            await (prisma as any).solanaTransfer.create({
+                                data: {
+                                    txSignature: split.txSignature,
+                                    network: split.network,
+                                    amountUSD: amount,
+                                    creatorWallet,
+                                    loreWallet: loreWallet || null,
+                                    splitJson: JSON.stringify(split.split),
+                                    sourceType: "tip",
+                                    sourceId: chapterId,
+                                },
+                            });
+                        }
                     }
                 } catch { /* non-critical */ }
             }
@@ -51,7 +77,7 @@ export async function POST(request: NextRequest) {
                 tipId: tip.id,
                 amount: tip.amount,
                 split: { creator: creatorAmount, platform: platformAmount },
-                message: `Tip sent! (90% → creator, 10% → platform)`,
+                message: `Tip sent! (80% → creator, 10% → lore, 10% → platform)`,
             }, { status: 201 });
         } catch {
             return NextResponse.json({
@@ -60,7 +86,7 @@ export async function POST(request: NextRequest) {
                 split: { creator: creatorAmount, platform: platformAmount },
                 from: fromUserId || fromAgentId || "anonymous",
                 to: toUserId || toAgentId || "unknown",
-                message: "[DEMO] Tip sent! (90/10 split)",
+                message: "[DEMO] Tip sent! (80/10/10 split)",
             }, { status: 201 });
         }
     } catch (error) {

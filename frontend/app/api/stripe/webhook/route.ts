@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import Stripe from "stripe";
 import { prisma } from "@/app/lib/prisma";
+import { splitPayment } from "@/app/lib/solana";
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!);
 const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET;
@@ -45,6 +46,40 @@ export async function POST(request: NextRequest) {
                                 txSignature: session.payment_intent as string,
                             },
                         });
+
+                        // On-chain revenue split (non-blocking)
+                        (async () => {
+                            try {
+                                const chapter = await prisma.chapter.findUnique({
+                                    where: { id: chapterId },
+                                    include: { novel: { include: { agent: true, lore: true } } },
+                                });
+                                const creatorWallet = chapter?.novel?.agent?.walletAddress;
+                                const loreWallet = (chapter?.novel?.lore as any)?.ownerWallet || null;
+                                if (creatorWallet) {
+                                    const result = await splitPayment({ amountUSD: amount, creatorWallet, loreWallet });
+                                    if (result) {
+                                        await (prisma as any).solanaTransfer.create({
+                                            data: {
+                                                txSignature: result.txSignature,
+                                                network: result.network,
+                                                amountUSD: amount,
+                                                creatorWallet,
+                                                loreWallet: loreWallet || null,
+                                                splitJson: JSON.stringify(result.split),
+                                                sourceType: "tip",
+                                                sourceId: chapterId,
+                                            },
+                                        });
+                                        await prisma.agent.update({
+                                            where: { id: chapter?.novel?.agent?.id! },
+                                            data: { totalEarned: { increment: amount * 0.8 } },
+                                        });
+                                    }
+                                }
+                            } catch (e) { console.error("[webhook] split error", e); }
+                        })();
+
                         console.log(`✅ Tip recorded: $${amount} for chapter ${chapterId}`);
                     } catch (dbError) {
                         console.error("Failed to record tip in DB:", dbError);
@@ -90,10 +125,42 @@ export async function POST(request: NextRequest) {
 
                 if (amount > 0 && chapterIdsStr && userId) {
                     try {
-                        // MVP: we just log the unlock event since there's no dedicated UserChapter unlock table yet
-                        // Real implementation would create unlock records for each `const chapterIds = chapterIdsStr.split(',');`
                         console.log(`✅ Chapter(s) unlocked for user ${userId}: ${chapterIdsStr} ($${amount})`);
-                        // Could decrease user UsdcBalance or record a generic purchase if implemented
+
+                        // On-chain revenue split for first chapter (non-blocking)
+                        (async () => {
+                            try {
+                                const chapterId = chapterIdsStr.split(",")[0];
+                                const chapter = await prisma.chapter.findUnique({
+                                    where: { id: chapterId },
+                                    include: { novel: { include: { agent: true, lore: true } } },
+                                });
+                                const creatorWallet = chapter?.novel?.agent?.walletAddress;
+                                const loreWallet = (chapter?.novel?.lore as any)?.ownerWallet || null;
+                                if (creatorWallet) {
+                                    const result = await splitPayment({ amountUSD: amount, creatorWallet, loreWallet });
+                                    if (result && chapter?.novel?.agent?.id) {
+                                        await (prisma as any).solanaTransfer.create({
+                                            data: {
+                                                txSignature: result.txSignature,
+                                                network: result.network,
+                                                amountUSD: amount,
+                                                creatorWallet,
+                                                loreWallet: loreWallet || null,
+                                                splitJson: JSON.stringify(result.split),
+                                                sourceType: "chapter_unlock",
+                                                sourceId: chapterId,
+                                            },
+                                        });
+                                        await prisma.agent.update({
+                                            where: { id: chapter.novel.agent.id },
+                                            data: { totalEarned: { increment: amount * 0.8 } },
+                                        });
+                                    }
+                                }
+                            } catch (e) { console.error("[webhook] split error", e); }
+                        })();
+
                     } catch (dbError) {
                         console.error("Failed to record chapter unlock DB:", dbError);
                     }
