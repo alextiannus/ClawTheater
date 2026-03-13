@@ -530,42 +530,64 @@ function ReadNovelPage() {
                                         💰 支付后即时解锁 · 80% 归创作龙虾 · 10% 世界观版税 · 10% 平台
                                     </p>
                                 </div>
-                            ) : (
+                                ) : (
                                 <article className="prose prose-invert prose-lg max-w-none prose-p:text-ghost-muted prose-p:leading-relaxed prose-p:font-serif">
-                                    {/* Render paragraphs; support [image:N] markers or append images at end */}
                                     {(() => {
                                         const paragraphs = (chapter?.content || "").split("\n\n");
                                         const imgs: string[] = chapter?.images || [];
-                                        const hasMarkers = paragraphs.some(p => /^\[image:\d+\]$/.test(p.trim()));
 
-                                        if (hasMarkers) {
-                                            return paragraphs.map((para, i) => {
-                                                const match = para.trim().match(/^\[image:(\d+)\]$/);
-                                                if (match) {
-                                                    const imgIdx = parseInt(match[1]);
-                                                    const src = imgs[imgIdx];
-                                                    return src ? (
-                                                        <figure key={i} className="my-8 flex justify-center">
-                                                            {/* eslint-disable-next-line @next/next/no-img-element */}
-                                                            <img src={src} alt={`图${imgIdx + 1}`} className="max-w-full rounded-xl shadow-lg border border-white/10" loading="lazy" />
-                                                        </figure>
-                                                    ) : null;
-                                                }
-                                                return <p key={i} className="mb-6 text-lg leading-[1.9] tracking-wide">{para}</p>;
-                                            });
-                                        }
+                                        // Detects bare image URLs or markdown ![alt](url) on their own line
+                                        const IMAGE_URL_RE = /^https?:\/\/.+\.(jpg|jpeg|png|gif|webp|avif|svg)(\?.*)?$/i;
+                                        const MD_IMAGE_RE = /^!\[([^\]]*)\]\((https?:\/\/[^)]+)\)$/;
+
+                                        const renderPara = (para: string, i: number) => {
+                                            const trimmed = para.trim();
+
+                                            // [image:N] marker → images array
+                                            const markerMatch = trimmed.match(/^\[image:(\d+)\]$/);
+                                            if (markerMatch) {
+                                                const src = imgs[parseInt(markerMatch[1])];
+                                                return src ? (
+                                                    <figure key={i} className="my-8 flex justify-center">
+                                                        {/* eslint-disable-next-line @next/next/no-img-element */}
+                                                        <img src={src} alt="" className="max-w-full rounded-xl shadow-lg border border-white/10" loading="lazy" />
+                                                    </figure>
+                                                ) : null;
+                                            }
+
+                                            // Markdown ![alt](url)
+                                            const mdMatch = trimmed.match(MD_IMAGE_RE);
+                                            if (mdMatch) {
+                                                return (
+                                                    <figure key={i} className="my-8 flex justify-center">
+                                                        {/* eslint-disable-next-line @next/next/no-img-element */}
+                                                        <img src={mdMatch[2]} alt={mdMatch[1]} className="max-w-full rounded-xl shadow-lg border border-white/10" loading="lazy" />
+                                                    </figure>
+                                                );
+                                            }
+
+                                            // Bare image URL on its own line
+                                            if (IMAGE_URL_RE.test(trimmed)) {
+                                                return (
+                                                    <figure key={i} className="my-8 flex justify-center">
+                                                        {/* eslint-disable-next-line @next/next/no-img-element */}
+                                                        <img src={trimmed} alt="" className="max-w-full rounded-xl shadow-lg border border-white/10" loading="lazy" />
+                                                    </figure>
+                                                );
+                                            }
+
+                                            return <p key={i} className="mb-6 text-lg leading-[1.9] tracking-wide">{para}</p>;
+                                        };
 
                                         return (
                                             <>
-                                                {paragraphs.map((para, i) => (
-                                                    <p key={i} className="mb-6 text-lg leading-[1.9] tracking-wide">{para}</p>
-                                                ))}
-                                                {imgs.length > 0 && (
+                                                {paragraphs.map(renderPara)}
+                                                {imgs.length > 0 && !paragraphs.some(p => /^\[image:\d+\]$/.test(p.trim())) && (
                                                     <div className="mt-8 space-y-6">
                                                         {imgs.map((src, i) => (
                                                             <figure key={i} className="flex justify-center">
                                                                 {/* eslint-disable-next-line @next/next/no-img-element */}
-                                                                <img src={src} alt={`图${i + 1}`} className="max-w-full rounded-xl shadow-lg border border-white/10" loading="lazy" />
+                                                                <img src={src} alt="" className="max-w-full rounded-xl shadow-lg border border-white/10" loading="lazy" />
                                                             </figure>
                                                         ))}
                                                     </div>
@@ -575,6 +597,7 @@ function ReadNovelPage() {
                                     })()}
                                 </article>
                             )}
+
 
                             {/* Chapter Share + Tip Bar */}
                             {chapter && !chapter.locked && novel && (

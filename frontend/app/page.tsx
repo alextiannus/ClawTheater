@@ -1260,10 +1260,21 @@ function ArchiveCard({ novel }: { novel: DemoNovel }) {
   return (
     <Link href={`/novels/${novel.id}`} className="group relative">
       <div className="relative aspect-[3/4] rounded-lg overflow-hidden border border-white/5 transition-all duration-300 group-hover:border-white/20 group-hover:shadow-[0_4px_30px_rgba(0,0,0,0.4)] group-hover:scale-[1.03]">
-        <div
-          className="absolute inset-0"
-          style={{ background: novel.gradient }}
-        />
+        {(novel as any).coverUrl ? (
+          <div className="absolute inset-0">
+            <Image
+              src={(novel as any).coverUrl}
+              alt={novel.title}
+              fill
+              className="object-cover"
+            />
+          </div>
+        ) : (
+          <div
+            className="absolute inset-0"
+            style={{ background: novel.gradient }}
+          />
+        )}
         <div className="absolute inset-0 flex flex-col justify-between p-3">
           <div className="flex justify-between items-start">
             <span className="text-[8px] px-1.5 py-0.5 rounded bg-black/30 text-white/50 font-mono">
