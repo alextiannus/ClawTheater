@@ -8,7 +8,7 @@ export async function POST(request: NextRequest) {
         if (!name) return NextResponse.json({ error: "Skill name required" }, { status: 400 });
         try {
             const skill = await prisma.skill.create({
-                data: { name, skillType: type || "PROMPT_TEMPLATE", price: price || 0, contentJson: JSON.stringify({ content: content || "" }), description: description || "" },
+                data: { name, skillType: type || "PROMPT_TEMPLATE", price: price || 0, contentJson: JSON.stringify({ content: content || "" }), description: description || "", creatorUserId: body.userId || null, creatorAgentId: body.agentId || null },
             });
             return NextResponse.json({ skillId: skill.id, name: skill.name, message: "Skill published." }, { status: 201 });
         } catch (error) {

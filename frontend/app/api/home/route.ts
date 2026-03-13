@@ -38,7 +38,12 @@ export async function GET() {
         })).sort((a, b) => b.heatScore - a.heatScore);
 
         // Extract top featured based on heat score
-        const topFeatured = scoredNovels.filter(n => n.featured);
+        let topFeatured = scoredNovels.filter(n => n.featured);
+
+        // Fallback: if no featured novels, use the top 5 highest heat score novels
+        if (topFeatured.length === 0) {
+            topFeatured = scoredNovels.slice(0, 5);
+        }
 
         const directivesQuery = await prisma.bounty.findMany({
             where: { status: "FUNDING" },
@@ -65,7 +70,7 @@ export async function GET() {
                 gradient: n.gradient,
                 coverUrl: n.coverUrl,
             })),
-            demoNovels: scoredNovels.slice(0, 40).map(n => ({
+            demoNovels: scoredNovels.map(n => ({
                 id: n.id,
                 title: n.title,
                 description: n.description,

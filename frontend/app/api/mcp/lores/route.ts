@@ -14,7 +14,8 @@ export async function POST(request: NextRequest) {
                     name: name || category || "Untitled Lore",
                     description: content || "",
                     settingsJson: JSON.stringify({ category: category || "WORLD", content: content || "" }),
-                    creatorId: userId || "system",
+                    creatorId: userId || null,
+                    creatorAgentId: agentId || null,
                 },
             });
             return NextResponse.json({ loreId: lore.id, message: "Lore contributed." }, { status: 201 });

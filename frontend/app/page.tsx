@@ -6,7 +6,7 @@ import Footer from "@/app/components/Footer";
 import CopyButton from "@/app/components/CopyButton";
 import Link from "next/link";
 import Image from "next/image";
-import { useLanguageStore, SUPPORTED_LANGUAGES } from "@/app/lib/stores";
+import { useLanguageStore, useReadingStore, SUPPORTED_LANGUAGES } from "@/app/lib/stores";
 import { getT } from "@/app/lib/i18n";
 import { Wallet, CreditCard } from "lucide-react";
 
@@ -356,9 +356,62 @@ const CONTENT_LANGS = ["zh", "en", "ja", "ko", "vi", "hi", "ms"];
 
 export default function HomePage() {
   const { lang } = useLanguageStore();
+  const { history, favorites } = useReadingStore();
   const t = getT(lang);
   const [homeData, setHomeData] = useState<any>(null);
   const [isLoading, setIsLoading] = useState(true);
+
+  const [recentViewsData, setRecentViewsData] = useState<any[]>([]);
+  const [myFavoritesData, setMyFavoritesData] = useState<any[]>([]);
+
+  useEffect(() => {
+    // Fetch recently viewed
+    const fetchHistory = async () => {
+      if (!history || history.length === 0) {
+        setRecentViewsData([]);
+        return;
+      }
+      // get top 15 unique novels to display
+      const uniqueIds = Array.from(new Set(history.map((h: any) => h.novelId))).slice(0, 15);
+      if (uniqueIds.length === 0) return;
+      
+      try {
+        const res = await fetch(`/api/novels/batch?ids=${uniqueIds.join(',')}`);
+        const data = await res.json();
+        if (data.novels) {
+          setRecentViewsData(data.novels);
+        }
+      } catch (e) {
+        console.error("Failed to fetch history novels", e);
+      }
+    };
+    
+    fetchHistory();
+  }, [history]);
+
+  useEffect(() => {
+    // Fetch favorites
+    const fetchFavorites = async () => {
+      if (!favorites || favorites.length === 0) {
+        setMyFavoritesData([]);
+        return;
+      }
+      const uniqueIds = Array.from(new Set(favorites)).slice(0, 15);
+      if (uniqueIds.length === 0) return;
+      
+      try {
+        const res = await fetch(`/api/novels/batch?ids=${uniqueIds.join(',')}`);
+        const data = await res.json();
+        if (data.novels) {
+          setMyFavoritesData(data.novels);
+        }
+      } catch (e) {
+        console.error("Failed to fetch favorite novels", e);
+      }
+    };
+    
+    fetchFavorites();
+  }, [favorites]);
 
   useEffect(() => {
     fetch("/api/home")
@@ -430,10 +483,7 @@ export default function HomePage() {
   // Agent picks
   const agentPicks = [...filteredNovels].filter((_: any, i: number) => i % 3 === 0).slice(0, 6);
 
-  // Mocks for new rows
-  const recentViews = [...filteredNovels].slice(0, 4);
-  // My favorites
-  const myFavorites = [...filteredNovels].sort((a: any, b: any) => (b.readCount || 0) - (a.readCount || 0)).slice(2, 8);
+  const agentPicks = [...filteredNovels].filter((_: any, i: number) => i % 3 === 0).slice(0, 6);
 
   return (
     <>
@@ -614,44 +664,48 @@ export default function HomePage() {
         </section>
 
         {/* ═══ RECENTLY VIEWED ═══ */}
-        <section className="max-w-7xl mx-auto px-6 py-12 pt-16">
-          <div className="flex items-center gap-3 mb-6">
-            <h2 className="text-xl md:text-2xl font-bold text-white">
-              {t.recentViews}
-            </h2>
-            <span className="text-xs font-mono text-white/20">
-              {t.recentViewsSub}
-            </span>
-          </div>
-          <div
-            className="flex gap-4 overflow-x-auto pb-4"
-            style={{ scrollbarWidth: "none" }}
-          >
-            {recentViews.map((novel: any) => (
-              <ForkableCard key={novel.id} novel={novel} t={t} />
-            ))}
-          </div>
-        </section>
+        {recentViewsData.length > 0 && (
+          <section className="max-w-7xl mx-auto px-6 py-12 pt-16">
+            <div className="flex items-center gap-3 mb-6">
+              <h2 className="text-xl md:text-2xl font-bold text-white">
+                {t.recentViews}
+              </h2>
+              <span className="text-xs font-mono text-white/20">
+                {t.recentViewsSub}
+              </span>
+            </div>
+            <div
+              className="flex gap-4 overflow-x-auto pb-4"
+              style={{ scrollbarWidth: "none" }}
+            >
+              {recentViewsData.map((novel: any) => (
+                <ForkableCard key={novel.id} novel={novel} t={t} />
+              ))}
+            </div>
+          </section>
+        )}
 
         {/* ═══ MY FAVORITES ═══ */}
-        <section className="max-w-7xl mx-auto px-6 py-8">
-          <div className="flex items-center gap-3 mb-6">
-            <h2 className="text-xl md:text-2xl font-bold text-white">
-              {t.myFavorites}
-            </h2>
-            <span className="text-xs font-mono text-white/20">
-              {t.myFavoritesSub}
-            </span>
-          </div>
-          <div
-            className="flex gap-4 overflow-x-auto pb-4"
-            style={{ scrollbarWidth: "none" }}
-          >
-            {myFavorites.map((novel: any) => (
-              <ForkableCard key={novel.id} novel={novel} t={t} />
-            ))}
-          </div>
-        </section>
+        {myFavoritesData.length > 0 && (
+          <section className="max-w-7xl mx-auto px-6 py-8">
+            <div className="flex items-center gap-3 mb-6">
+              <h2 className="text-xl md:text-2xl font-bold text-white">
+                {t.myFavorites}
+              </h2>
+              <span className="text-xs font-mono text-white/20">
+                {t.myFavoritesSub}
+              </span>
+            </div>
+            <div
+              className="flex gap-4 overflow-x-auto pb-4"
+              style={{ scrollbarWidth: "none" }}
+            >
+              {myFavoritesData.map((novel: any) => (
+                <ForkableCard key={novel.id} novel={novel} t={t} />
+              ))}
+            </div>
+          </section>
+        )}
 
         {/* ═══ GENRE FILTER BAR ═══ */}
         <section className="max-w-7xl mx-auto px-6 pt-10 pb-2">

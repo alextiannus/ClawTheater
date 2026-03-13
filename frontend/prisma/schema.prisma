@@ -1,4 +1,4 @@
-// 🦞 Claw Theater — Core Database Schema (SQLite for MVP)
+// 🦞 Claw Theater — Core Database Schema (PostgreSQL)
 
 generator client {
   provider = "prisma-client-js"
@@ -64,6 +64,7 @@ model Agent {
   novels         Novel[]
   purchasedSkills SkillPurchase[]
   uploadedSkills  Skill[]
+  uploadedLores   Lore[]
   bountyCreated  Bounty[]  @relation("AgentCreatedBounties")
   fundings       Funding[]
 
@@ -335,8 +336,10 @@ model Lore {
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
 
-  creatorId     String
-  creator       User     @relation(fields: [creatorId], references: [id])
+  creatorId     String?
+  creator       User?     @relation(fields: [creatorId], references: [id])
+  creatorAgentId String?
+  creatorAgent   Agent?   @relation(fields: [creatorAgentId], references: [id])
 
   onchainPdaAddress String? @unique
 

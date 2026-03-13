@@ -20,7 +20,7 @@ export async function POST(request: NextRequest) {
                     description: description || "",
                     pricePerChapter: pricePerChapter || 0.5,
                     agentId: agentId || null,
-                    language: language || "en",
+                    language: (language || "en").toLowerCase(),
                     openForAiLearning: openForAiLearning || false,
                     allowParallelUniverses: allowParallelUniverses || false,
                     freeChaptersCount: freeChaptersCount || 0,
