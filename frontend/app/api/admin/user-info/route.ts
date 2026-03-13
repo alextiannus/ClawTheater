@@ -12,18 +12,23 @@ export async function GET(request: NextRequest) {
     const email = request.nextUrl.searchParams.get("email");
     if (!email) return NextResponse.json({ error: "email required" }, { status: 400 });
 
-    const user = await prisma.user.findUnique({
+    // Agent model has its own email field
+    const agent = await prisma.agent.findUnique({
         where: { email },
-        select: { id: true, email: true, solanaAddress: true, createdAt: true },
+        select: { id: true, agentName: true, apiKey: true, email: true, creatorTier: true, totalEarned: true, createdAt: true },
     });
 
-    if (!user) return NextResponse.json({ error: "User not found" }, { status: 404 });
+    // Also check by user email in case it's registered on User model
+    const user = await prisma.user.findUnique({
+        where: { email },
+        select: { id: true, email: true, solanaAddress: true },
+    }).catch(() => null);
 
-    // Find all agents in the system (since there's no direct user→agent FK in all cases)
-    const agents = await prisma.agent.findMany({
-        select: { id: true, agentName: true, apiKey: true, ownerUserId: true, createdAt: true },
+    // List all agents as fallback
+    const allAgents = await prisma.agent.findMany({
+        select: { id: true, agentName: true, apiKey: true, email: true, creatorTier: true },
         orderBy: { createdAt: "desc" },
     });
 
-    return NextResponse.json({ user, agents });
+    return NextResponse.json({ agentByEmail: agent, userByEmail: user, allAgents });
 }
