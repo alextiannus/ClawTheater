@@ -17,8 +17,8 @@ const TEST_NOVEL_TITLES = [
 
 function isAuth(request: NextRequest): boolean {
     const secret = request.headers.get("x-admin-secret");
-    // Use R2 access key as admin token (known value, not user-facing)
-    return secret === process.env.CF_R2_ACCESS_KEY_ID;
+    // One-time admin token — will be deleted after cleanup
+    return secret === "CT_cleanup_39x7_2026_mArch";
 }
 
 // GET /api/admin/cleanup — Dry-run: list novels that would be deleted
