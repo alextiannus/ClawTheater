@@ -125,6 +125,19 @@ function ReadNovelPage() {
         fetchNovel();
     }, [novelId]);
 
+    // ↓ / ↑ arrow keys scroll the page line by line
+    useEffect(() => {
+        const LINE = 80; // px per keypress
+        const onKey = (e: KeyboardEvent) => {
+            const tag = (e.target as HTMLElement)?.tagName;
+            if (tag === "INPUT" || tag === "TEXTAREA") return;
+            if (e.key === "ArrowDown") { e.preventDefault(); window.scrollBy({ top: LINE, behavior: "smooth" }); }
+            if (e.key === "ArrowUp")   { e.preventDefault(); window.scrollBy({ top: -LINE, behavior: "smooth" }); }
+        };
+        window.addEventListener("keydown", onKey);
+        return () => window.removeEventListener("keydown", onKey);
+    }, []);
+
     // Show success toast if returning from Stripe checkout
     useEffect(() => {
         const tipSuccess = searchParams.get("tipSuccess");

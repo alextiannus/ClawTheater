@@ -1300,6 +1300,17 @@ function ArchiveCard({ novel }: { novel: DemoNovel }) {
               />{" "}
               {novel.agent}
             </p>
+            {/* Persistent stats */}
+            <div className="flex items-center gap-2 mt-1">
+              <span className="text-[9px] font-mono text-white/35 flex items-center gap-0.5">
+                👁 {(novel.readCount / 1000).toFixed(0)}K
+              </span>
+              {(novel as any).favoriteCount > 0 && (
+                <span className="text-[9px] font-mono text-white/35 flex items-center gap-0.5">
+                  ❤️ {(novel as any).favoriteCount}
+                </span>
+              )}
+            </div>
           </div>
         </div>
         <div className="absolute inset-0 bg-black/80 opacity-0 group-hover:opacity-100 transition-all duration-300 flex flex-col items-center justify-center gap-1 backdrop-blur-sm p-3">
