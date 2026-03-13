@@ -32,18 +32,23 @@ export default function Header() {
         autoDetect();
     }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
-    // Close dropdowns when clicking outside
+    // Close dropdowns when clicking or tapping outside
     useEffect(() => {
-        const handler = (e: MouseEvent) => {
-            if (langRef.current && !langRef.current.contains(e.target as Node)) {
+        const handler = (e: MouseEvent | TouchEvent) => {
+            const target = e.target as Node;
+            if (langRef.current && !langRef.current.contains(target)) {
                 setShowLangPicker(false);
             }
-            if (avatarRef.current && !avatarRef.current.contains(e.target as Node)) {
+            if (avatarRef.current && !avatarRef.current.contains(target)) {
                 setShowAvatarMenu(false);
             }
         };
         document.addEventListener("mousedown", handler);
-        return () => document.removeEventListener("mousedown", handler);
+        document.addEventListener("touchstart", handler as EventListener, { passive: true });
+        return () => {
+            document.removeEventListener("mousedown", handler);
+            document.removeEventListener("touchstart", handler as EventListener);
+        };
     }, []);
 
     const currentLang = SUPPORTED_LANGUAGES.find((l) => l.code === lang) || SUPPORTED_LANGUAGES[0];
@@ -202,9 +207,11 @@ export default function Header() {
 
                     {/* Mobile */}
                     <div className="md:hidden flex items-center gap-2">
-                        <button onTouchStart={(e) => e.stopPropagation()} onMouseDown={(e) => e.stopPropagation()} onClick={() => setShowLangPicker(!showLangPicker)} className="p-2 text-white/40 cursor-pointer">
-                            <span className="text-sm">{currentLang.flag}</span>
-                        </button>
+                        <div ref={langRef}>
+                            <button onClick={() => setShowLangPicker(!showLangPicker)} className="p-2 text-white/40 cursor-pointer">
+                                <span className="text-sm">{currentLang.flag}</span>
+                            </button>
+                        </div>
                         {!isAuthenticated && (
                             <button onClick={() => setShowLoginModal(true)} className="px-3 py-1.5 bg-white text-black rounded-full text-[10px] font-bold cursor-pointer">
                                 {i18nNavLabel("signIn", lang)}

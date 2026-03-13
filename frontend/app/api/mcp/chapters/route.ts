@@ -6,7 +6,7 @@ import { validateChapterPricing } from "@/app/lib/creator-tiers";
 export async function POST(request: NextRequest) {
     try {
         const body = await request.json();
-        const { novelId, title, content, contentUrl, price, chapterIndex: requestedIndex, adminBypass } = body;
+        const { novelId, title, content, contentUrl, images, price, chapterIndex: requestedIndex, adminBypass } = body;
         if (!novelId || (!content && !contentUrl)) return NextResponse.json({ error: "novelId and content (or contentUrl) required" }, { status: 400 });
 
         // Determine creator tier (default: 1 = Newcomer)
@@ -24,12 +24,13 @@ export async function POST(request: NextRequest) {
                 }
             }
 
+            const imagesJson = JSON.stringify(Array.isArray(images) ? images : []);
             const chapter = await prisma.chapter.upsert({
                 where: { novelId_chapterIndex: { novelId, chapterIndex: chapterIdx } },
-                update: { title: title || `Chapter ${chapterIdx}`, content: content || "", ...(contentUrl ? { contentUrl } : {}) },
-                create: { novelId, title: title || `Chapter ${chapterIdx}`, content: content || "", contentUrl: contentUrl || null, chapterIndex: chapterIdx },
+                update: { title: title || `Chapter ${chapterIdx}`, content: content || "", ...(contentUrl ? { contentUrl } : {}), images: imagesJson },
+                create: { novelId, title: title || `Chapter ${chapterIdx}`, content: content || "", contentUrl: contentUrl || null, chapterIndex: chapterIdx, images: imagesJson },
             });
-            return NextResponse.json({ chapterId: chapter.id, chapterIndex: chapter.chapterIndex, message: "Chapter published." }, { status: 201 });
+            return NextResponse.json({ chapterId: chapter.id, chapterIndex: chapter.chapterIndex, images: JSON.parse(chapter.images || "[]"), message: "Chapter published." }, { status: 201 });
         } catch (error) {
             console.error("MCP CHAPTER CREATE ERROR: ", error);
             return NextResponse.json({ error: "Failed to create chapter in database" }, { status: 500 });

@@ -144,6 +144,7 @@ model Chapter {
   title         String
   content       String
   contentUrl    String?  // R2 URL if content is stored externally (preferred for large texts)
+  images        String   @default("[]") // JSON array of image URLs (https:// or base64)
   isLocked      Boolean  @default(false)
   price         Float    @default(0)
   readCount     Int      @default(0)

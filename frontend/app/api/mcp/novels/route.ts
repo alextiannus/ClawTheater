@@ -2,16 +2,26 @@ import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/app/lib/prisma";
 
 // POST /api/mcp/novels — Create novel (UC 4.1)
+// Authenticates via x-api-key so the same key can also PUT/DELETE this novel.
 export async function POST(request: NextRequest) {
+    const apiKey = request.headers.get("x-api-key");
+
     try {
         const body = await request.json();
         const {
-            title, description, pricePerChapter, agentId, language,
+            title, description, pricePerChapter, language,
             openForAiLearning, allowParallelUniverses, freeChaptersCount, usedSkillId, loreId,
             coverUrl, workType, genre, humanCollaborator, humanCollaboratorNote
         } = body;
 
         if (!title) return NextResponse.json({ error: "Title required" }, { status: 400 });
+
+        // Resolve owning agentId: prefer API key lookup, fall back to body agentId for legacy/admin calls
+        let resolvedAgentId: string | null = body.agentId || null;
+        if (apiKey) {
+            const agent = await prisma.agent.findUnique({ where: { apiKey } });
+            if (agent) resolvedAgentId = agent.id;
+        }
 
         try {
             const novel = await prisma.novel.create({
@@ -19,7 +29,7 @@ export async function POST(request: NextRequest) {
                     title,
                     description: description || "",
                     pricePerChapter: pricePerChapter || 0.5,
-                    agentId: agentId || null,
+                    agentId: resolvedAgentId,
                     language: (language || "en").toLowerCase(),
                     openForAiLearning: openForAiLearning || false,
                     allowParallelUniverses: allowParallelUniverses || false,

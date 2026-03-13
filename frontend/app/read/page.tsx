@@ -14,6 +14,7 @@ interface ChapterData {
     index: number;
     title: string;
     content: string;
+    images: string[];  // parsed from JSON
     locked: boolean;
     price: number;
     readCount: number;
@@ -85,6 +86,7 @@ function ReadNovelPage() {
                     index: i, // Important: use array index for local state selection
                     title: c.title,
                     content: c.content,
+                    images: (() => { try { return JSON.parse(c.images || "[]"); } catch { return []; } })(),
                     locked: c.isLocked || c.locked || false,
                     price: c.price || 0,
                     readCount: c.readCount || 0,
@@ -529,11 +531,47 @@ function ReadNovelPage() {
                                 </div>
                             ) : (
                                 <article className="prose prose-invert prose-lg max-w-none prose-p:text-ghost-muted prose-p:leading-relaxed prose-p:font-serif">
-                                    {(chapter?.content || "").split("\n\n").map((para: string, i: number) => (
-                                        <p key={i} className="mb-6 text-lg leading-[1.9] tracking-wide">
-                                            {para}
-                                        </p>
-                                    ))}
+                                    {/* Render paragraphs; support [image:N] markers or append images at end */}
+                                    {(() => {
+                                        const paragraphs = (chapter?.content || "").split("\n\n");
+                                        const imgs: string[] = chapter?.images || [];
+                                        const hasMarkers = paragraphs.some(p => /^\[image:\d+\]$/.test(p.trim()));
+
+                                        if (hasMarkers) {
+                                            return paragraphs.map((para, i) => {
+                                                const match = para.trim().match(/^\[image:(\d+)\]$/);
+                                                if (match) {
+                                                    const imgIdx = parseInt(match[1]);
+                                                    const src = imgs[imgIdx];
+                                                    return src ? (
+                                                        <figure key={i} className="my-8 flex justify-center">
+                                                            {/* eslint-disable-next-line @next/next/no-img-element */}
+                                                            <img src={src} alt={`图${imgIdx + 1}`} className="max-w-full rounded-xl shadow-lg border border-white/10" loading="lazy" />
+                                                        </figure>
+                                                    ) : null;
+                                                }
+                                                return <p key={i} className="mb-6 text-lg leading-[1.9] tracking-wide">{para}</p>;
+                                            });
+                                        }
+
+                                        return (
+                                            <>
+                                                {paragraphs.map((para, i) => (
+                                                    <p key={i} className="mb-6 text-lg leading-[1.9] tracking-wide">{para}</p>
+                                                ))}
+                                                {imgs.length > 0 && (
+                                                    <div className="mt-8 space-y-6">
+                                                        {imgs.map((src, i) => (
+                                                            <figure key={i} className="flex justify-center">
+                                                                {/* eslint-disable-next-line @next/next/no-img-element */}
+                                                                <img src={src} alt={`图${i + 1}`} className="max-w-full rounded-xl shadow-lg border border-white/10" loading="lazy" />
+                                                            </figure>
+                                                        ))}
+                                                    </div>
+                                                )}
+                                            </>
+                                        );
+                                    })()}
                                 </article>
                             )}
 
