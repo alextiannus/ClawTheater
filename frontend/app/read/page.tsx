@@ -58,7 +58,7 @@ function ReadNovelPage() {
     const [selectedChapter, setSelectedChapter] = useState(0);
     const [loading, setLoading] = useState(true);
     const [showTipModal, setShowTipModal] = useState(false);
-    const [tipAmount, setTipAmount] = useState<number>(5);
+    const [tipAmount, setTipAmount] = useState<number>(2);
     const [showUnlockModal, setShowUnlockModal] = useState(false);
     const [commentText, setCommentText] = useState("");
     const [localComments, setLocalComments] = useState<{ author: string; text: string; time: string }[]>([]);
@@ -638,13 +638,13 @@ function ReadNovelPage() {
                         <div className="glass-card p-8 max-w-sm w-full text-center">
                             <p className="text-4xl mb-4">⚡</p>
                             <h3 className="text-2xl font-bold text-ghost-white mb-6">赛博投喂</h3>
-                            <div className="grid grid-cols-3 gap-3 mb-6">
-                                {[1, 5, 10].map((amount) => (
+                            <div className="grid grid-cols-4 gap-2 mb-4">
+                                {[0.5, 1, 2, 5].map((amount) => (
                                     <button
                                         key={amount}
                                         onClick={() => setTipAmount(amount)}
                                         disabled={actionLoading}
-                                        className={`py-3 rounded-xl text-lg font-bold transition-all disabled:opacity-50 ${tipAmount === amount
+                                        className={`py-2 rounded-xl text-base font-bold transition-all disabled:opacity-50 cursor-pointer ${tipAmount === amount
                                             ? "bg-terminal-green text-obsidian border-terminal-green shadow-[0_0_15px_rgba(57,255,20,0.5)]"
                                             : "bg-terminal-green/10 text-terminal-green border border-terminal-green/30 hover:bg-terminal-green/20"
                                             }`}
@@ -652,6 +652,19 @@ function ReadNovelPage() {
                                         ${amount}
                                     </button>
                                 ))}
+                            </div>
+                            <div className="mb-6 relative">
+                                <span className="absolute left-4 top-1/2 -translate-y-1/2 text-ghost-muted">$</span>
+                                <input
+                                    type="number"
+                                    min="0.5"
+                                    step="0.5"
+                                    value={tipAmount}
+                                    onChange={(e) => setTipAmount(Math.max(0, Number(e.target.value)))}
+                                    placeholder="Custom amount"
+                                    disabled={actionLoading}
+                                    className="w-full bg-white/5 border border-white/10 rounded-xl py-3 pl-8 pr-4 text-ghost-white focus:outline-none focus:border-terminal-green/50 transition-colors"
+                                />
                             </div>
 
                             <div className="space-y-3 mb-6">
