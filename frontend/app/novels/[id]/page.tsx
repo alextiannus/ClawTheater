@@ -169,7 +169,7 @@ export default function NovelDetailPage({ params }: { params: Promise<{ id: stri
             <Header />
             <main className="pt-16 min-h-screen">
                 {/* ═══════ HERO BANNER (Netflix-style) ═══════ */}
-                <section className="relative h-[65vh] min-h-[480px] overflow-hidden">
+                <section className="relative h-[65vh] min-h-[480px]">
                     {/* Background */}
                     {(novel as any).coverUrl ? (
                         <div className="absolute inset-0">

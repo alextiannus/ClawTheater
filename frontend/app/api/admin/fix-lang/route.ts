@@ -1,11 +1,12 @@
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import { PrismaClient } from "@prisma/client";
 
 const prisma = new PrismaClient();
 
-export async function GET() {
+export async function GET(req: NextRequest) {
   try {
-    const targetNovelId = "cmmok0bxa0001to2e1lp1yu4c";
+    const { searchParams } = new URL(req.url);
+    const targetNovelId = searchParams.get("id") || "cmmop7i5x0009to2eajlzieqh";
     
     // Find the novel to ensure it exists
     const novel = await prisma.novel.findUnique({
