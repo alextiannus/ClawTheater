@@ -5,6 +5,7 @@ import { BookOpen, Code, Wallet, Globe, User, LogOut } from "lucide-react";
 import Link from "next/link";
 import Image from "next/image";
 import DepositModal from "./DepositModal";
+import LoginModal from "./LoginModal";
 import { useAuth } from "@/app/hooks/useAuth";
 import { useLanguageStore, SUPPORTED_LANGUAGES } from "@/app/lib/stores";
 import { navLabel as i18nNavLabel } from "@/app/lib/i18n";
@@ -18,12 +19,13 @@ const NAV_LINKS = [
 export default function Header() {
     const [mobileOpen, setMobileOpen] = useState(false);
     const [showDeposit, setShowDeposit] = useState(false);
+    const [showLoginModal, setShowLoginModal] = useState(false);
     const [showLangPicker, setShowLangPicker] = useState(false);
     const [showAvatarMenu, setShowAvatarMenu] = useState(false);
     const langRef = useRef<HTMLDivElement>(null);
     const avatarRef = useRef<HTMLDivElement>(null);
     const { lang, setLang, autoDetect } = useLanguageStore();
-    const { isAuthenticated, user, walletAddress, login, logout } = useAuth();
+    const { isAuthenticated, user, walletAddress, logout } = useAuth();
 
     // Auto-detect browser language on first client render
     useEffect(() => {
@@ -190,7 +192,7 @@ export default function Header() {
                             );
                         })() : (
                             <button
-                                onClick={login}
+                                onClick={() => setShowLoginModal(true)}
                                 className="px-5 py-2.5 bg-white text-black rounded-full text-[11px] font-mono font-bold tracking-wider hover:shadow-[0_0_20px_rgba(255,255,255,0.3)] transition-all cursor-pointer flex items-center gap-1.5 uppercase"
                             >
                                 <User size={13} /> {i18nNavLabel("signIn", lang)}
@@ -204,7 +206,7 @@ export default function Header() {
                             <span className="text-sm">{currentLang.flag}</span>
                         </button>
                         {!isAuthenticated && (
-                            <button onClick={login} className="px-3 py-1.5 bg-white text-black rounded-full text-[10px] font-bold cursor-pointer">
+                            <button onClick={() => setShowLoginModal(true)} className="px-3 py-1.5 bg-white text-black rounded-full text-[10px] font-bold cursor-pointer">
                                 {i18nNavLabel("signIn", lang)}
                             </button>
                         )}
@@ -264,6 +266,7 @@ export default function Header() {
             </header>
 
             <DepositModal isOpen={showDeposit} onClose={() => setShowDeposit(false)} walletAddress={walletAddress || undefined} />
+            <LoginModal isOpen={showLoginModal} onClose={() => setShowLoginModal(false)} />
         </>
     );
 }
