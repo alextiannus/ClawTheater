@@ -1,61 +1,88 @@
 "use client";
 
+import { usePrivy, useWallets } from "@privy-io/react-auth";
 import { useUserStore } from "../lib/stores";
-import { useState, useCallback } from "react";
+import { useEffect, useRef } from "react";
 
-/**
- * Hook that syncs JWT auth state with Zustand store.
- * Replaces the old Privy implementation.
- */
 export function useAuth() {
+    const { ready, authenticated, user, login, logout: privyLogout } = usePrivy();
+    const { wallets } = useWallets();
     const store = useUserStore();
-    const [ready, setReady] = useState(false);
+    const syncedRef = useRef(false);
+    const syncedWalletRef = useRef<string | null>(null);
 
-    const syncAuth = useCallback(async () => {
-        try {
-            const res = await fetch("/api/auth/me");
-            if (res.ok) {
-                const data = await res.json();
-                if (data.user) {
-                    store.setUserId(data.user.id);
-                    store.login(data.user.userType?.toLowerCase() || "human", data.user.displayName || data.user.email);
-                    if (data.user.walletAddress) {
-                        store.setWallet(data.user.walletAddress);
+    useEffect(() => {
+        if (ready && authenticated && user) {
+            const walletAccount = user.linkedAccounts?.find(
+                (account) => account.type === "wallet" && (account as any).walletClientType === "privy"
+            ) as any;
+            
+            const fallbackLinkedWallet = user.linkedAccounts?.find(
+                (account) => account.type === "wallet" && account.address && account.address.length >= 32 && account.address.length <= 44 && !account.address.startsWith("0x")
+            ) as any;
+
+            const activeSolanaWallet = wallets.find(
+                (w) => w.walletClientType === "privy" && w.address && !w.address.startsWith("0x")
+            );
+
+            const walletAddress = user.wallet?.address || walletAccount?.address || fallbackLinkedWallet?.address || activeSolanaWallet?.address || null;
+
+            const displayName = user.google?.name || user.email?.address || "Anon";
+            const email = user.email?.address || null;
+
+            const hasSynced = syncedRef.current && syncedWalletRef.current === walletAddress;
+            if (hasSynced) return;
+
+            syncedRef.current = true;
+            syncedWalletRef.current = walletAddress || "none";
+
+            store.login("human", displayName);
+            if (walletAddress) store.setWallet(walletAddress);
+
+            fetch("/api/auth/sync", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    privyId: user.id,
+                    email,
+                    displayName,
+                    walletAddress,
+                }),
+            })
+                .then((r) => r.json())
+                .then((data) => {
+                    if (data.userId) {
+                        store.setUserId(data.userId);
                     }
-                    if (typeof data.user.usdcBalance === "number") {
-                        store.setBalance(data.user.usdcBalance);
+                    if (typeof data.usdcBalance === "number") {
+                        store.setBalance(data.usdcBalance);
                     }
-                }
-            } else {
-                store.logout();
-            }
-        } catch (error) {
-            console.error("[useAuth] Failed to sync auth:", error);
+                })
+                .catch(() => {});
+        } else if (ready && !authenticated) {
+            syncedRef.current = false;
             store.logout();
-        } finally {
-            setReady(true);
         }
-    }, [store]);
+    }, [ready, authenticated, user, wallets.length, store]);
 
-    const handleLogin = () => {
-        // Trigger generic modal open using custom event
-        window.dispatchEvent(new Event("open-auth-modal"));
-    };
+    const handleLogin = () => login();
 
     const handleLogout = async () => {
-        await fetch("/api/auth/logout", { method: "POST" });
+        syncedRef.current = false;
+        await privyLogout();
         store.logout();
     };
 
     return {
         ready,
-        isAuthenticated: !!store.userId,
-        user: store.userId ? { id: store.userId, email: store.displayName } : null,
+        isAuthenticated: authenticated,
+        user,
         userId: store.userId,
         walletAddress: store.walletAddress,
         displayName: store.displayName,
         login: handleLogin,
         logout: handleLogout,
-        syncAuth,
+        syncAuth: () => {} // Shim to avoid breaking other components using it on mount
     };
 }
+

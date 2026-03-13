@@ -23,6 +23,8 @@ interface NovelDetail {
     gradient: string;
     coverUrl?: string;
     description: string;
+    workType?: string;
+    genre?: string;
 }
 
 interface ChapterPreview {
@@ -95,41 +97,31 @@ export default function NovelDetailPage({ params }: { params: Promise<{ id: stri
     };
 
     useEffect(() => {
-        // Fetch specific novel from the API list (or we can use a dedicated endpoint)
-        fetch(`/api/novels`)
+        fetch(`/api/novels/${id}`)
             .then((r) => r.json())
             .then((data) => {
-                const found = (data.novels || []).find((n: any) => n.id === id);
-                if (found) {
+                if (data.id) {
                     setNovel({
-                        id: found.id,
-                        title: found.title,
-                        agent: found.agent || "Unknown",
-                        tags: found.tags || [],
-                        readCount: found.readCount || 0,
-                        chapters: found.chapterCount || 0,
-                        price: found.price || 0,
-                        status: found.status || "ONGOING",
-                        lang: found.language || "en",
-                        gradient: found.gradient || "linear-gradient(135deg, #0a2e1a 0%, #064e3b 40%, #059669 100%)",
-                        coverUrl: found.coverUrl,
-                        description: found.description || "",
+                        id: data.id,
+                        title: data.title,
+                        agent: data.agent?.agentName || "Unknown",
+                        tags: data.tags || [],
+                        readCount: data.readCount || 0,
+                        chapters: data.chapters?.length || 0,
+                        price: data.pricePerChapter || 0,
+                        status: data.status || "ONGOING",
+                        lang: data.language || "en",
+                        gradient: "linear-gradient(135deg, #0a2e1a 0%, #064e3b 40%, #059669 100%)",
+                        coverUrl: data.coverUrl,
+                        description: data.description || "",
+                        workType: data.workType || "novel",
+                        genre: data.genre || "其他",
                     });
+                    setChapters(data.chapters || []);
                 }
                 setLoading(false);
             })
             .catch(() => setLoading(false));
-
-        // Fetch chapters
-        fetch(`/api/novels/${id}/chapters`)
-            .then((r) => r.json())
-            .then((data) => {
-                setChapters(data.chapters || []);
-                if (data.novel && data.novel.totalChapters !== undefined) {
-                    setNovel(prev => prev ? { ...prev, chapters: data.novel.totalChapters } : null);
-                }
-            })
-            .catch(() => { });
     }, [id]);
 
     if (loading) {
@@ -163,88 +155,104 @@ export default function NovelDetailPage({ params }: { params: Promise<{ id: stri
 
     const statusText = novel.status === "ONGOING" ? t.ongoing : t.completed;
     const visibleChapters = showAllChapters ? chapters : chapters.slice(0, 12);
+    const isToolOrOther = novel.workType === "other" || novel.genre === "nonfiction" || novel.genre === "other" || novel.genre === "工具类" || novel.genre === "其他";
 
     return (
         <>
             <Header />
             <main className="pt-16 min-h-screen">
-                {/* ═══════ HERO BANNER (Netflix-style) ═══════ */}
-                <section className="relative h-[65vh] min-h-[480px]">
+                {/* ═══════ HERO BANNER (Netflix-style or Book Cover style) ═══════ */}
+                <section className={`relative min-h-[480px] ${isToolOrOther ? 'py-12 md:py-24 flex items-center' : 'h-[65vh]'}`}>
                     {/* Background */}
-                    {(novel as any).coverUrl ? (
-                        <div className="absolute inset-0">
-                            <Image src={(novel as any).coverUrl} alt={novel.title} fill className="object-cover opacity-60" priority />
+                    {novel.coverUrl ? (
+                        <div className="absolute inset-0 overflow-hidden">
+                            <Image src={novel.coverUrl} alt={novel.title} fill className={`object-cover ${isToolOrOther ? 'blur-[80px] opacity-40 scale-125' : 'opacity-60'}`} priority />
                         </div>
                     ) : (
                         <div className="absolute inset-0" style={{ background: (novel as any).gradient || 'linear-gradient(135deg, #000 0%, #111 100%)' }} />
                     )}
                     <div className="absolute inset-0 bg-gradient-to-t from-black via-black/40 to-transparent" />
-                    <div className="absolute inset-0 bg-gradient-to-r from-black/80 via-transparent to-transparent" />
+                    {!isToolOrOther && <div className="absolute inset-0 bg-gradient-to-r from-black/80 via-transparent to-transparent" />}
 
                     {/* Content */}
-                    <div className="relative h-full max-w-7xl mx-auto px-6 flex items-end pb-12">
-                        <div className="max-w-2xl space-y-5">
-                            {/* Tags */}
-                            <div className="flex items-center gap-2 flex-wrap">
-                                <span className={`text-xs px-2.5 py-1 rounded-full border ${novel.status === "ONGOING"
-                                    ? "text-terminal-green bg-terminal-green/10 border-terminal-green/30"
-                                    : "text-neon-green bg-neon-green/10 border-neon-green/30"
-                                    }`}>
-                                    {statusText}
-                                </span>
-                                {novel.tags.map((tag) => (
-                                    <span key={tag} className="text-xs px-2 py-0.5 rounded bg-white/10 text-white/70">
-                                        {tag}
+                    <div className={`relative h-full w-full max-w-7xl mx-auto px-6 flex ${isToolOrOther ? 'items-center justify-center md:justify-start' : 'items-end pb-12'}`}>
+                        <div className={`flex flex-col md:flex-row gap-8 lg:gap-12 w-full ${isToolOrOther ? 'items-center md:items-start pt-8 md:pt-12' : 'max-w-2xl'}`}>
+                            
+                            {/* Book Cover for Tool/Other */}
+                            {isToolOrOther && novel.coverUrl && (
+                                <div className="shrink-0 w-[200px] md:w-[280px] aspect-[1/1] md:aspect-[3/4] relative rounded-xl overflow-hidden shadow-[0_20px_50px_rgba(0,0,0,0.5)] border border-white/10 z-10 transition-transform hover:scale-[1.02]">
+                                   <Image src={novel.coverUrl} alt={novel.title} fill className="object-cover" priority />
+                                </div>
+                            )}
+
+                            <div className={`space-y-5 ${isToolOrOther ? 'flex-1 text-center md:text-left flex flex-col items-center md:items-start' : ''}`}>
+                                {/* Tags */}
+                                <div className="flex items-center gap-2 flex-wrap">
+                                    <span className={`text-xs px-2.5 py-1 rounded-full border ${novel.status === "ONGOING"
+                                        ? "text-terminal-green bg-terminal-green/10 border-terminal-green/30"
+                                        : "text-neon-green bg-neon-green/10 border-neon-green/30"
+                                        }`}>
+                                        {statusText}
                                     </span>
-                                ))}
-                            </div>
+                                    {novel.tags.map((tag) => (
+                                        <span key={tag} className="text-xs px-2 py-0.5 rounded bg-white/10 text-white/70">
+                                            {tag}
+                                        </span>
+                                    ))}
+                                    {isToolOrOther && novel.genre && (
+                                        <span className="text-xs px-2 py-0.5 rounded bg-pulse-blue/20 text-pulse-blue border border-pulse-blue/30 font-bold uppercase">
+                                            {novel.genre}
+                                        </span>
+                                    )}
+                                </div>
 
-                            {/* Title */}
-                            <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold text-white leading-tight">
-                                {novel.title}
-                            </h1>
+                                {/* Title */}
+                                <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold text-white leading-tight">
+                                    {novel.title}
+                                </h1>
 
-                            {/* Meta */}
-                            <div className="flex items-center gap-4 text-sm text-white/60">
-                                <span>🦞 {novel.agent}</span>
-                                <span>·</span>
-                                <span>{novel.chapters} {t.chapters}</span>
-                                <span>·</span>
-                                <span>{(novel.readCount / 1000).toFixed(1)}K {t.readers}</span>
-                                {novel.price > 0 && (
-                                    <>
-                                        <span>·</span>
-                                        <span className="text-terminal-green">${novel.price} {t.pricePerChapter}</span>
-                                    </>
-                                )}
-                            </div>
+                                {/* Meta */}
+                                <div className="flex items-center gap-4 text-sm text-white/60 flex-wrap justify-center md:justify-start">
+                                    <span>🦞 {novel.agent}</span>
+                                    <span>·</span>
+                                    <span>{novel.chapters} {t.chapters}</span>
+                                    <span>·</span>
+                                    <span>{(novel.readCount / 1000).toFixed(1)}K {t.readers}</span>
+                                    {novel.price > 0 && (
+                                        <>
+                                            <span>·</span>
+                                            <span className="text-terminal-green">${novel.price} {t.pricePerChapter}</span>
+                                        </>
+                                    )}
+                                </div>
 
-                            {/* CTA Row */}
-                            <div className="flex items-center gap-3 pt-2">
-                                <Link
-                                    href={`/read/${novel.id}/1`}
-                                    className="px-8 py-3.5 bg-terminal-green text-black font-bold rounded-xl text-sm tracking-wider uppercase hover:shadow-[0_0_30px_rgba(5,150,105,0.4)] transition-all inline-flex items-center gap-2"
-                                >
-                                    ▶ {t.startReading}
-                                </Link>
-                                <button
-                                    onClick={() => setShowTipModal(true)}
-                                    className="px-6 py-3.5 bg-terminal-green/10 text-terminal-green border border-terminal-green/30 font-bold rounded-xl text-sm tracking-wider uppercase hover:bg-terminal-green/20 transition-all cursor-pointer"
-                                >
-                                    ⚡ {t.fundCta}
-                                </button>
-                                <SaveShareButtons
-                                    itemId={novel.id}
-                                    context={{
-                                        type: "novel",
-                                        title: novel.title,
-                                        author: novel.agent,
-                                        readCount: novel.readCount,
-                                        chapters: novel.chapters,
-                                        tags: novel.tags,
-                                        coverUrl: novel.coverUrl,
-                                    }}
-                                />
+                                {/* CTA Row */}
+                                <div className={`flex items-center gap-3 pt-2 flex-wrap ${isToolOrOther ? 'justify-center md:justify-start' : ''}`}>
+                                    <Link
+                                        href={`/read/${novel.id}/1`}
+                                        className="px-8 py-3.5 bg-terminal-green text-black font-bold rounded-xl text-sm tracking-wider uppercase hover:shadow-[0_0_30px_rgba(5,150,105,0.4)] transition-all inline-flex items-center gap-2"
+                                    >
+                                        ▶ {t.startReading}
+                                    </Link>
+                                    <button
+                                        onClick={() => setShowTipModal(true)}
+                                        className="px-6 py-3.5 bg-terminal-green/10 text-terminal-green border border-terminal-green/30 font-bold rounded-xl text-sm tracking-wider uppercase hover:bg-terminal-green/20 transition-all cursor-pointer"
+                                    >
+                                        ⚡ {t.fundCta}
+                                    </button>
+                                    <SaveShareButtons
+                                        itemId={novel.id}
+                                        context={{
+                                            type: "novel",
+                                            title: novel.title,
+                                            author: novel.agent,
+                                            readCount: novel.readCount,
+                                            chapters: novel.chapters,
+                                            tags: novel.tags,
+                                            coverUrl: novel.coverUrl,
+                                        }}
+                                    />
+                                </div>
                             </div>
                         </div>
                     </div>

@@ -200,7 +200,7 @@ export default function Header() {
 
                     {/* Mobile */}
                     <div className="md:hidden flex items-center gap-2">
-                        <button onMouseDown={(e) => e.stopPropagation()} onClick={() => setShowLangPicker(!showLangPicker)} className="p-2 text-white/40 cursor-pointer">
+                        <button onTouchStart={(e) => e.stopPropagation()} onMouseDown={(e) => e.stopPropagation()} onClick={() => setShowLangPicker(!showLangPicker)} className="p-2 text-white/40 cursor-pointer">
                             <span className="text-sm">{currentLang.flag}</span>
                         </button>
                         {!isAuthenticated && (
@@ -218,7 +218,7 @@ export default function Header() {
 
                 {/* Mobile lang picker */}
                 {showLangPicker && (
-                    <div onMouseDown={(e) => e.stopPropagation()} className="md:hidden mx-4 mt-1 px-4 py-3 bg-obsidian/95 backdrop-blur-md border border-white/5 rounded-2xl">
+                    <div onTouchStart={(e) => e.stopPropagation()} onMouseDown={(e) => e.stopPropagation()} className="md:hidden mx-4 mt-1 px-4 py-3 bg-obsidian/95 backdrop-blur-md border border-white/5 rounded-2xl">
                         <div className="text-[9px] font-mono text-terminal-green/40 tracking-[0.3em] uppercase mb-2 px-2">CULTURAL UNIVERSE</div>
                         <div className="grid grid-cols-3 gap-1.5">
                             {SUPPORTED_LANGUAGES.map((l) => (

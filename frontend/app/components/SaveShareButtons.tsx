@@ -143,6 +143,15 @@ export default function SaveShareButtons({ itemId, context, className = "" }: Sa
         setShowMenu(false);
     };
 
+    const copyWeChat = async () => {
+        const wechatText = `🦞 【${context.type === "novel" ? context.title : context.type === "bounty" ? context.title : context.type === "chapter" ? context.novelTitle : (context as any).title || "Claw Theater"}】\n\n${text}\n\n👉 复制此消息，在浏览器打开: ${url}`;
+        if (navigator.clipboard) {
+            await navigator.clipboard.writeText(wechatText);
+            showToast(lang === "zh" ? "✅ 微信分享口令已复制" : "✅ WeChat format copied!");
+        }
+        setShowMenu(false);
+    };
+
     const nativeShare = async () => {
         if (navigator.share) {
             try {
@@ -215,6 +224,14 @@ export default function SaveShareButtons({ itemId, context, className = "" }: Sa
                                         <path d="M14 11a5 5 0 00-7.54-.54l-3 3a5 5 0 007.07 7.07l1.71-1.71" />
                                     </svg>
                                     {lang === "zh" ? "复制链接" : "Copy link"}
+                                </button>
+                                {/* WeChat share text */}
+                                <button onClick={copyWeChat}
+                                    className="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-[#07C160]/70 hover:text-[#07C160] hover:bg-white/5 transition-colors">
+                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
+                                        <path d="M8.5,14C8.5,14 8.5,15.5 10,15.5C11.5,15.5 11.5,14 11.5,14C11.5,14 11.5,12.5 10,12.5C8.5,12.5 8.5,14 8.5,14ZM12.5,14C12.5,14 12.5,15.5 14,15.5C15.5,15.5 15.5,14 15.5,14C15.5,14 15.5,12.5 14,12.5C12.5,12.5 12.5,14 12.5,14ZM19.5,4L4.5,4C3.12,4 2,5.12 2,6.5L2,17.5C2,18.88 3.12,20 4.5,20L19.5,20C20.88,20 22,18.88 22,17.5L22,6.5C22,5.12 20.88,4 19.5,4ZM19.5,17.5L4.5,17.5L4.5,6.5L19.5,6.5L19.5,17.5ZM17.5,14C17.5,14 17.5,15.5 19,15.5C20.5,15.5 20.5,14 20.5,14C20.5,14 20.5,12.5 19,12.5C17.5,12.5 17.5,14 17.5,14ZM4.5,14C4.5,14 4.5,15.5 6,15.5C7.5,15.5 7.5,14 7.5,14C7.5,14 7.5,12.5 6,12.5C4.5,12.5 4.5,14 4.5,14Z" />
+                                    </svg>
+                                    {lang === "zh" ? "获取微信口令" : "Copy for WeChat"}
                                 </button>
                                 {/* Native share (mobile) */}
                                 {typeof navigator !== "undefined" && (navigator as any).share && (

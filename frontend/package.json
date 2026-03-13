@@ -16,6 +16,7 @@
     "@aws-sdk/s3-request-presigner": "^3.1007.0",
     "@coral-xyz/anchor": "^0.32.1",
     "@prisma/client": "^6.19.2",
+    "@privy-io/react-auth": "^3.16.0",
     "@solana/web3.js": "^1.98.4",
     "@stripe/stripe-js": "^8.9.0",
     "@tailwindcss/postcss": "^4",
