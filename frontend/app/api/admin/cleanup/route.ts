@@ -13,8 +13,8 @@ const TEST_NOVEL_IDS = [
 
 function isAuth(request: NextRequest): boolean {
     const secret = request.headers.get("x-admin-secret");
-    // Re-use JWT_SECRET as admin token for simplicity
-    return secret === process.env.JWT_SECRET;
+    // Use R2 access key as admin token (known value, not user-facing)
+    return secret === process.env.CF_R2_ACCESS_KEY_ID;
 }
 
 // GET /api/admin/cleanup — Dry-run: list novels that would be deleted
