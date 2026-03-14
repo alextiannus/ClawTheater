@@ -843,7 +843,7 @@ export default function HomePage() {
           </div>
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-4">
             {novels.map((novel: any) => (
-              <ArchiveCard key={novel.id} novel={novel} />
+              <ForkableCard key={novel.id} novel={novel} t={t} isGrid={true} />
             ))}
           </div>
         </section>
@@ -1090,9 +1090,9 @@ function FundForm({
   );
 }
 
-function ForkableCard({ novel, t }: { novel: DemoNovel; t: PageTranslations }) {
+function ForkableCard({ novel, t, isGrid = false }: { novel: DemoNovel; t: PageTranslations; isGrid?: boolean }) {
   return (
-    <div className="flex-shrink-0 w-56 group relative">
+    <div className={`group relative ${isGrid ? 'w-full' : 'flex-shrink-0 w-56'}`}>
       <Link href={`/novels/${novel.id}`}>
         <div className="relative aspect-[3/4] rounded-lg overflow-hidden border border-white/5 transition-all duration-500 group-hover:border-white/20 group-hover:shadow-[0_8px_50px_rgba(0,0,0,0.6)] group-hover:scale-[1.04]">
           {novel.coverUrl ? (
@@ -1113,7 +1113,7 @@ function ForkableCard({ novel, t }: { novel: DemoNovel; t: PageTranslations }) {
           <div className="absolute inset-0 flex flex-col justify-end p-4">
             <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
             <div className="relative z-10">
-              <h3 className="text-xl font-bold text-white tracking-tight leading-tight mb-1">
+              <h3 className="text-xl font-bold text-white tracking-tight leading-tight mb-1 line-clamp-2">
                 {novel.title}
               </h3>
               <p className="text-[10px] font-mono text-white/40 flex items-center gap-1">
@@ -1144,28 +1144,26 @@ function ForkableCard({ novel, t }: { novel: DemoNovel; t: PageTranslations }) {
             </span>
           </div>
           <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-all duration-500 flex">
-            <div className="w-1/2 bg-black/80 backdrop-blur-md flex flex-col items-center justify-center gap-2 border-r border-white/10 text-center px-2">
-              <div className="text-3xl font-bold font-mono text-terminal-green">
-                {(novel.readCount / 1000).toFixed(0)}K
+            <div className="w-1/2 bg-black/80 backdrop-blur-md flex flex-col items-center justify-center gap-2 border-r border-white/10 text-center px-1">
+              <div className="text-2xl font-bold font-mono text-terminal-green">
+                {((novel.readCount || 0) / 1000).toFixed(0)}K
               </div>
-              <div className="text-[9px] text-white/30 font-mono uppercase tracking-widest">{t.readers}</div>
+              <div className="text-[8px] text-white/30 font-mono uppercase tracking-widest">{t.readers}</div>
               {/* Engagement mini-stats */}
-              <div className="flex flex-col gap-1 text-[9px] font-mono text-white/40 leading-tight mt-1">
-                <span>❤️ {(novel as any).favoriteCount || 0} 收藏</span>
-                <span>💬 {(novel as any).commentCount || 0} 评论</span>
-                <span>💰 {(novel as any).tipCount || 0} 打赏</span>
+              <div className="flex flex-col gap-1 text-[8px] font-mono text-white/40 leading-tight mt-1">
+                <span>❤️ {(novel as any).favoriteCount || 0}</span>
+                <span>💰 {(novel as any).tipCount || 0}</span>
               </div>
-              <div className="text-[10px] font-mono text-white/30">{novel.chapters} ch · ${novel.price}</div>
-              <div className="mt-1 px-4 py-1.5 bg-terminal-green text-black text-xs font-bold rounded-sm uppercase tracking-wider">
+              <div className="mt-1 px-2 py-1 bg-terminal-green text-black text-[10px] font-bold rounded-sm uppercase tracking-wider">
                 ▶ Read
               </div>
             </div>
             <div className="w-1/2 bg-terminal-green/10 backdrop-blur-md flex flex-col items-center justify-center gap-3 border-l border-terminal-green/20">
-              <div className="text-[10px] text-terminal-green/60 font-mono text-center px-2">
+              <div className="text-[9px] text-terminal-green/60 font-mono text-center px-2 leading-tight">
                 {t.unhappy}
               </div>
-              <div className="text-terminal-green text-lg">🔀</div>
-              <div className="px-3 py-2 bg-terminal-green/20 border border-terminal-green/30 text-terminal-green text-[9px] font-bold rounded-sm uppercase text-center whitespace-pre-line">
+              <div className="text-terminal-green text-sm">🔀</div>
+              <div className="px-2 py-1 bg-terminal-green/20 border border-terminal-green/30 text-terminal-green text-[8px] font-bold rounded-sm uppercase text-center whitespace-pre-line">
                 {t.forkCost}
               </div>
             </div>
@@ -1245,76 +1243,3 @@ function MissionCard({
   );
 }
 
-function ArchiveCard({ novel }: { novel: DemoNovel }) {
-  return (
-    <Link href={`/novels/${novel.id}`} className="group relative">
-      <div className="relative aspect-[3/4] rounded-lg overflow-hidden border border-white/5 transition-all duration-300 group-hover:border-white/20 group-hover:shadow-[0_4px_30px_rgba(0,0,0,0.4)] group-hover:scale-[1.03]">
-        {(novel as any).coverUrl ? (
-          <div className="absolute inset-0">
-            <Image
-              src={(novel as any).coverUrl}
-              alt={novel.title}
-              fill
-              className="object-cover"
-            />
-          </div>
-        ) : (
-          <div
-            className="absolute inset-0"
-            style={{ background: novel.gradient }}
-          />
-        )}
-        <div className="absolute inset-0 flex flex-col justify-between p-3">
-          <div className="flex justify-between items-start">
-            <span className="text-[8px] px-1.5 py-0.5 rounded bg-black/30 text-white/50 font-mono">
-              {novel.tags[0]}
-            </span>
-            <span
-              className={`text-[8px] font-mono ${novel.status === "ONGOING" ? "text-terminal-green" : "text-pulse-blue"}`}
-            >
-              {novel.status === "ONGOING" ? "●" : "✓"}
-            </span>
-          </div>
-          <div>
-            <h3 className="text-sm font-bold text-white leading-tight mb-0.5 line-clamp-2 drop-shadow-lg">
-              {novel.title}
-            </h3>
-            <p className="text-[10px] text-white/40 font-mono flex items-center gap-1">
-              <Image
-                src="/lobster-hero.png"
-                alt=""
-                width={10}
-                height={10}
-                className="opacity-50"
-              />{" "}
-              {novel.agent}
-            </p>
-            {/* Persistent stats */}
-            <div className="flex items-center gap-2 mt-1">
-              <span className="text-[9px] font-mono text-white/35 flex items-center gap-0.5">
-                👁 {(novel.readCount / 1000).toFixed(0)}K
-              </span>
-              {(novel as any).favoriteCount > 0 && (
-                <span className="text-[9px] font-mono text-white/35 flex items-center gap-0.5">
-                  ❤️ {(novel as any).favoriteCount}
-                </span>
-              )}
-            </div>
-          </div>
-        </div>
-        <div className="absolute inset-0 bg-black/80 opacity-0 group-hover:opacity-100 transition-all duration-300 flex flex-col items-center justify-center gap-1 backdrop-blur-sm p-3">
-          <div className="text-xl font-bold font-mono text-white">
-            {(novel.readCount / 1000).toFixed(0)}K
-          </div>
-          <div className="text-[9px] text-white/30 font-mono">READERS</div>
-          <div className="text-xs font-mono text-terminal-green">
-            {novel.chapters} ch · ${novel.price}
-          </div>
-          <div className="mt-2 px-4 py-1.5 bg-white text-black text-[10px] font-bold rounded-sm uppercase">
-            ▶ Read
-          </div>
-        </div>
-      </div>
-    </Link>
-  );
-}
