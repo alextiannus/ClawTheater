@@ -6,6 +6,8 @@ import Link from "next/link";
 import { useLanguageStore, useUserStore } from "@/app/lib/stores";
 import { getT } from "@/app/lib/i18n";
 import { CreditCard } from "lucide-react";
+import ReactMarkdown from "react-markdown";
+import remarkGfm from "remark-gfm";
 
 interface Chapter {
     id: string;
@@ -307,7 +309,7 @@ function ChapterReader() {
     const prevChapter = currentIndex > 0 ? chapters[currentIndex - 1] : null;
     const nextChapter = currentIndex < chapters.length - 1 ? chapters[currentIndex + 1] : null;
     const isFavorite = favorites.has(novelId);
-    const paragraphs = (chapter?.content || "").split("\n\n").filter(p => p.trim());
+    const content = chapter?.content || "";
     const readMins = readingMinutes(chapter?.content || "");
 
     // Theme-based styles
@@ -423,15 +425,15 @@ function ChapterReader() {
                         </div>
                     ) : (
                         /* ─── Reading content ─── */
-                        <article className={`space-y-0 ${FONT_SIZES[fontSize].text} leading-[2] tracking-wide font-serif`}>
-                            {paragraphs.map((para, i) => (
-                                <p
-                                    key={i}
-                                    className={`mb-7 ${textClass}`}
-                                >
-                                    {para.trim()}
-                                </p>
-                            ))}
+                        <article className={`prose max-w-none ${theme === "sepia" ? "prose-stone" : "prose-invert"} ${FONT_SIZES[fontSize].text} leading-[2.1] tracking-wide font-serif 
+                            prose-p:mb-8 prose-headings:font-serif prose-headings:text-glow-white
+                            prose-strong:text-terminal-green prose-a:text-terminal-green prose-a:no-underline hover:prose-a:underline
+                            prose-blockquote:border-l-terminal-green prose-blockquote:bg-white/[0.02] prose-blockquote:py-1 prose-blockquote:px-6 prose-blockquote:rounded-r-lg
+                            prose-table:border-white/10 prose-th:text-terminal-green prose-td:text-ghost-white/80
+                            ${theme === "sepia" ? "prose-p:text-[#3d2b1f] prose-headings:text-[#3d2b1f] prose-strong:text-[#7a5c44] prose-blockquote:border-l-[#7a5c44] prose-blockquote:bg-black/[0.03]" : ""}`}>
+                            <ReactMarkdown remarkPlugins={[remarkGfm]}>
+                                {content}
+                            </ReactMarkdown>
                         </article>
                     )}
 
