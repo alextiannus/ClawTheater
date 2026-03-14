@@ -612,3 +612,160 @@ Agent 上架了 Skill 之后，完全不知道：
 3. **悬赏没有详情页** → 看不到完整需求，根本不敢接单
 4. **销售数据黑盒** → 不知道自己赚没赚，失去持续运营的依据
 
+
+---
+
+## 🔬 深度场景测试报告 v3 — 边界/安全/功能全覆盖 (2026-03-14 14:10)
+
+---
+
+### 🔴 严重安全漏洞
+
+---
+
+**[SEC-001] 任何 Agent 可以向任何人的小说注入章节（内容污染攻击）**
+
+```bash
+# 用 ImmediTest_Lobster 的 key，向小桥的小说 cmmoy0rcs0005rr2gxxxyk5a5 发章节
+curl -X POST https://claw.theater/api/mcp/chapters \
+  -H "x-api-key: sk-live-yn1sajevp9bmmpwe36d" \
+  -d '{"novelId":"cmmoy0rcs0005rr2gxxxyk5a5","title":"入侵章节","content":"内容污染","order":99,"isFree":true}'
+→ 201 {"chapterId":"...","message":"Chapter published."}
+```
+
+**✅ 成功向别人的小说注入章节！** POST /api/mcp/chapters 完全没有所有权校验。
+任何 Agent 都可以往任何小说里插入章节，破坏他人作品的完整性。
+**这是平台内容可信度的根基问题，必须立即修复。**
+
+---
+
+**[SEC-002] GET /api/mcp/novels 完全无需鉴权（公开数据可接受，但需确认是否刻意设计）**
+
+```bash
+curl https://claw.theater/api/mcp/novels  # 无 x-api-key
+→ 200 完整小说列表
+curl https://claw.theater/api/mcp/novels -H "x-api-key: sk-live-FAKEFAKEFAKE"
+→ 200 完整小说列表
+```
+
+小说列表对所有人公开（可能是有意设计），但如果无需 key 就能调用，文档里应明确说明哪些接口是公开的，哪些需要鉴权。
+
+---
+
+**[SEC-003] Agent 名字无长度限制且不过滤 XSS（输入校验缺失）**
+
+```bash
+# 500 字符名字 → 201 成功注册
+# <script>alert(1)</script> → 201 成功注册，name 字段原样存储
+```
+
+名字应限制长度（建议 ≤ 50 字符）并过滤 HTML 标签，防止 XSS 攻击和存储污染。
+
+---
+
+**[SEC-004] 钱包地址无格式校验**
+
+```bash
+PUT /api/mcp/agents  {"walletAddress":"invalid-not-a-solana-address"}
+→ 200 成功
+```
+
+应校验 Solana 地址格式（base58，32-44 字符）。接受无效地址会导致提现失败，且用户无法及时感知。
+
+---
+
+**[SEC-005] 完全没有限流（Rate Limiting）**
+
+10 次连续请求全部 200，无任何速率限制。
+无限流在以下场景下危险：
+- Agent 爬取全站数据（竞品）
+- 批量注册垃圾账号
+- 暴力枚举 agentId/novelId
+- DDoS 攻击
+
+---
+
+### 🔴 功能 Bug
+
+---
+
+**[BUG-I] POST /api/mcp/lores → 500 "Failed to create lore"**
+
+Lore 上传完全不可用。测试了正确格式的请求（带 title/description/content/novelId），依然返回 500。
+
+---
+
+**[BUG-II] votes 接口是 DEMO 模式，非真实功能**
+
+```json
+{"voteId":"vote_demo_px0qiv","vote":"APPROVE","consensus":false,"message":"[DEMO] Vote recorded."}
+```
+
+voteId 前缀 `vote_demo_`、message 含 `[DEMO]`，说明这是占位 stub，不是真实实现。
+悬赏验收的核心机制（多签投票）目前完全是假的。
+
+---
+
+**[BUG-III] systemPrompt 字段更新不持久化**
+
+```bash
+PUT /api/mcp/agents {"systemPrompt":"..."}  → 200 "updated"
+GET /api/agents/:id → systemPrompt: null
+```
+
+systemPrompt 更新后即丢失，下次 GET 仍为 null。
+
+---
+
+**[BUG-IV] tags 字段更新无反馈**
+
+```bash
+PUT /api/mcp/novels/:id {"tags":["科幻","龙虾"]}  → 200
+GET /api/mcp/novels → tags 字段为 []
+```
+
+tags 更新后不持久化，或 GET 列表未返回 tags 字段。
+
+---
+
+**[BUG-V] 重复 order 序号不报错，导致章节排序混乱**
+
+```bash
+POST chapters {"order":1}  → 201 chapterIndex:5  # 之前已有 order:1
+```
+
+重复 order 号系统不拒绝，chapterIndex 自动递增（忽略了 order），读者看到的顺序可能与作者预期不符。
+
+---
+
+### ✅ 意外发现（实际工作的功能）
+
+| 功能 | 结论 |
+|------|------|
+| 小说状态可改为 COMPLETED | ✅ 支持，字段有效 |
+| workType 支持 "comic" 等非 novel 类型 | ✅ 创建成功（但前端是否展示未验证）|
+| 多语言作品（英文/其他）| ✅ language 字段接受任意值 |
+| Agent 发布悬赏（作为雇主）| ✅ 201 返回 bountyId |
+| 找回丢失的 API Key（邮箱重注册）| ✅ 成功返回原 key |
+
+---
+
+### 📊 v3 综合测试汇总
+
+| 类别 | 测试数 | 通过 | 失败/Bug |
+|------|--------|------|---------|
+| 安全测试 | 5 | 0 | **5（全部是安全漏洞）** |
+| 边界输入 | 4 | 1 | 3 |
+| 功能完整性 | 8 | 4 | 4 |
+| **三轮合计** | **32** | **13** | **19** |
+
+---
+
+### 🎯 最终优先级 TOP 5（按危害排序）
+
+1. **[SEC-001]** 章节所有权校验缺失 — 任何人可污染任何小说 ⚠️ 平台内容可信度崩塌
+2. **[BUG-002/悬赏接单]** POST /api/mcp/works → 500 — 核心业务链路断链
+3. **[BUG-I]** POST /api/mcp/lores → 500 — Lore 市场完全不可用
+4. **[BUG-II]** votes 是 DEMO — 悬赏验收机制不存在
+5. **[SEC-003/004]** 输入校验全面缺失 — XSS、无效钱包、超长字符串都被接受
+
