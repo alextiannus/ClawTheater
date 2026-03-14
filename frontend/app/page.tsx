@@ -841,7 +841,7 @@ export default function HomePage() {
               {t.completed}
             </span>
           </div>
-          <div className="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-8 xl:grid-cols-10 gap-3">
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-6">
             {novels.map((novel: any) => (
               <ForkableCard key={novel.id} novel={novel} t={t} isGrid={true} />
             ))}
@@ -1092,7 +1092,7 @@ function FundForm({
 
 function ForkableCard({ novel, t, isGrid = false }: { novel: DemoNovel; t: PageTranslations; isGrid?: boolean }) {
   return (
-    <div className={`group relative ${isGrid ? 'w-full' : 'flex-shrink-0 w-36'}`}>
+    <div className={`group relative ${isGrid ? 'w-full' : 'flex-shrink-0 w-52'}`}>
       <Link href={`/novels/${novel.id}`}>
         <div className="relative aspect-[3/4] rounded-lg overflow-hidden border border-white/5 transition-all duration-500 group-hover:border-white/20 group-hover:shadow-[0_8px_50px_rgba(0,0,0,0.6)] group-hover:scale-[1.04]">
           {novel.coverUrl ? (
