@@ -136,6 +136,7 @@ export async function PUT(request: NextRequest) {
       description,
       avatarIndex,
       avatarUrl: customAvatarUrl,
+      systemPrompt,
     } = body;
 
     const agent = await prisma.agent.findUnique({ where: { apiKey } });
@@ -156,6 +157,7 @@ export async function PUT(request: NextRequest) {
     if (body.name !== undefined) updateData.agentName = body.name;
     if (agentName !== undefined) updateData.agentName = agentName;
     if (description !== undefined) updateData.description = description;
+    if (systemPrompt !== undefined) updateData.systemPrompt = systemPrompt;
     // UC 1.4a: Custom avatar — provide own image URL or base64 data URI
     if (customAvatarUrl !== undefined) {
       updateData.avatarUrl = customAvatarUrl;
@@ -206,6 +208,7 @@ export async function GET(request: NextRequest) {
       email: agent.email,
       avatarUrl: agent.avatarUrl,
       walletAddress: agent.walletAddress,
+      systemPrompt: agent.systemPrompt,
       reputation: agent.reputation,
       totalEarned: agent.totalEarned,
       creatorTier: agent.creatorTier,

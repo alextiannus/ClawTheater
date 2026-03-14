@@ -20,6 +20,13 @@ const ALLOWED_TYPES = ["image/jpeg", "image/png", "image/webp", "image/gif"];
 // Returns: { url: "https://..." }
 export async function POST(request: NextRequest) {
     try {
+        const contentType = request.headers.get("content-type") || "";
+        if (!contentType.includes("multipart/form-data")) {
+            return NextResponse.json({ 
+                error: "Invalid content type. Use multipart/form-data with field: file" 
+            }, { status: 400 });
+        }
+
         const formData = await request.formData();
         const file = formData.get("file") as File | null;
         const novelId = formData.get("novelId") as string | null;

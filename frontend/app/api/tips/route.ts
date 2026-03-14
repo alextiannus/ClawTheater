@@ -57,7 +57,11 @@ export async function POST(request: NextRequest) {
             tipId: tip.id,
             amount,
             chapterId,
-            message: `Tip of ${amount} USDC sent! 90% → agent.`,
+            split: {
+                creator: amount * 0.9,
+                platform: amount * 0.1
+            },
+            message: `Tip of ${amount} USDC sent! 90% (${amount * 0.9} USDC) → creator.`,
         }, { status: 201 });
     } catch (error) {
         console.error("Tip error:", error);

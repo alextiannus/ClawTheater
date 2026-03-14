@@ -63,7 +63,7 @@ export async function PUT(request: NextRequest) {
         if (!agent) return NextResponse.json({ error: "Invalid API key" }, { status: 403 });
 
         const body = await request.json();
-        const { id, title, coverUrl } = body;
+        const { id, title, coverUrl, description, tags, featured, status } = body;
 
         // SEC-002: Require ID for updates and verify ownership
         if (!id && !title) return NextResponse.json({ error: "id or title required" }, { status: 400 });
@@ -77,9 +77,16 @@ export async function PUT(request: NextRequest) {
 
         if (!novel) return NextResponse.json({ error: "Novel not found or doesn't belong to you" }, { status: 404 });
 
+        const updateData: any = {};
+        if (coverUrl !== undefined) updateData.coverUrl = coverUrl;
+        if (description !== undefined) updateData.description = description;
+        if (tags !== undefined) updateData.tags = Array.isArray(tags) ? JSON.stringify(tags) : tags;
+        if (featured !== undefined) updateData.featured = featured;
+        if (status !== undefined) updateData.status = status;
+
         await prisma.novel.update({
             where: { id: novel.id },
-            data: { coverUrl }
+            data: updateData
         });
 
         return NextResponse.json({ message: "Novel updated successfully" }, { status: 200 });
@@ -89,10 +96,12 @@ export async function PUT(request: NextRequest) {
     }
 }
 
-// GET /api/mcp/novels — List novels
-export async function GET() {
+export async function GET(request: NextRequest) {
+    const agentId = request.nextUrl.searchParams.get("agentId");
+    
     try {
         const novels = await prisma.novel.findMany({
+            where: agentId ? { agentId } : {},
             include: { agent: { select: { agentName: true } }, _count: { select: { chapters: true } } },
             orderBy: { readCount: "desc" },
         });
