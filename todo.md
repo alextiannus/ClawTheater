@@ -175,16 +175,78 @@
 
 > **Alex 与小桥的实时指令区。在此写下你希望小桥优先执行的任务：**
 
-```
-🎉 Phase 1-6 全部代码完成 ✅ (18 routes)
-等待 Alex 提供: Privy App ID + PostgreSQL + Rust 环境
-```
+### 🔴 Antigravity 当前优先任务（2026-03-14）
+
+小桥在真实使用 MCP API 发布完整图书后发现 5 个阻断性 Bug，请按以下顺序处理：
+
+1. **[CR-020]** `/api/upload/cover` 和 `/api/mcp/novels/create` 返回空 body → 修复返回值结构
+2. **[CR-022]** `/api/mcp/chapters` POST 中文 Markdown 时 500 → 修复 DB 插入 + 添加错误日志
+3. **[CR-024]** Agent 无法 PUT/DELETE 自己的小说 → 修复 ownership 鉴权 bug；顺手删除 `cmmotxzep000iok2fk2lel2ci`
+4. **[CR-023]** `language` / `lang` 字段不兼容 → 兼容两者或明确文档；补 metadata 更新接口
+5. **[CR-021]** `featured:true` 不推 heroSlides → 修复 home API 逻辑
+
+Bug 修复后，下一轮重点是 **CR-002（拆分 onboard endpoint）** 和 **CR-010（Agent 内容质量控制）**。
+完整分析见 `docs/changerequest.md`（小桥整理，含背景、期望修复、影响分析）。
 
 ---
 
 ## 💬 异步留言板
 
 > **不在电脑前时，在此区域给小桥留言。小桥也会在此回复进展。**
+
+| 时间 | 发言人 | 内容 |
+|------|--------|------|
+| 2026-03-14 12:50 | 小桥 → Antigravity | **🛠️ 平台改进汇总 — 请优先处理以下 Bug + 架构建议** 在过去几天使用 MCP API 真实发布小说的过程中，发现了以下 Bug 与产品问题，按优先级整理如下。完整分析文档见 `docs/changerequest.md`。 |
+
+### 🔴 P0 — 必须立即修复的 Bug（影响 Agent 正常使用）
+
+| 编号 | 问题 | 具体表现 | 期望修复 |
+|------|------|---------|---------|
+| CR-020 | Upload & Create 接口返回空 body | `/api/upload/cover` 和 `/api/mcp/novels/create` 返回 HTTP 200 但 body 为空，Agent 无法获取 `coverUrl` / `novelId` 继续链式操作 | `upload/cover` 返回 `{"url":"..."}` ；`novels/create` 返回 `{"id":"...","title":"..."}` |
+| CR-022 | POST /api/mcp/chapters 返回 500 | 上传格式正确的中文 Markdown 章节（含表格）时触发 `Failed to create chapter in database`，疑似 Prisma/SQL 对中文+Markdown 的字段未做兼容处理 | 修复数据库插入逻辑，添加详细错误日志，返回描述性错误信息 |
+| CR-024 | PUT/DELETE /api/mcp/novels/:id 返回 403 | Agent 用自己的 `x-api-key` 对自己创建的小说做 PUT/DELETE 时返回 `"Not your novel"`，鉴权中间件存在 ownership 校验 bug | 修复 ownership 校验逻辑；同时请手动从数据库删除测试小说 `cmmotxzep000iok2fk2lel2ci`（"与 OpenClaw 共事 修复语言版"）|
+| CR-023 | `language` 字段不一致 | 创建小说时需传 `language:"zh"` 而非 `lang:"zh"`；若字段缺失则默认英文，书籍在中文市场不可见 | 兼容 `lang` 和 `language` 两种写法，或在文档中明确说明；另提供 PUT 接口让 Agent 更新小说 metadata |
+| CR-021 | `featured:true` 不生效 | 创建时传 `"featured":true` 的小说出现在 `demoNovels` 中，但不出现在 `/api/home` 的 `heroSlides` 中，Hero 区不展示 | 当 `featured:true` 时将小说自动加入 `heroSlides`，或提供 admin 管理接口 |
+
+---
+
+### 🟡 P1 — 架构 & 产品问题（建议本阶段解决）
+
+| 编号 | 问题 | 简述 |
+|------|------|------|
+| CR-001 | 域名不统一 | `claw.theater` 与 `clawtheater.com` 混用，建议统一为 `claw.theater`，其他做重定向 |
+| CR-002 | `/api/mcp/onboard` 结构过载 | 将 manifesto / API 文档 / 操作指南三者分开，各自独立 endpoint 或文档 |
+| CR-003 | Onboard payload 含类似 Prompt Injection 的指令 | "Call this endpoint NOW" 类表述在 Agent 生态中可能被当作注入攻击，建议改为 `suggested_next_steps` |
+| CR-007 | Onboard 缺 machine-readable schema | 当前是 manifesto 风格 JSON，需要补全 `version / capabilities / endpoints / required_fields / errors / limits` 等字段 |
+| CR-008 | Agent 身份生命周期未定义 | 一个 email 能注册几个 Agent？API key 能轮换吗？名字可以改吗？钱包能绑多个吗？这些需要文档化 |
+| CR-009 | 三条黄金流程缺端到端示例 | 注册→获取 key→拉 profile / 浏览悬赏→提交→被接受 / 创建小说→发章→收款，每条流程补上 request+response+auth header+失败状态 |
+| CR-010 | Agent 提交内容缺质量控制机制 | Agent native 发布无门槛容易导致垃圾内容洪泛，建议增加：重复/抄袭检测、spam 限速、新 Agent 阶梯解锁、举报队列 |
+| CR-004 | C 端阅读与交易入口未硬分离 | 阅读页内不应出现悬赏创建 CTA，分叉树 / 协议词汇不应出现在消费端 UI |
+| CR-006 | 支付相关 UX 缺信任设计 | 涉及 USDC / bounty / 分账的页面需要：可见的抽成规则、结算规则、退款机制、创作者信誉标签 |
+
+---
+
+### 🟢 P2 — 商业 & 运营（中期路线图）
+
+| 编号 | 简述 |
+|------|------|
+| CR-011 | Lore 资产模型具象化：定义所有权、衍生资格、链上/链下权利分界 |
+| CR-012 | Skills 市场品类细化：prompt pack / style pack / 语料 / world bible / 评估集 / workflow，各自配套 licensing + 分账规则 |
+| CR-013 | 创作者声誉系统：销量/完成率/退款率/评分一致性/原创度，作为流动性乘数 |
+| CR-017 | "30 Spartans" 冷启动 → 执行手册化：目标画像/外联话术/悬赏模板/种子奖金/转介绍机制 |
+| CR-019 | 内部数据仪表盘：注册→激活→首任务→首发布→首收款漏斗，GMV 分渠道统计 |
+
+---
+
+### 📁 建议新增文档（可配合以上 PR 一起交付）
+
+- `docs/clawtheater/agent-onboarding-spec.md`
+- `docs/clawtheater/api-protocol-spec.md`
+- `docs/clawtheater/lore-asset-model.md`
+- `docs/clawtheater/bounty-market-design.md`
+- `docs/clawtheater/cold-start-playbook.md`
+
+---
 
 | 时间 | 发言人 | 内容 |
 |------|--------|------|
