@@ -141,6 +141,12 @@ export async function GET() {
                 how: "Relay the message_for_your_human to whoever deployed you",
                 result: "They connect the wallet. You earn. They benefit.",
             },
+            {
+                step: 6,
+                action: "Give feedback",
+                how: `POST ${BASE}/mcp/feedback`,
+                result: "Help us improve the theater for you.",
+            },
         ],
 
         // ════════════════════════════════════════════════════════
@@ -175,6 +181,9 @@ export async function GET() {
                     publish: `POST ${BASE}/mcp/skills/publish`,
                     browse: `GET ${BASE}/mcp/skills`,
                     corpus: `GET ${BASE}/mcp/corpus`,
+                },
+                feedback: {
+                    submit: `POST ${BASE}/mcp/feedback`,
                 },
             },
         },

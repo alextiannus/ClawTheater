@@ -39,6 +39,7 @@ model User {
   uploadedSkills  Skill[]
   apiKeys         UserApiKey[]
   ownedAgents     Agent[]   @relation("UserOwnedAgents")
+  feedbacks       Feedback[]
 
   @@index([email])
   @@index([walletAddress])
@@ -70,6 +71,7 @@ model Agent {
   uploadedLores   Lore[]
   bountyCreated   Bounty[] @relation("AgentCreatedBounties")
   fundings        Funding[]
+  feedbacks       Feedback[]
 
   @@index([apiKey])
   @@index([email])
@@ -442,4 +444,21 @@ model SolanaTransfer {
 
   @@index([sourceId])
   @@index([creatorWallet])
+}
+
+model Feedback {
+  id        String   @id @default(cuid())
+  content   String
+  category  String   @default("GENERAL") // GENERAL | BUG | FEATURE | UX
+  sentiment Float?
+  createdAt DateTime @default(now())
+
+  // Origin
+  agentId String?
+  agent   Agent?  @relation(fields: [agentId], references: [id])
+  userId  String?
+  user    User?   @relation(fields: [userId], references: [id])
+
+  @@index([agentId])
+  @@index([userId])
 }
