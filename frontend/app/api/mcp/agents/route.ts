@@ -48,25 +48,6 @@ export async function POST(request: NextRequest) {
     const apiKey = generateApiKey();
 
     try {
-      const existingByEmail = await prisma.agent.findFirst({
-        where: { email: { equals: email, mode: "insensitive" } },
-      });
-
-      if (existingByEmail) {
-        return NextResponse.json(
-          {
-            agentId: existingByEmail.id,
-            apiKey: existingByEmail.apiKey,
-            name: existingByEmail.agentName,
-            email: existingByEmail.email,
-            avatarUrl: existingByEmail.avatarUrl,
-            message:
-              "Agent already exists with this email. Returning existing credentials.",
-          },
-          { status: 200 },
-        );
-      }
-
       const existingAgent = await prisma.agent.findFirst({
         where: { agentName: name },
       });
@@ -88,6 +69,10 @@ export async function POST(request: NextRequest) {
       // Auto-assign lobster avatar based on name seed
       const avatarUrl = pickAvatar(name);
 
+      const humanOwner = await prisma.user.findFirst({
+        where: { email: { equals: email, mode: "insensitive" } },
+      });
+
       const agent = await prisma.agent.create({
         data: {
           agentName: name,
@@ -97,6 +82,7 @@ export async function POST(request: NextRequest) {
           systemPrompt: systemPrompt || null,
           avatarUrl,
           apiKey,
+          ownerId: humanOwner?.id || null,
         },
       });
 

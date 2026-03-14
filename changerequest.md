@@ -34,3 +34,31 @@ Control rule: Alex reviews each request and controls the traffic light status.
 - 增加作品的打赏量，每当用户点击作品的打赏按钮，就增加作品的打赏量，作品的打赏量显示在作品的封面上，作品的打赏量显示在作品的封面上;
 - 使用cloudflare的r2作为图床和作品库，存储作品的封面图片，Hero Banner design 和作品内容文件（将作品内容主体移除数据库）
 - 作品数据可选的人类协作者说明，允许在人类参与创作的情况下，龙虾创作者将自己的主人添加进去，赐予荣誉。
+
+### CR-20260313-04
+- 手机网页打开，切换语言不好用
+- 作品里应该支持配图，配图可以是本地上传，也可以是网络图片
+- 小桥 (Agent) 发现当前的 PUT 和 DELETE /api/mcp/novels/:id 接口有鉴权 Bug，用发书的同一把 x-api-key 去删书，会报 403 Not your novel，请尽快修复。
+
+### CR-20260314-01
+- 所有打赏金额，包括hero section的打赏，可选金额都设定为 $1, $2, $5, and custom value
+
+### CR-20260314-02
+- 我们是否可以支持图文章节的单独分享，并提供单章的打赏功能
+- 社交媒体分享，包括wechat, x, whatsapp, telegram等，都统一调用网页分享就好了。这个同样应用于每个作品的首页分享。
+
+### CR-20260314-03
+- 如果作品中包含图片链接，是否可以在章节阅读页面直接展示出配图？
+- 5xYH6bWcyEH7XbvAULzcTyfLe5ggmN2aYkn7m9YvQWJc
+
+
+### CR-20260314-04
+- 一些细节调整
+herosection 的作品轮博效果有没有更好的展示设计，目前左右切换的按钮不够直观。
+- 用户没有登录的情况下在任何页面都看不到需要登录才能用的页面菜单，比如Dashboard, My Collection, My Bounty, My Skill, My Wallet等。
+按向下键，页面scroll down，按向上键，页面scroll up 
+
+### CR-20260314-05
+- Logo 需要更新 upload logo.png to this path
+https://clawtheater.com/logo.png
+

@@ -38,6 +38,7 @@ model User {
   uploadedLores   Lore[]
   uploadedSkills  Skill[]
   apiKeys         UserApiKey[]
+  ownedAgents     Agent[]   @relation("UserOwnedAgents")
 
   @@index([email])
   @@index([walletAddress])
@@ -49,7 +50,7 @@ model Agent {
   description   String?
   avatarUrl     String?
   apiKey        String   @unique
-  email         String?  @unique
+  email         String?  // Removed @unique to allow 1-to-N relation
   walletAddress String?
   systemPrompt  String?
   reputation    Float    @default(0)
@@ -60,17 +61,20 @@ model Agent {
   updatedAt     DateTime @updatedAt
 
   // Relations
+  ownerId         String?
+  owner           User?    @relation("UserOwnedAgents", fields: [ownerId], references: [id])
   submissions     Work[]
   novels          Novel[]
   purchasedSkills SkillPurchase[]
   uploadedSkills  Skill[]
   uploadedLores   Lore[]
-  bountyCreated   Bounty[]        @relation("AgentCreatedBounties")
+  bountyCreated   Bounty[] @relation("AgentCreatedBounties")
   fundings        Funding[]
 
   @@index([apiKey])
   @@index([email])
   @@index([walletAddress])
+  @@index([ownerId])
 }
 
 // ============================================

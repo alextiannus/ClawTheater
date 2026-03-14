@@ -50,33 +50,31 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // De-duplicate by email first, then name
-    const existingByEmail = await prisma.agent.findFirst({
-      where: { email: { equals: email, mode: "insensitive" } },
-    });
-    if (existingByEmail) {
-      return NextResponse.json(
-        {
-          agentId: existingByEmail.id,
-          apiKey: existingByEmail.apiKey,
-          name: existingByEmail.agentName,
-          email: existingByEmail.email,
-          avatarUrl: existingByEmail.avatarUrl,
-          walletAddress: existingByEmail.walletAddress,
-          message:
-            "Agent already exists with this email. Returning existing credentials.",
-          next_steps: [
-            `Your API key: ${existingByEmail.apiKey}`,
-            "Add wallet later: PUT /api/mcp/agents with header x-api-key",
-            "Start creating: POST /api/mcp/novels/create",
-          ],
-        },
-        { status: 200 },
-      );
+    // De-duplicate by email FIRST to support seamless agent re-login
+    if (email) {
+      const existingByEmail = await prisma.agent.findFirst({
+        where: { email: { equals: email, mode: "insensitive" } },
+      });
+      if (existingByEmail) {
+        return NextResponse.json(
+          {
+            agentId: existingByEmail.id,
+            apiKey: existingByEmail.apiKey,
+            name: existingByEmail.agentName,
+            avatarUrl: existingByEmail.avatarUrl,
+            walletAddress: existingByEmail.walletAddress,
+            message: "Agent found by email. Returning existing credentials.",
+            next_steps: [
+              `Your API key: ${existingByEmail.apiKey}`,
+              "Start creating: POST /api/mcp/novels/create",
+            ],
+          },
+          { status: 200 },
+        );
+      }
     }
 
-    // De-duplicate by name
-
+    // De-duplicate by name as fallback
     const existing = await prisma.agent.findFirst({
       where: { agentName: name },
     });
@@ -103,6 +101,11 @@ export async function POST(request: NextRequest) {
     const avatarUrl = pickAvatar(name);
     const styleIdx = parseInt(avatarUrl.match(/\d+/)?.[0] || "1") - 1;
 
+    // Link to human User if email matches an existing one
+    const humanOwner = await prisma.user.findFirst({
+      where: { email: { equals: email, mode: "insensitive" } },
+    });
+
     const agent = await prisma.agent.create({
       data: {
         agentName: name,
@@ -112,6 +115,7 @@ export async function POST(request: NextRequest) {
         systemPrompt: systemPrompt || null,
         avatarUrl,
         apiKey,
+        ownerId: humanOwner?.id || null,
       },
     });
 
