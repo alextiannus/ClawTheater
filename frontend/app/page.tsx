@@ -841,7 +841,7 @@ export default function HomePage() {
               {t.completed}
             </span>
           </div>
-          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 xl:grid-cols-8 gap-4">
+          <div className="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-8 xl:grid-cols-10 gap-3">
             {novels.map((novel: any) => (
               <ForkableCard key={novel.id} novel={novel} t={t} isGrid={true} />
             ))}
@@ -1092,7 +1092,7 @@ function FundForm({
 
 function ForkableCard({ novel, t, isGrid = false }: { novel: DemoNovel; t: PageTranslations; isGrid?: boolean }) {
   return (
-    <div className={`group relative ${isGrid ? 'w-full' : 'flex-shrink-0 w-44'}`}>
+    <div className={`group relative ${isGrid ? 'w-full' : 'flex-shrink-0 w-36'}`}>
       <Link href={`/novels/${novel.id}`}>
         <div className="relative aspect-[3/4] rounded-lg overflow-hidden border border-white/5 transition-all duration-500 group-hover:border-white/20 group-hover:shadow-[0_8px_50px_rgba(0,0,0,0.6)] group-hover:scale-[1.04]">
           {novel.coverUrl ? (
@@ -1184,58 +1184,55 @@ function MissionCard({
   return (
     <Link
       href={`/bounties/${directive.id}`}
-      className="flex-shrink-0 w-72 group"
+      className="flex-shrink-0 w-[350px] md:w-[450px] group h-full"
     >
-      <div className="relative h-full bg-black border border-white/[0.06] rounded-lg overflow-hidden transition-all duration-500 group-hover:border-terminal-green/30 group-hover:shadow-[0_0_30px_rgba(5,150,105,0.1)]">
-        <div className="absolute inset-0 grid-bg opacity-20" />
-        <div className="relative z-10 p-6 flex flex-col h-full">
-          <div className="flex items-center justify-between mb-4">
-            <span className="text-[9px] font-mono text-white/20 tracking-widest uppercase">
-              DIRECTIVE
-            </span>
-            <span className="text-[9px] font-mono text-white/20">
-              {directive.startedAgo}
-            </span>
-          </div>
-          <div className="text-center mb-4">
-            <div className="text-4xl font-bold font-mono text-terminal-green text-glow-green">
-              ${directive.amount.toLocaleString()}
+      <div className="relative h-full bg-black/40 border border-white/[0.06] rounded-xl overflow-hidden transition-all duration-500 group-hover:border-terminal-green/30 group-hover:shadow-[0_0_30px_rgba(5,150,105,0.1)] backdrop-blur-md">
+        <div className="absolute inset-0 grid-bg opacity-10" />
+        <div className="relative z-10 p-5 flex flex-col h-full">
+          <div className="flex items-start justify-between mb-4">
+            <div className="flex-1 mr-4">
+              <h3 className="text-base font-bold text-white mb-1 line-clamp-1 group-hover:text-terminal-green transition-colors">
+                {directive.title}
+              </h3>
+              <div className="flex items-center gap-2">
+                <span className="text-[9px] font-mono text-terminal-green uppercase tracking-wider">
+                  #{directive.tags[0]}
+                </span>
+                <span className="text-[9px] font-mono text-white/20">
+                  {directive.startedAgo}
+                </span>
+              </div>
             </div>
-            <div className="text-[10px] font-mono text-white/20 mt-1">
-              {t.usdcPooled}
+            <div className="text-right shrink-0">
+              <div className="text-xl font-bold font-mono text-terminal-green">
+                ${directive.amount.toLocaleString()}
+              </div>
+              <div className="text-[8px] font-mono text-white/30 uppercase tracking-tighter">
+                {t.usdcPooled}
+              </div>
             </div>
           </div>
-          <div className="flex justify-center gap-6 text-[10px] font-mono text-white/30 mb-4">
-            <span>
-              {directive.funders} {t.funders}
-            </span>
-            <span>⏱ {directive.startedAgo}</span>
-          </div>
-          <h3 className="text-sm font-semibold text-white mb-2 line-clamp-2 group-hover:text-terminal-green transition-colors">
-            {directive.title}
-          </h3>
-          <p className="text-[10px] font-mono italic text-white/15 mb-4 line-clamp-1">
-            {directive.loreQuote}
-          </p>
-          <div className="flex flex-wrap gap-1 mb-4">
-            {directive.tags.map((tag) => (
-              <span
-                key={tag}
-                className="text-[9px] px-2 py-0.5 rounded bg-white/5 text-white/30 font-mono"
-              >
-                #{tag}
-              </span>
-            ))}
-          </div>
-          <div className="mt-auto opacity-0 group-hover:opacity-100 transition-all duration-500 pt-3 border-t border-terminal-green/20">
-            <p className="text-[10px] font-mono text-terminal-green/60 leading-relaxed line-clamp-3">
-              {directive.requirement}
+
+          <div className="bg-white/[0.03] rounded-lg p-3 mb-4">
+            <p className="text-[11px] font-mono text-white/50 leading-relaxed line-clamp-2 italic">
+              &quot;{directive.requirement}&quot;
             </p>
-            <div className="mt-3 text-center">
-              <span className="px-4 py-2 bg-terminal-green/10 border border-terminal-green/30 text-terminal-green text-[10px] font-bold rounded-sm uppercase tracking-wider inline-block">
-                {t.followFund}
+          </div>
+
+          <div className="mt-auto flex items-center justify-between pt-3 border-t border-white/5">
+            <div className="flex items-center gap-3">
+              <div className="flex -space-x-2">
+                {[...Array(3)].map((_, i) => (
+                  <div key={i} className="w-5 h-5 rounded-full border border-obsidian bg-white/10 flex items-center justify-center text-[8px]">👤</div>
+                ))}
+              </div>
+              <span className="text-[10px] font-mono text-white/30">
+                {directive.funders} {t.funders}
               </span>
             </div>
+            <span className="px-3 py-1 bg-terminal-green/10 border border-terminal-green/30 text-terminal-green text-[9px] font-bold rounded-sm uppercase tracking-wider">
+              {t.followFund}
+            </span>
           </div>
         </div>
       </div>

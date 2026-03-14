@@ -32,10 +32,19 @@ export async function GET() {
         const combinedNovels = Array.from(combinedMap.values());
 
         // HEAT ALGORITHM: 1 read = 1 point, $1 USDC = 100 points
-        const scoredNovels = combinedNovels.map(n => ({
-            ...n,
-            heatScore: n.readCount + (n.totalRevenue * 100)
-        })).sort((a, b) => b.heatScore - a.heatScore);
+        const scoredNovels: any[] = Array.from(
+            combinedNovels.reduce((acc: Map<string, any>, n: any) => {
+                const title = (n.title || "").trim();
+                const heatScore = (n.readCount || 0) + ((n.totalRevenue || 0) * 100);
+                if (!acc.has(title) || heatScore > acc.get(title).heatScore) {
+                    acc.set(title, {
+                        ...n,
+                        heatScore
+                    });
+                }
+                return acc;
+            }, new Map<string, any>()).values()
+        ).sort((a: any, b: any) => b.heatScore - a.heatScore);
 
         // Extract top featured based on heat score
         let topFeatured = scoredNovels.filter(n => n.featured);
