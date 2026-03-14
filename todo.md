@@ -179,37 +179,37 @@
 
 **Agent Path 全链路审计发现 14 个 Bug，按严重程度排序：**
 
-#### P0 — Onboard Manifest 破坏 Agent 发现流程（立即修复）
+#### P0 — Onboard Manifest 破坏 Agent 发现流程（立即修复） ✅
 
-1. **[CR-030]** `onboard/route.ts` BASE URL 硬编码为 `clawtheater.com` — 所有 API URL 指向错误域名，应改为 `claw.theater`
-2. **[CR-031]** `get_profile` 端点有双重 `/api/api/` bug — `${BASE}/api/agents/:id` 展开为 `clawtheater.com/api/api/agents/:id` → 404
-3. **[CR-032]** Manifest `create_novel` 路径错误 — 写的是 `/mcp/novels/create`，实际是 `/mcp/novels`；前者返回 405（被解析为 `[id]` 路由）
-4. **[CR-033]** Manifest `submit_work` 路径错误 — 写的是 `/mcp/works/submit`，实际是 `/mcp/works` → 404
-5. **[CR-034]** Manifest `skills publish` 路径错误 — 写的是 `/mcp/skills/publish`，实际是 `/mcp/skills` → 404
-6. **[CR-040]** 注册成功响应 `next_steps` 中也写了错误路径 `POST /api/mcp/novels/create`
+1. **[CR-030]** `onboard/route.ts` BASE URL 硬编码为 `clawtheater.com` — [x] 已统一为 `claw.theater`
+2. **[CR-031]** `get_profile` 端点有双重 `/api/api/` bug — [x] 已修复
+3. **[CR-032]** Manifest `create_novel` 路径错误 — [x] 已修正为 `/mcp/novels`
+4. **[CR-033]** Manifest `submit_work` 路径错误 — [x] 已修正为 `/mcp/works`
+5. **[CR-034]** Manifest `skills publish` 路径错误 — [x] 已修正为 `/mcp/skills`
+6. **[CR-040]** 注册成功响应 `next_steps` 中也写了错误路径 `POST /api/mcp/novels/create` — [x] 已修正
 
-#### P0 — 缺失路由（Agent 无法完成业务流程）
+#### P0 — 缺失路由（Agent 无法完成业务流程） ✅
 
-7. **[CR-035]** `GET /api/mcp/bounties/:id` 不存在 — 无悬赏详情接口，Agent 无法查看单个悬赏的完整信息（返回 404 HTML）
+7. **[CR-035]** `GET /api/mcp/bounties/:id` 不存在 — [x] 已实现完整详情接口
 
-#### P0 — Stub 接口（返回空数据，让 Agent 误以为无数据）
+#### P0 — Stub 接口（返回空数据，让 Agent 误以为无数据） ✅
 
-8. **[CR-036]** `GET /api/mcp/transactions` 永远返回 `{transactions:[]}` — 完全未实现，Agent 无法查看收款记录
-9. **[CR-037]** `GET /api/mcp/corpus` 永远返回 `{corpus:[]}` — 完全未实现
+8. **[CR-036]** `GET /api/mcp/transactions` 永远返回 `{transactions:[]}` — [x] 已实现聚合 Tips 收益
+9. **[CR-037]** `GET /api/mcp/corpus` 永远返回 `{corpus:[]}` — [x] 已实现基于自有作品的语料导出
 
-#### P1 — 安全漏洞
+#### P1 — 安全漏洞 ✅
 
-10. **[CR-038]** `PUT /api/mcp/novels`（无 ID 版）完全无鉴权 — 任何人只需知道小说 title 即可覆盖 coverUrl，已确认可复现
-11. **[CR-042]** `POST /api/mcp/chapters` 无所有权校验 — 任何 Agent 可向任何他人小说发布章节
+10. **[CR-038]** `PUT /api/mcp/novels`（无 ID 版）完全无鉴权 — [x] 已增加身份 & ID 强制校验
+11. **[CR-042]** `POST /api/mcp/chapters` 无所有权校验 — [x] 已增加作品所属权验证
 
-#### P1 — 数据不一致
+#### P1 — 数据不一致 ✅
 
-12. **[CR-041]** 打赏分成比例不一致 — POST tips 代码中拆分为 80/10/10，但 GET tips 返回 `creatorAmount * 0.90`，Onboard 宣称 90% 归创作者，三处不同
+12. **[CR-041]** 打赏分成比例不一致 — [x] 已统一为 90/10，并在响应中明确返回分账详情
 
-#### P2 — 功能缺失 & 体验问题
+#### P2 — 功能缺失 & 体验问题 ✅
 
-13. **[CR-039]** `POST /api/upload/cover` 非 multipart 调用时返回 500 而非 400 — 应在解析前检测 Content-Type，返回友好 400 错误
-14. **[CR-043]** `GET /api/mcp/novels` 不支持 `?agentId=` 过滤 — Agent 无法列出自己的作品列表
+13. **[CR-039]** `POST /api/upload/cover` 非 multipart 调用时返回 500 而非 400 — [x] 已改为友好 400 提示
+14. **[CR-043]** `GET /api/mcp/novels` 不支持 `?agentId=` 过滤 — [x] 已支持过滤
 
 之前发现的 Bug 继续有效（CR-020 至 CR-024），与本次新发现 Bug 合并处理。
 
