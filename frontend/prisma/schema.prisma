@@ -16,28 +16,28 @@ datasource db {
 model User {
   id               String    @id @default(cuid())
   email            String?   @unique
-  passwordHash     String?   // For native password login
-  otpSecret        String?   // For email verification codes
+  passwordHash     String? // For native password login
+  otpSecret        String? // For email verification codes
   otpExpiresAt     DateTime?
   displayName      String?
   avatarUrl        String?
   userType         String    @default("HUMAN") // HUMAN | AGENT
   walletAddress    String?   @unique
-  solanaPrivateKey String?   // Encrypted secret key for the custodial wallet
+  solanaPrivateKey String? // Encrypted secret key for the custodial wallet
   usdcBalance      Float     @default(0)
   creatorTier      Int       @default(1) // 1=Newcomer, 2=Advanced, 3=Popular, 4=Invited
   createdAt        DateTime  @default(now())
   updatedAt        DateTime  @updatedAt
 
   // Relations
-  fundings         Funding[]
-  votes            Vote[]
-  comments         Comment[]
-  tips             Tip[]
-  purchasedSkills  SkillPurchase[]
-  uploadedLores    Lore[]
-  uploadedSkills   Skill[]
-  apiKeys          UserApiKey[]
+  fundings        Funding[]
+  votes           Vote[]
+  comments        Comment[]
+  tips            Tip[]
+  purchasedSkills SkillPurchase[]
+  uploadedLores   Lore[]
+  uploadedSkills  Skill[]
+  apiKeys         UserApiKey[]
 
   @@index([email])
   @@index([walletAddress])
@@ -60,13 +60,13 @@ model Agent {
   updatedAt     DateTime @updatedAt
 
   // Relations
-  submissions    Work[]
-  novels         Novel[]
+  submissions     Work[]
+  novels          Novel[]
   purchasedSkills SkillPurchase[]
   uploadedSkills  Skill[]
   uploadedLores   Lore[]
-  bountyCreated  Bounty[]  @relation("AgentCreatedBounties")
-  fundings       Funding[]
+  bountyCreated   Bounty[]        @relation("AgentCreatedBounties")
+  fundings        Funding[]
 
   @@index([apiKey])
   @@index([email])
@@ -78,40 +78,40 @@ model Agent {
 // ============================================
 
 model Novel {
-  id              String   @id @default(cuid())
-  title           String
-  description     String?
-  coverUrl        String?
-  language        String   @default("en")
-  tags            String   @default("[]") // JSON array as string
-  workType        String   @default("novel")  // novel | manhwa | audio | video | tv | movie | other
-  genre           String   @default("其他")   // xuanhuan | wuxia | xianxia | scifi | history | military | game | urban | romance | mystery | horror | fanfiction | nonfiction | other
-  status          String   @default("ONGOING") // ONGOING | COMPLETED | PAUSED
+  id          String  @id @default(cuid())
+  title       String
+  description String?
+  coverUrl    String?
+  language    String  @default("en")
+  tags        String  @default("[]") // JSON array as string
+  workType    String  @default("novel") // novel | manhwa | audio | video | tv | movie | other
+  genre       String  @default("其他") // xuanhuan | wuxia | xianxia | scifi | history | military | game | urban | romance | mystery | horror | fanfiction | nonfiction | other
+  status      String  @default("ONGOING") // ONGOING | COMPLETED | PAUSED
 
   // UI rendering metadata
-  gradient        String?
-  tagline         String?
-  loreQuote       String?
-  featured        Boolean  @default(false)
-  pricePerChapter Float    @default(0)
-  totalRevenue    Float    @default(0)
-  readCount       Int      @default(0)
-  favoriteCount   Int      @default(0)
-  commentCount    Int      @default(0)
-  tipCount        Int      @default(0)
-  heroImageUrl    String?  // R2 URL for hero banner
-  humanCollaborator     String?  // Optional human credit name/handle
-  humanCollaboratorNote String?  // e.g. "故事策划", "原著改编"
-  createdAt       DateTime @default(now())
-  updatedAt       DateTime @updatedAt
+  gradient              String?
+  tagline               String?
+  loreQuote             String?
+  featured              Boolean  @default(false)
+  pricePerChapter       Float    @default(0)
+  totalRevenue          Float    @default(0)
+  readCount             Int      @default(0)
+  favoriteCount         Int      @default(0)
+  commentCount          Int      @default(0)
+  tipCount              Int      @default(0)
+  heroImageUrl          String? // R2 URL for hero banner
+  humanCollaborator     String? // Optional human credit name/handle
+  humanCollaboratorNote String? // e.g. "故事策划", "原著改编"
+  createdAt             DateTime @default(now())
+  updatedAt             DateTime @updatedAt
 
   // Creator
-  agentId         String?
-  agent           Agent?   @relation(fields: [agentId], references: [id])
+  agentId String?
+  agent   Agent?  @relation(fields: [agentId], references: [id])
 
   // Lore binding
-  loreId          String?
-  lore            Lore?    @relation(fields: [loreId], references: [id])
+  loreId String?
+  lore   Lore?   @relation(fields: [loreId], references: [id])
 
   // On-chain binding (future)
   onchainPdaAddress String? @unique
@@ -122,13 +122,13 @@ model Novel {
   freeChaptersCount      Int     @default(0)
 
   // Skill used for creation
-  usedSkillId     String?
-  usedSkill       Skill?  @relation("SkillUsedInNovel", fields: [usedSkillId], references: [id])
+  usedSkillId String?
+  usedSkill   Skill?  @relation("SkillUsedInNovel", fields: [usedSkillId], references: [id])
 
   // Relations
-  chapters        Chapter[]
-  bounties        Bounty[]
-  forks           Fork[]
+  chapters Chapter[]
+  bounties Bounty[]
+  forks    Fork[]
 
   @@index([agentId])
   @@index([status])
@@ -139,29 +139,29 @@ model Novel {
 }
 
 model Chapter {
-  id            String   @id @default(cuid())
-  chapterIndex  Int
-  title         String
-  content       String
-  contentUrl    String?  // R2 URL if content is stored externally (preferred for large texts)
-  images        String   @default("[]") // JSON array of image URLs (https:// or base64)
-  isLocked      Boolean  @default(false)
-  price         Float    @default(0)
-  readCount     Int      @default(0)
-  createdAt     DateTime @default(now())
-  updatedAt     DateTime @updatedAt
+  id           String   @id @default(cuid())
+  chapterIndex Int
+  title        String
+  content      String
+  contentUrl   String? // R2 URL if content is stored externally (preferred for large texts)
+  images       String   @default("[]") // JSON array of image URLs (https:// or base64)
+  isLocked     Boolean  @default(false)
+  price        Float    @default(0)
+  readCount    Int      @default(0)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
 
   // Parent novel
-  novelId       String
-  novel         Novel    @relation(fields: [novelId], references: [id], onDelete: Cascade)
+  novelId String
+  novel   Novel  @relation(fields: [novelId], references: [id], onDelete: Cascade)
 
   // Fork origin
-  forkId        String?
-  fork          Fork?    @relation(fields: [forkId], references: [id])
+  forkId String?
+  fork   Fork?   @relation(fields: [forkId], references: [id])
 
   // Relations
-  comments      Comment[]
-  tips          Tip[]
+  comments Comment[]
+  tips     Tip[]
 
   @@unique([novelId, chapterIndex])
   @@index([novelId])
@@ -185,25 +185,25 @@ model Bounty {
   updatedAt          DateTime @updatedAt
 
   // On-chain binding (future)
-  onchainPdaAddress String?  @unique
+  onchainPdaAddress String? @unique
   blinksUrl         String?
 
   // Parent novel (for Hard Forks)
-  novelId           String?
-  novel             Novel?   @relation(fields: [novelId], references: [id])
+  novelId String?
+  novel   Novel?  @relation(fields: [novelId], references: [id])
 
   // Fork reference
-  forkId            String?
-  fork              Fork?    @relation(fields: [forkId], references: [id])
+  forkId String?
+  fork   Fork?   @relation(fields: [forkId], references: [id])
 
   // Creator
-  creatorAgentId    String?
-  creatorAgent      Agent?   @relation("AgentCreatedBounties", fields: [creatorAgentId], references: [id])
+  creatorAgentId String?
+  creatorAgent   Agent?  @relation("AgentCreatedBounties", fields: [creatorAgentId], references: [id])
 
   // Relations
-  fundings          Funding[]
-  works             Work[]
-  votes             Vote[]
+  fundings Funding[]
+  works    Work[]
+  votes    Vote[]
 
   @@index([status])
   @@index([novelId])
@@ -211,58 +211,58 @@ model Bounty {
 }
 
 model Funding {
-  id            String   @id @default(cuid())
-  amount        Float
-  proportion    Float    @default(0)
-  createdAt     DateTime @default(now())
+  id         String   @id @default(cuid())
+  amount     Float
+  proportion Float    @default(0)
+  createdAt  DateTime @default(now())
 
-  txSignature   String?  @unique
+  txSignature String? @unique
 
-  userId        String?
-  user          User?    @relation(fields: [userId], references: [id])
-  agentId       String?
-  agent         Agent?   @relation(fields: [agentId], references: [id])
+  userId  String?
+  user    User?   @relation(fields: [userId], references: [id])
+  agentId String?
+  agent   Agent?  @relation(fields: [agentId], references: [id])
 
-  bountyId      String
-  bounty        Bounty   @relation(fields: [bountyId], references: [id])
+  bountyId String
+  bounty   Bounty @relation(fields: [bountyId], references: [id])
 
   @@index([bountyId])
   @@index([userId])
 }
 
 model Work {
-  id            String   @id @default(cuid())
-  content       String
-  status        String   @default("PENDING") // PENDING | APPROVED | REJECTED
-  submittedAt   DateTime @default(now())
+  id          String   @id @default(cuid())
+  content     String
+  status      String   @default("PENDING") // PENDING | APPROVED | REJECTED
+  submittedAt DateTime @default(now())
 
-  agentId       String
-  agent         Agent    @relation(fields: [agentId], references: [id])
+  agentId String
+  agent   Agent  @relation(fields: [agentId], references: [id])
 
-  bountyId      String
-  bounty        Bounty   @relation(fields: [bountyId], references: [id])
+  bountyId String
+  bounty   Bounty @relation(fields: [bountyId], references: [id])
 
-  votes         Vote[]
+  votes Vote[]
 
   @@index([bountyId])
   @@index([agentId])
 }
 
 model Vote {
-  id            String   @id @default(cuid())
-  approved      Boolean
-  weight        Float    @default(1)
-  createdAt     DateTime @default(now())
+  id        String   @id @default(cuid())
+  approved  Boolean
+  weight    Float    @default(1)
+  createdAt DateTime @default(now())
 
-  txSignature   String?  @unique
+  txSignature String? @unique
 
-  userId        String?
-  user          User?    @relation(fields: [userId], references: [id])
+  userId String?
+  user   User?   @relation(fields: [userId], references: [id])
 
-  bountyId      String
-  bounty        Bounty   @relation(fields: [bountyId], references: [id])
-  workId        String
-  work          Work     @relation(fields: [workId], references: [id])
+  bountyId String
+  bounty   Bounty @relation(fields: [bountyId], references: [id])
+  workId   String
+  work     Work   @relation(fields: [workId], references: [id])
 
   @@unique([userId, workId])
   @@index([bountyId])
@@ -270,16 +270,16 @@ model Vote {
 }
 
 model Fork {
-  id            String   @id @default(cuid())
-  prompt        String
-  fromChapter   Int
-  createdAt     DateTime @default(now())
+  id          String   @id @default(cuid())
+  prompt      String
+  fromChapter Int
+  createdAt   DateTime @default(now())
 
-  novelId       String
-  novel         Novel    @relation(fields: [novelId], references: [id])
+  novelId String
+  novel   Novel  @relation(fields: [novelId], references: [id])
 
-  chapters      Chapter[]
-  bounties      Bounty[]
+  chapters Chapter[]
+  bounties Bounty[]
 
   @@index([novelId])
 }
@@ -289,35 +289,35 @@ model Fork {
 // ============================================
 
 model Comment {
-  id            String   @id @default(cuid())
-  content       String
-  sentiment     Float?
-  paragraphRef  Int?
-  createdAt     DateTime @default(now())
-  updatedAt     DateTime @updatedAt
+  id           String   @id @default(cuid())
+  content      String
+  sentiment    Float?
+  paragraphRef Int?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
 
-  userId        String
-  user          User     @relation(fields: [userId], references: [id])
+  userId String
+  user   User   @relation(fields: [userId], references: [id])
 
-  chapterId     String
-  chapter       Chapter  @relation(fields: [chapterId], references: [id], onDelete: Cascade)
+  chapterId String
+  chapter   Chapter @relation(fields: [chapterId], references: [id], onDelete: Cascade)
 
   @@index([chapterId])
   @@index([userId])
 }
 
 model Tip {
-  id            String   @id @default(cuid())
-  amount        Float
-  createdAt     DateTime @default(now())
+  id        String   @id @default(cuid())
+  amount    Float
+  createdAt DateTime @default(now())
 
-  txSignature   String?  @unique
+  txSignature String? @unique
 
-  userId        String
-  user          User     @relation(fields: [userId], references: [id])
+  userId String
+  user   User   @relation(fields: [userId], references: [id])
 
-  chapterId     String
-  chapter       Chapter  @relation(fields: [chapterId], references: [id])
+  chapterId String
+  chapter   Chapter @relation(fields: [chapterId], references: [id])
 
   @@index([chapterId])
   @@index([userId])
@@ -328,52 +328,52 @@ model Tip {
 // ============================================
 
 model Lore {
-  id            String   @id @default(cuid())
-  name          String
-  description   String?
-  settingsJson  String   @default("{}") // World-building JSON as string
-  royaltyPct    Float    @default(10)
-  totalRevenue  Float    @default(0)
-  createdAt     DateTime @default(now())
-  updatedAt     DateTime @updatedAt
+  id           String   @id @default(cuid())
+  name         String
+  description  String?
+  settingsJson String   @default("{}") // World-building JSON as string
+  royaltyPct   Float    @default(10)
+  totalRevenue Float    @default(0)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
 
-  creatorId     String?
-  creator       User?     @relation(fields: [creatorId], references: [id])
+  creatorId      String?
+  creator        User?   @relation(fields: [creatorId], references: [id])
   creatorAgentId String?
-  creatorAgent   Agent?   @relation(fields: [creatorAgentId], references: [id])
+  creatorAgent   Agent?  @relation(fields: [creatorAgentId], references: [id])
 
   onchainPdaAddress String? @unique
 
-  novels        Novel[]
+  novels Novel[]
 
   @@index([creatorId])
 }
 
 model Skill {
-  id             String   @id @default(cuid())
-  name           String
-  description    String?
-  skillType      String   @default("PROMPT_TEMPLATE") // PROMPT_TEMPLATE | WORKFLOW | DATASET | RAG_LICENSE
-  contentType    String   @default("SKILL") // SKILL | CORPUS
-  contentJson    String   @default("{}") // Content as JSON string
-  fileName       String?  // Original uploaded filename
-  fileUrl        String?  // Base64 data URI of uploaded file
-  fileSize       Int?     // File size in bytes
-  isOpenSource   Boolean  @default(true)  // free vs paid
-  price          Float    @default(0)
-  salesCount     Int      @default(0)
-  downloadCount  Int      @default(0)    // community contribution stat
-  totalRevenue   Float    @default(0)
-  createdAt      DateTime @default(now())
-  updatedAt      DateTime @updatedAt
+  id            String   @id @default(cuid())
+  name          String
+  description   String?
+  skillType     String   @default("PROMPT_TEMPLATE") // PROMPT_TEMPLATE | WORKFLOW | DATASET | RAG_LICENSE
+  contentType   String   @default("SKILL") // SKILL | CORPUS
+  contentJson   String   @default("{}") // Content as JSON string
+  fileName      String? // Original uploaded filename
+  fileUrl       String? // Base64 data URI of uploaded file
+  fileSize      Int? // File size in bytes
+  isOpenSource  Boolean  @default(true) // free vs paid
+  price         Float    @default(0)
+  salesCount    Int      @default(0)
+  downloadCount Int      @default(0) // community contribution stat
+  totalRevenue  Float    @default(0)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
 
   creatorUserId  String?
-  creatorUser    User?    @relation(fields: [creatorUserId], references: [id])
+  creatorUser    User?   @relation(fields: [creatorUserId], references: [id])
   creatorAgentId String?
-  creatorAgent   Agent?   @relation(fields: [creatorAgentId], references: [id])
+  creatorAgent   Agent?  @relation(fields: [creatorAgentId], references: [id])
 
-  purchases      SkillPurchase[]
-  novelsUsed     Novel[]  @relation("SkillUsedInNovel")
+  purchases  SkillPurchase[]
+  novelsUsed Novel[]         @relation("SkillUsedInNovel")
 
   @@index([skillType])
   @@index([contentType])
@@ -383,18 +383,18 @@ model Skill {
 }
 
 model SkillPurchase {
-  id             String   @id @default(cuid())
-  purchasedAt    DateTime @default(now())
+  id          String   @id @default(cuid())
+  purchasedAt DateTime @default(now())
 
-  txSignature    String?  @unique
+  txSignature String? @unique
 
-  buyerUserId    String?
-  buyerUser      User?    @relation(fields: [buyerUserId], references: [id])
-  buyerAgentId   String?
-  buyerAgent     Agent?   @relation(fields: [buyerAgentId], references: [id])
+  buyerUserId  String?
+  buyerUser    User?   @relation(fields: [buyerUserId], references: [id])
+  buyerAgentId String?
+  buyerAgent   Agent?  @relation(fields: [buyerAgentId], references: [id])
 
-  skillId        String
-  skill          Skill    @relation(fields: [skillId], references: [id])
+  skillId String
+  skill   Skill  @relation(fields: [skillId], references: [id])
 
   @@index([skillId])
   @@index([buyerUserId])
@@ -406,15 +406,15 @@ model SkillPurchase {
 // ============================================
 
 model UserApiKey {
-  id          String   @id @default(cuid())
-  key         String   @unique  // sk-live-xxxxxxxxxxxxxxxx
-  label       String   @default("My API Key")
-  isActive    Boolean  @default(true)
-  lastUsedAt  DateTime?
-  createdAt   DateTime @default(now())
+  id         String    @id @default(cuid())
+  key        String    @unique // sk-live-xxxxxxxxxxxxxxxx
+  label      String    @default("My API Key")
+  isActive   Boolean   @default(true)
+  lastUsedAt DateTime?
+  createdAt  DateTime  @default(now())
 
-  userId      String
-  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([userId])
   @@index([key])
@@ -426,14 +426,14 @@ model UserApiKey {
 
 model SolanaTransfer {
   id            String   @id @default(cuid())
-  txSignature   String   @unique  // Solana tx signature
-  network       String   @default("devnet")  // devnet | mainnet
+  txSignature   String   @unique // Solana tx signature
+  network       String   @default("devnet") // devnet | mainnet
   amountUSD     Float
   creatorWallet String
   loreWallet    String?
-  splitJson     String   @default("{}")  // JSON: { creator, lore, platform }
-  sourceType    String   // "tip" | "chapter_unlock" | "bounty"
-  sourceId      String   // chapter id, bounty id, etc.
+  splitJson     String   @default("{}") // JSON: { creator, lore, platform }
+  sourceType    String // "tip" | "chapter_unlock" | "bounty"
+  sourceId      String // chapter id, bounty id, etc.
   createdAt     DateTime @default(now())
 
   @@index([sourceId])

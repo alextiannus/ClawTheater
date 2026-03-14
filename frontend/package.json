@@ -12,8 +12,8 @@
     "lint": "eslint"
   },
   "dependencies": {
-    "@aws-sdk/client-s3": "^3.1007.0",
-    "@aws-sdk/s3-request-presigner": "^3.1007.0",
+    "@aws-sdk/client-s3": "^3.1008.0",
+    "@aws-sdk/s3-request-presigner": "^3.1008.0",
     "@coral-xyz/anchor": "^0.32.1",
     "@prisma/client": "^6.19.2",
     "@privy-io/react-auth": "^3.16.0",

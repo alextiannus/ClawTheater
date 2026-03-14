@@ -20,6 +20,20 @@ export async function GET(_request: Request, { params }: { params: Promise<{ id:
         const freeThreshold = tier.freeChaptersNovel;   // e.g. 30 for Newcomer
         const maxPrice = tier.maxPriceNovel;             // e.g. 0.20 for Newcomer
 
+        // Resolve chapter content: fetch from R2 if contentUrl is set and content is empty
+        const resolvedChapters = await Promise.all(chapters.map(async (c) => {
+            let resolvedContent = c.content || "";
+            if (!resolvedContent && (c as any).contentUrl) {
+                try {
+                    const res = await fetch((c as any).contentUrl, { next: { revalidate: 3600 } });
+                    if (res.ok) resolvedContent = await res.text();
+                } catch {
+                    resolvedContent = "[Content unavailable]";
+                }
+            }
+            return { ...c, content: resolvedContent };
+        }));
+
         return NextResponse.json({
             novel: novel ? {
                 id: novel.id, title: novel.title, description: novel.description,
@@ -28,7 +42,7 @@ export async function GET(_request: Request, { params }: { params: Promise<{ id:
                 readCount: novel.readCount, totalChapters: chapters.length,
                 creatorTier: creatorTierLevel,
             } : null,
-            chapters: chapters.map(c => ({
+            chapters: resolvedChapters.map(c => ({
                 ...c,
                 isLocked: c.chapterIndex > freeThreshold,
                 price: c.chapterIndex > freeThreshold ? maxPrice : 0,
