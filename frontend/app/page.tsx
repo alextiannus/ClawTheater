@@ -529,23 +529,6 @@ export default function HomePage() {
             <div className="pb-24 max-w-3xl w-full">
               {/* Slide transition container */}
               <div key={slide?.id} className="animate-fade-in">
-              <Link
-                href={`/novels/${slide?.novelId}`}
-                className="group relative block w-full max-w-sm mx-auto md:mx-0 aspect-[3/4] rounded-2xl overflow-hidden border border-white/10 shadow-2xl mb-8"
-              >
-                {slide?.coverUrl ? (
-                  <Image
-                    src={slide.coverUrl}
-                    alt={slide.title}
-                    fill
-                    className="object-cover transition-transform duration-700 group-hover:scale-110"
-                  />
-                ) : (
-                  <div className="absolute inset-0" style={{ background: slide?.gradient }} />
-                )}
-                <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
-              </Link>
-
                 <div className="flex items-center gap-2 mb-4 whitespace-nowrap overflow-hidden">
                   {slide?.tags.map((tag: string) => (
                     <span
