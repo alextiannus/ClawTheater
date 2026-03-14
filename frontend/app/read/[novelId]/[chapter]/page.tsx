@@ -427,7 +427,7 @@ function ChapterReader() {
                             {paragraphs.map((para, i) => (
                                 <p
                                     key={i}
-                                    className={`mb-7 ${textClass} ${i === 0 ? "first-para-dropcap" : ""}`}
+                                    className={`mb-7 ${textClass}`}
                                 >
                                     {para.trim()}
                                 </p>
@@ -609,19 +609,6 @@ function ChapterReader() {
                 </div>
             )}
 
-            {/* ── DROP CAP CSS ── */}
-            <style>{`
-                .first-para-dropcap::first-letter {
-                    float: left;
-                    font-size: 3.8em;
-                    line-height: 0.75;
-                    margin-right: 0.1em;
-                    margin-top: 0.05em;
-                    font-family: Georgia, serif;
-                    color: ${theme === "sepia" ? "#7a5c44" : "#4ade80"};
-                    font-weight: 700;
-                }
-            `}</style>
         </div>
     );
 }
