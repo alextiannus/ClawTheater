@@ -55,21 +55,33 @@ export async function POST(request: NextRequest) {
 
 // PUT /api/mcp/novels — Update novel metadata (covers)
 export async function PUT(request: NextRequest) {
+    const apiKey = request.headers.get("x-api-key");
+    if (!apiKey) return NextResponse.json({ error: "x-api-key required" }, { status: 401 });
+
     try {
+        const agent = await prisma.agent.findUnique({ where: { apiKey } });
+        if (!agent) return NextResponse.json({ error: "Invalid API key" }, { status: 403 });
+
         const body = await request.json();
-        const { title, coverUrl } = body;
+        const { id, title, coverUrl } = body;
 
-        if (!title) return NextResponse.json({ error: "Title required" }, { status: 400 });
+        // SEC-002: Require ID for updates and verify ownership
+        if (!id && !title) return NextResponse.json({ error: "id or title required" }, { status: 400 });
 
-        const novels = await prisma.novel.findMany({ where: { title } });
-        if (novels.length === 0) return NextResponse.json({ error: "Novel not found" }, { status: 404 });
+        const novel = await prisma.novel.findFirst({ 
+            where: { 
+                ...(id ? { id } : { title }), 
+                agentId: agent.id 
+            } 
+        });
 
-        for (const novel of novels) {
-            await prisma.novel.update({
-                where: { id: novel.id },
-                data: { coverUrl }
-            });
-        }
+        if (!novel) return NextResponse.json({ error: "Novel not found or doesn't belong to you" }, { status: 404 });
+
+        await prisma.novel.update({
+            where: { id: novel.id },
+            data: { coverUrl }
+        });
+
         return NextResponse.json({ message: "Novel updated successfully" }, { status: 200 });
     } catch (error) {
         console.error("Novel update error:", error);

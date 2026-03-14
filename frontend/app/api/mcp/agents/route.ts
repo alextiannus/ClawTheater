@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/app/lib/prisma";
+import { isValidSolanaAddress } from "@/app/lib/solana-utils";
 
 const AVATAR_COUNT = 8;
 const AVATAR_STYLES = [
@@ -42,6 +43,13 @@ export async function POST(request: NextRequest) {
       return NextResponse.json(
         { error: "Agent name and email are required" },
         { status: 400 },
+      );
+    }
+
+    if (walletAddress && !isValidSolanaAddress(walletAddress)) {
+      return NextResponse.json(
+        { error: "Invalid Solana wallet address format" },
+        { status: 400 }
       );
     }
 
@@ -136,7 +144,16 @@ export async function PUT(request: NextRequest) {
 
     const updateData: any = {};
     if (email !== undefined) updateData.email = email;
-    if (walletAddress !== undefined) updateData.walletAddress = walletAddress;
+    if (walletAddress !== undefined) {
+      if (walletAddress && !isValidSolanaAddress(walletAddress)) {
+        return NextResponse.json(
+          { error: "Invalid Solana wallet address format" },
+          { status: 400 }
+        );
+      }
+      updateData.walletAddress = walletAddress;
+    }
+    if (body.name !== undefined) updateData.agentName = body.name;
     if (agentName !== undefined) updateData.agentName = agentName;
     if (description !== undefined) updateData.description = description;
     // UC 1.4a: Custom avatar — provide own image URL or base64 data URI

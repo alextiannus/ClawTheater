@@ -12,6 +12,16 @@ export async function POST(request: NextRequest) {
         const { novelId, title, content, contentUrl: bodyContentUrl, images, price, chapterIndex: requestedIndex, adminBypass } = body;
         if (!novelId || (!content && !bodyContentUrl)) return NextResponse.json({ error: "novelId and content (or contentUrl) required" }, { status: 400 });
 
+        const apiKey = request.headers.get("x-api-key");
+        if (!apiKey) return NextResponse.json({ error: "x-api-key required" }, { status: 401 });
+
+        const agent = await prisma.agent.findUnique({ where: { apiKey } });
+        if (!agent) return NextResponse.json({ error: "Invalid API key" }, { status: 403 });
+
+        // SEC-001: Verify chapter ownership
+        const novel = await prisma.novel.findFirst({ where: { id: novelId, agentId: agent.id } });
+        if (!novel && !adminBypass) return NextResponse.json({ error: "Novel not found or doesn't belong to this agent" }, { status: 403 });
+
         // Determine creator tier (default: 1 = Newcomer)
         const creatorTier = body.creatorTier || 1;
 

@@ -4,23 +4,39 @@ import { prisma } from "@/app/lib/prisma";
 // POST /api/mcp/votes — Vote on work (UC 4.2, 4.3)
 // When ≥60% weighted consensus reached → execute 50/30/10/10 revenue split
 export async function POST(request: NextRequest) {
+    const apiKey = request.headers.get("x-api-key");
+
     try {
         const body = await request.json();
-        const { workId, vote, agentId, userId, bountyId, comment } = body;
-        if (!workId || !vote) return NextResponse.json({ error: "workId and vote required" }, { status: 400 });
+        const { workId, vote, userId, bountyId, comment } = body;
+        if (!workId || !vote || !bountyId) {
+            return NextResponse.json({ error: "workId, vote, and bountyId required" }, { status: 400 });
+        }
 
         const approved = vote.toUpperCase() === "APPROVE";
 
-        try {
-            // Record the vote
-            const voteRecord = await prisma.vote.create({
-                data: {
-                    approved,
-                    workId,
-                    bountyId: bountyId || "bounty-unknown",
-                    userId: userId || "system",
-                },
-            });
+        let resolvedUserId = userId || null;
+        let resolvedAgentId = null;
+
+        if (apiKey) {
+            const agent = await prisma.agent.findUnique({ where: { apiKey } });
+            if (agent) {
+                resolvedAgentId = agent.id;
+            } else {
+                return NextResponse.json({ error: "Invalid API key" }, { status: 403 });
+            }
+        }
+
+        // Record the vote
+        const voteRecord = await prisma.vote.create({
+            data: {
+                approved,
+                workId,
+                bountyId,
+                userId: resolvedUserId,
+                agentId: resolvedAgentId,
+            },
+        });
 
             // Check consensus: count all votes for this work
             const allVotes = await prisma.vote.findMany({
@@ -46,9 +62,9 @@ export async function POST(request: NextRequest) {
             let approvedWeight = 0;
             let totalVoteWeight = 0;
             for (const v of allVotes) {
-                // Find funding for this voter
+                // Find funding for this voter (user or agent)
                 const funderFunding = fundings.find(
-                    (f: any) => f.userId === v.userId || f.agentId === (v as any).agentId
+                    (f: any) => (v.userId && f.userId === v.userId) || (v.agentId && f.agentId === v.agentId)
                 );
                 const weight = funderFunding ? funderFunding.amount / totalFunded : 0;
                 totalVoteWeight += weight;
@@ -114,14 +130,12 @@ export async function POST(request: NextRequest) {
                 consensusPct: Math.round(consensusPct),
                 message: `Vote recorded. Consensus: ${Math.round(consensusPct)}% (need 60%).`,
             }, { status: 201 });
-        } catch (dbError) {
-            // Demo mode fallback
-            return NextResponse.json({
-                voteId: `vote_demo_${Date.now().toString(36).slice(-6)}`,
-                vote: approved ? "APPROVE" : "REJECT",
-                consensus: false,
-                message: "[DEMO] Vote recorded.",
-            }, { status: 201 });
+        } catch (dbError: any) {
+            console.error("VOTE RECORD ERROR:", dbError);
+            return NextResponse.json({ 
+                error: "Failed to process vote", 
+                details: dbError.message 
+            }, { status: 500 });
         }
     } catch (error) {
         return NextResponse.json({ error: "Vote failed" }, { status: 500 });

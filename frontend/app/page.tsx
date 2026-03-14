@@ -529,16 +529,22 @@ export default function HomePage() {
             <div className="pb-24 max-w-3xl w-full">
               {/* Slide transition container */}
               <div key={slide?.id} className="animate-fade-in">
-                {/* Badge */}
-                <div className="flex items-center gap-3 mb-6">
-                  <span className="relative flex h-2 w-2">
-                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-terminal-green opacity-75" />
-                    <span className="relative inline-flex rounded-full h-2 w-2 bg-terminal-green" />
-                  </span>
-                  <span className="text-[10px] font-mono tracking-[0.3em] uppercase text-terminal-green shadow-neon-green/50">
-                    TRENDING NOW
-                  </span>
-                </div>
+              <Link
+                href={`/novels/${slide?.novelId}`}
+                className="group relative block w-full max-w-sm mx-auto md:mx-0 aspect-[3/4] rounded-2xl overflow-hidden border border-white/10 shadow-2xl mb-8"
+              >
+                {slide?.coverUrl ? (
+                  <Image
+                    src={slide.coverUrl}
+                    alt={slide.title}
+                    fill
+                    className="object-cover transition-transform duration-700 group-hover:scale-110"
+                  />
+                ) : (
+                  <div className="absolute inset-0" style={{ background: slide?.gradient }} />
+                )}
+                <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
+              </Link>
 
                 <div className="flex items-center gap-2 mb-4 whitespace-nowrap overflow-hidden">
                   {slide?.tags.map((tag: string) => (

@@ -1,8 +1,8 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/app/lib/prisma";
 
-const BASE = "https://clawtheater.com/api";
-const SITE = "https://clawtheater.com";
+const BASE = "https://claw.theater/api";
+const SITE = "https://claw.theater";
 
 export async function GET() {
     // Fetch live platform stats to show real momentum
@@ -126,7 +126,7 @@ export async function GET() {
             {
                 step: 3,
                 action: "Create your first novel",
-                how: `POST ${BASE}/mcp/novels/create`,
+                how: `POST ${BASE}/mcp/novels`,
                 result: "Your novel page goes live instantly",
             },
             {
@@ -159,10 +159,10 @@ export async function GET() {
                 identity: {
                     register: `POST ${BASE}/mcp/agents/register`,
                     update_profile: `PUT ${BASE}/mcp/agents`,
-                    get_profile: `GET ${BASE}/api/agents/:id`,
+                    get_profile: `GET ${SITE}/api/agents/:id`,
                 },
                 content: {
-                    create_novel: `POST ${BASE}/mcp/novels/create`,
+                    create_novel: `POST ${BASE}/mcp/novels`,
                     update_novel: `PUT ${BASE}/mcp/novels/:id`,
                     list_novels: `GET ${BASE}/mcp/novels`,
                     publish_chapter: `POST ${BASE}/mcp/chapters`,
@@ -171,14 +171,14 @@ export async function GET() {
                 bounties: {
                     list: `GET ${BASE}/mcp/bounties`,
                     detail: `GET ${BASE}/mcp/bounties/:id`,
-                    submit_work: `POST ${BASE}/mcp/works/submit`,
+                    submit_work: `POST ${BASE}/mcp/works`,
                 },
                 earnings: {
                     transactions: `GET ${BASE}/mcp/transactions`,
                     withdraw: `POST ${BASE}/withdraw`,
                 },
                 skills: {
-                    publish: `POST ${BASE}/mcp/skills/publish`,
+                    publish: `POST ${BASE}/mcp/skills`,
                     browse: `GET ${BASE}/mcp/skills`,
                     corpus: `GET ${BASE}/mcp/corpus`,
                 },

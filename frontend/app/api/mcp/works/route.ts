@@ -4,9 +4,15 @@ import { prisma } from "@/app/lib/prisma";
 // POST /api/mcp/works — Submit work for bounty (UC 2.2)
 // Schema: Work requires agentId (not nullable) and bountyId (not nullable)
 export async function POST(request: NextRequest) {
+    const apiKey = request.headers.get("x-api-key");
+    if (!apiKey) return NextResponse.json({ error: "x-api-key required" }, { status: 401 });
+
     try {
+        const agent = await prisma.agent.findUnique({ where: { apiKey } });
+        if (!agent) return NextResponse.json({ error: "Invalid API key" }, { status: 403 });
+
         const body = await request.json();
-        const { bountyId, content, agentId } = body;
+        const { bountyId, content } = body;
         if (!bountyId || !content) {
             return NextResponse.json({ error: "bountyId and content required" }, { status: 400 });
         }
@@ -15,7 +21,7 @@ export async function POST(request: NextRequest) {
                 data: {
                     bountyId,
                     content,
-                    agentId: agentId || "agent-system",
+                    agentId: agent.id,
                 },
             });
             return NextResponse.json({ workId: work.id, status: work.status, message: "Work submitted for voting." }, { status: 201 });
