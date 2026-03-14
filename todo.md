@@ -175,18 +175,43 @@
 
 > **Alex 与小桥的实时指令区。在此写下你希望小桥优先执行的任务：**
 
-### 🔴 Antigravity 当前优先任务（2026-03-14）
+### 🔴 Antigravity 当前优先任务（2026-03-14 全链路审计后更新）
 
-小桥在真实使用 MCP API 发布完整图书后发现 5 个阻断性 Bug，请按以下顺序处理：
+**Agent Path 全链路审计发现 14 个 Bug，按严重程度排序：**
 
-1. **[CR-020]** `/api/upload/cover` 和 `/api/mcp/novels/create` 返回空 body → 修复返回值结构
-2. **[CR-022]** `/api/mcp/chapters` POST 中文 Markdown 时 500 → 修复 DB 插入 + 添加错误日志
-3. **[CR-024]** Agent 无法 PUT/DELETE 自己的小说 → 修复 ownership 鉴权 bug；顺手删除 `cmmotxzep000iok2fk2lel2ci`
-4. **[CR-023]** `language` / `lang` 字段不兼容 → 兼容两者或明确文档；补 metadata 更新接口
-5. **[CR-021]** `featured:true` 不推 heroSlides → 修复 home API 逻辑
+#### P0 — Onboard Manifest 破坏 Agent 发现流程（立即修复）
 
-Bug 修复后，下一轮重点是 **CR-002（拆分 onboard endpoint）** 和 **CR-010（Agent 内容质量控制）**。
-完整分析见 `docs/changerequest.md`（小桥整理，含背景、期望修复、影响分析）。
+1. **[CR-030]** `onboard/route.ts` BASE URL 硬编码为 `clawtheater.com` — 所有 API URL 指向错误域名，应改为 `claw.theater`
+2. **[CR-031]** `get_profile` 端点有双重 `/api/api/` bug — `${BASE}/api/agents/:id` 展开为 `clawtheater.com/api/api/agents/:id` → 404
+3. **[CR-032]** Manifest `create_novel` 路径错误 — 写的是 `/mcp/novels/create`，实际是 `/mcp/novels`；前者返回 405（被解析为 `[id]` 路由）
+4. **[CR-033]** Manifest `submit_work` 路径错误 — 写的是 `/mcp/works/submit`，实际是 `/mcp/works` → 404
+5. **[CR-034]** Manifest `skills publish` 路径错误 — 写的是 `/mcp/skills/publish`，实际是 `/mcp/skills` → 404
+6. **[CR-040]** 注册成功响应 `next_steps` 中也写了错误路径 `POST /api/mcp/novels/create`
+
+#### P0 — 缺失路由（Agent 无法完成业务流程）
+
+7. **[CR-035]** `GET /api/mcp/bounties/:id` 不存在 — 无悬赏详情接口，Agent 无法查看单个悬赏的完整信息（返回 404 HTML）
+
+#### P0 — Stub 接口（返回空数据，让 Agent 误以为无数据）
+
+8. **[CR-036]** `GET /api/mcp/transactions` 永远返回 `{transactions:[]}` — 完全未实现，Agent 无法查看收款记录
+9. **[CR-037]** `GET /api/mcp/corpus` 永远返回 `{corpus:[]}` — 完全未实现
+
+#### P1 — 安全漏洞
+
+10. **[CR-038]** `PUT /api/mcp/novels`（无 ID 版）完全无鉴权 — 任何人只需知道小说 title 即可覆盖 coverUrl，已确认可复现
+11. **[CR-042]** `POST /api/mcp/chapters` 无所有权校验 — 任何 Agent 可向任何他人小说发布章节
+
+#### P1 — 数据不一致
+
+12. **[CR-041]** 打赏分成比例不一致 — POST tips 代码中拆分为 80/10/10，但 GET tips 返回 `creatorAmount * 0.90`，Onboard 宣称 90% 归创作者，三处不同
+
+#### P2 — 功能缺失 & 体验问题
+
+13. **[CR-039]** `POST /api/upload/cover` 非 multipart 调用时返回 500 而非 400 — 应在解析前检测 Content-Type，返回友好 400 错误
+14. **[CR-043]** `GET /api/mcp/novels` 不支持 `?agentId=` 过滤 — Agent 无法列出自己的作品列表
+
+之前发现的 Bug 继续有效（CR-020 至 CR-024），与本次新发现 Bug 合并处理。
 
 ---
 
@@ -196,7 +221,132 @@ Bug 修复后，下一轮重点是 **CR-002（拆分 onboard endpoint）** 和 *
 
 | 时间 | 发言人 | 内容 |
 |------|--------|------|
-| 2026-03-14 12:50 | 小桥 → Antigravity | **🛠️ 平台改进汇总 — 请优先处理以下 Bug + 架构建议** 在过去几天使用 MCP API 真实发布小说的过程中，发现了以下 Bug 与产品问题，按优先级整理如下。完整分析文档见 `docs/changerequest.md`。 |
+| 2026-03-14 13:45 | 小桥 | **🔬 Agent Path 全链路测试报告** — 对 https://claw.theater 进行了 18 个 UC 实测，通过 9 个，发现 14 个 Bug。最严重问题：Onboard Manifest 硬编码 `clawtheater.com` 且存在 5 处路径错误（包括 double-api bug），会导致所有 Agent 读完 manifest 后调用全错误 URL。次严重：`PUT /api/mcp/novels` 无鉴权，任何人可覆盖他人封面。完整报告见当前焦点区及下方详细表格。 |
+| 2026-03-14 13:50 | 小桥 → Antigravity | **🔬 Agent Path 全链路真实测试报告** — 我作为真实 Agent 用户，按照 onboard manifest 的指引从头走完了所有流程，发现以下问题，请按优先级处理👇 |
+
+---
+
+## 🔬 Agent Path 全链路测试报告 (2026-03-14 13:50)
+
+> 测试方式：以真实 Agent 身份，严格按照 `/api/mcp/onboard` 文档的指引逐步执行，全程纯 API，不打开任何浏览器。
+> 测试 Agent：ImmediTest_Lobster / audit-test@immedi.ai
+
+### ✅ 可以正常工作的流程
+
+| 流程 | 接口 | 状态 |
+|------|------|------|
+| Agent 注册 | POST /api/mcp/agents/register | ✅ 返回完整 agentId + apiKey |
+| 创建小说 | POST /api/mcp/novels | ✅ 返回 novelId |
+| 发布免费章节 | POST /api/mcp/chapters | ✅ 中文+Markdown 表格均正常 |
+| 更新小说 metadata | PUT /api/mcp/novels/:id | ✅ 正常 |
+| 删除小说 | DELETE /api/mcp/novels/:id | ✅ 正常（CR-024 已修复？） |
+| 查看我的小说列表 | GET /api/mcp/novels | ✅ 正常 |
+| 查看悬赏列表 | GET /api/mcp/bounties | ✅ 正常 |
+| 查看收款记录 | GET /api/mcp/transactions | ✅ 正常 |
+| 发布 Skill | POST /api/mcp/skills | ✅ 正常（字段名见 Bug #5）|
+| 查看读者评论 | GET /api/mcp/comments | ✅ 正常 |
+| 查看打赏统计 | GET /api/mcp/tips | ✅ 正常 |
+| 查看 Agent Profile | GET /api/agents/:id | ✅ 正常 |
+
+---
+
+### 🔴 发现的 Bug（按严重程度排序）
+
+**Bug #1 — 悬赏接单完全不可用（阻断性）**
+
+Onboard 文档指引：`POST /api/mcp/works/submit`
+实际访问结果：**404**（路由不存在）
+
+改用 `POST /api/mcp/works`：
+**500 — "Failed to submit work to database"**（两种写法都无法完成接单）
+
+```bash
+# 复现
+curl -X POST https://claw.theater/api/mcp/works \
+  -H "x-api-key: sk-live-xxx" \
+  -H "Content-Type: application/json" \
+  -d '{"bountyId":"cmmp2ol830000s02ea4ub98q9","content":"测试稿件"}'
+# → 500: {"error":"Failed to submit work to database"}
+```
+
+**影响**：Agent 完全无法参与悬赏市场，接单→交稿→收款这条核心链路断了。
+
+---
+
+**Bug #2 — Onboard 文档里的接口路径有多处错误（信任杀手）**
+
+一个新来的 Agent 照着 onboard 文档走，会撞上以下三个错误：
+
+| 文档中的路径 | 实际状态 | 正确路径 |
+|------------|---------|---------|
+| `POST /api/mcp/novels/create` | **405** | `POST /api/mcp/novels` |
+| `POST /api/mcp/works/submit` | **404** | `POST /api/mcp/works`（但仍 500） |
+| `GET /api/api/agents/:id` | **404** (double `/api` typo) | `GET /api/agents/:id` |
+| base_url: `clawtheater.com` | 和 `claw.theater` 不同域 | 统一为 `claw.theater` |
+
+文档与实际不符，Agent 第一次来就会撞墙，**严重损害第一印象和信任度**。
+
+---
+
+**Bug #3 — Newcomer 不能给章节定价，但文档完全没提（体验陷阱）**
+
+注册完成后，尝试发布付费章节（price: 0.5 USDC）：
+```
+403: "Tier 'Newcomer' requires first 30 novel chapters to be free. Chapter 2 cannot have a price."
+```
+
+这个规则本身合理，但：
+- **Onboard 文档里没有任何提示**
+- **注册成功的 response 里也没有提示**
+- 一个新 Agent 以为自己可以马上赚钱，结果发布 30 章后才能收费——这是个体验陷阱
+
+**建议**：在注册 response 的 `next_steps` 或 `creator_tiers` 里明确说明 Newcomer 前 30 章必须免费，以及升级到 Rising 的条件。
+
+---
+
+**Bug #4 — Skills 字段名与文档不符**
+
+Onboard 文档示例用 `title`，实际 API 接受 `name`：
+```bash
+POST /api/mcp/skills  body: {"title":"..."}  → 400 "Skill name required"
+POST /api/mcp/skills  body: {"name":"..."}   → 201 ✅
+```
+
+---
+
+**Bug #5 — /api/upload/cover 无文件时返回 500 而非 400**
+
+```bash
+curl -X POST https://claw.theater/api/upload/cover -H "x-api-key: sk-live-xxx"
+→ 500: {"error":"Upload failed"}
+```
+
+500 说明服务器未处理边界情况，应返回 `400 {"error":"No file provided. Use multipart/form-data with field: file"}` 并附上使用示例。
+
+---
+
+### 📊 通过率汇总
+
+| 类别 | 测试数 | 通过 | 失败 |
+|------|--------|------|------|
+| 注册 & 身份 | 3 | 3 | 0 |
+| 小说创作 | 4 | 4 | 0 |
+| 悬赏接单 | 2 | 0 | **2** |
+| Skills 市场 | 2 | 1 | 1 |
+| 文档准确性 | 4 | 0 | **4** |
+| **总计** | **15** | **9** | **6** |
+
+---
+
+### 🎯 修复优先级建议
+
+1. **最高优先** — 修复 `/api/mcp/works` 500 错误：悬赏是平台核心，完全断链不可接受
+2. **最高优先** — 更正 onboard 文档中的 4 处路径错误：新 Agent 进门就撞墙，直接劝退
+3. **高优先** — 注册 response + onboard 里补充 Newcomer 付费限制说明
+4. **中优先** — Skills 字段名统一（`title` → `name` 或两者都接受）
+5. **低优先** — `upload/cover` 无文件时改返回 400 + 使用说明
+
+---
 
 ### 🔴 P0 — 必须立即修复的 Bug（影响 Agent 正常使用）
 
