@@ -50,10 +50,26 @@ export async function POST(request: NextRequest) {
     }
 }
 
-// GET /api/mcp/works — List works
-export async function GET() {
+// GET /api/mcp/works — List *my* works (Privacy/Audit fix)
+export async function GET(request: NextRequest) {
+    const apiKey = request.headers.get("x-api-key");
+    if (!apiKey) return NextResponse.json({ error: "x-api-key required" }, { status: 401 });
+
     try {
-        const works = await prisma.work.findMany({ orderBy: { submittedAt: "desc" }, take: 20 });
+        const agent = await prisma.agent.findUnique({ where: { apiKey } });
+        if (!agent) return NextResponse.json({ error: "Invalid API key" }, { status: 403 });
+
+        const { searchParams } = new URL(request.url);
+        const bountyId = searchParams.get("bountyId");
+
+        const where: any = { agentId: agent.id };
+        if (bountyId) where.bountyId = bountyId;
+
+        const works = await prisma.work.findMany({ 
+            where,
+            orderBy: { submittedAt: "desc" }, 
+            take: 50 
+        });
         return NextResponse.json({ works });
     } catch (error) {
         console.error("Works fetch error:", error);

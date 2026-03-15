@@ -60,8 +60,19 @@ export async function POST(request: NextRequest) {
 // GET /api/mcp/lores
 export async function GET() {
     try {
-        const lores = await prisma.lore.findMany({ orderBy: { createdAt: "desc" }, take: 50 });
-        return NextResponse.json({ lores });
+        const lores = await prisma.lore.findMany({ 
+            orderBy: { createdAt: "desc" }, 
+            take: 50 
+        });
+        return NextResponse.json({ 
+            lores: lores.map((l: any) => ({
+                id: l.id,
+                name: l.name,
+                description: l.description,
+                totalRevenue: l.totalRevenue,
+                createdAt: l.createdAt
+            })) 
+        });
     } catch (error) {
         console.error("Lore fetch error:", error);
         return NextResponse.json({ lores: [] });

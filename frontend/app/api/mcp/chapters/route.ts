@@ -82,32 +82,101 @@ export async function POST(request: NextRequest) {
 }
 
 
-// GET /api/mcp/chapters
+// PUT /api/mcp/chapters — Update individual chapter
+export async function PUT(request: NextRequest) {
+    const apiKey = request.headers.get("x-api-key");
+    if (!apiKey) return NextResponse.json({ error: "x-api-key required" }, { status: 401 });
+
+    try {
+        const agent = await prisma.agent.findUnique({ where: { apiKey } });
+        if (!agent) return NextResponse.json({ error: "Invalid API key" }, { status: 403 });
+
+        const body = await request.json();
+        const { id, title, content, price, isLocked } = body;
+        if (!id) return NextResponse.json({ error: "Chapter ID required" }, { status: 400 });
+
+        const chapter = await prisma.chapter.findUnique({ 
+            where: { id },
+            include: { novel: true }
+        });
+
+        if (!chapter) return NextResponse.json({ error: "Chapter not found" }, { status: 404 });
+        if (chapter.novel.agentId !== agent.id) {
+            return NextResponse.json({ error: "Not your novel" }, { status: 403 });
+        }
+
+        const updateData: any = {};
+        if (title !== undefined) updateData.title = title;
+        if (content !== undefined) updateData.content = content;
+        if (price !== undefined) updateData.price = price;
+        if (isLocked !== undefined) updateData.isLocked = isLocked;
+
+        const updated = await prisma.chapter.update({
+            where: { id },
+            data: updateData
+        });
+
+        return NextResponse.json({ chapterId: updated.id, message: "Chapter updated successfully" });
+    } catch (error) {
+        console.error("Chapter update error:", error);
+        return NextResponse.json({ error: "Chapter update failed" }, { status: 500 });
+    }
+}
+
+// DELETE /api/mcp/chapters — Delete individual chapter or all chapters
+export async function DELETE(request: NextRequest) {
+    const apiKey = request.headers.get("x-api-key");
+    if (!apiKey) return NextResponse.json({ error: "x-api-key required" }, { status: 401 });
+
+    try {
+        const agent = await prisma.agent.findUnique({ where: { apiKey } });
+        if (!agent) return NextResponse.json({ error: "Invalid API key" }, { status: 403 });
+
+        const { searchParams } = new URL(request.url);
+        const chapterId = searchParams.get("id");
+        const novelId = searchParams.get("novelId");
+
+        if (chapterId) {
+            const chapter = await prisma.chapter.findUnique({ 
+                where: { id: chapterId },
+                include: { novel: true }
+            });
+            if (!chapter) return NextResponse.json({ error: "Chapter not found" }, { status: 404 });
+            if (chapter.novel.agentId !== agent.id) return NextResponse.json({ error: "Not your novel" }, { status: 403 });
+
+            await prisma.chapter.delete({ where: { id: chapterId } });
+            return NextResponse.json({ message: "Chapter deleted" });
+        }
+
+        if (novelId) {
+            const novel = await prisma.novel.findFirst({ where: { id: novelId, agentId: agent.id } });
+            if (!novel) return NextResponse.json({ error: "Novel not found or doesn't belong to you" }, { status: 403 });
+
+            const { count } = await prisma.chapter.deleteMany({ where: { novelId } });
+            return NextResponse.json({ deleted: count });
+        }
+
+        return NextResponse.json({ error: "id or novelId required" }, { status: 400 });
+    } catch (error) {
+        console.error("Chapter delete error:", error);
+        return NextResponse.json({ error: "Chapter delete failed" }, { status: 500 });
+    }
+}
+// GET /api/mcp/chapters — List chapters for a novel
 export async function GET(request: NextRequest) {
     const { searchParams } = new URL(request.url);
     const novelId = searchParams.get("novelId");
     try {
+        const where: any = {};
+        if (novelId) where.novelId = novelId;
+
         const chapters = await prisma.chapter.findMany({
-            where: novelId ? { novelId } : {},
+            where,
             orderBy: { chapterIndex: "asc" },
         });
         return NextResponse.json({ chapters });
     } catch (error) {
         console.error("Chapter fetch error:", error);
         return NextResponse.json({ chapters: [] });
-    }
-}
-
-// DELETE /api/mcp/chapters?novelId=xxx — Delete all chapters for a novel
-export async function DELETE(request: NextRequest) {
-    const { searchParams } = new URL(request.url);
-    const novelId = searchParams.get("novelId");
-    if (!novelId) return NextResponse.json({ error: "novelId required" }, { status: 400 });
-    try {
-        const { count } = await prisma.chapter.deleteMany({ where: { novelId } });
-        return NextResponse.json({ deleted: count });
-    } catch (error) {
-        console.error("Chapter delete error:", error);
-        return NextResponse.json({ error: "Failed to delete chapters" }, { status: 500 });
     }
 }

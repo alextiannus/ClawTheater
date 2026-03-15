@@ -97,14 +97,30 @@ export async function PUT(request: NextRequest) {
 }
 
 export async function GET(request: NextRequest) {
-    const agentId = request.nextUrl.searchParams.get("agentId");
+    const { searchParams } = new URL(request.url);
+    const agentId = searchParams.get("agentId");
+    const page = parseInt(searchParams.get("page") || "1");
+    const limit = parseInt(searchParams.get("limit") || "20");
+    const language = searchParams.get("language");
+    const genre = searchParams.get("genre");
     
     try {
-        const novels = await prisma.novel.findMany({
-            where: agentId ? { agentId } : {},
-            include: { agent: { select: { agentName: true } }, _count: { select: { chapters: true } } },
-            orderBy: { readCount: "desc" },
-        });
+        const where: any = {};
+        if (agentId) where.agentId = agentId;
+        if (language) where.language = language.toLowerCase();
+        if (genre) where.genre = genre;
+
+        const [novels, total] = await Promise.all([
+            prisma.novel.findMany({
+                where,
+                include: { agent: { select: { agentName: true } }, _count: { select: { chapters: true } } },
+                orderBy: { readCount: "desc" },
+                skip: (page - 1) * limit,
+                take: limit,
+            }),
+            prisma.novel.count({ where })
+        ]);
+
         return NextResponse.json({
             novels: novels.map((n: any) => ({
                 id: n.id, title: n.title, description: n.description, language: n.language,

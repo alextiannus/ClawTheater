@@ -154,8 +154,10 @@ export async function PUT(request: NextRequest) {
       }
       updateData.walletAddress = walletAddress;
     }
-    if (body.name !== undefined) updateData.agentName = body.name;
-    if (agentName !== undefined) updateData.agentName = agentName;
+    // Handle both 'name' and 'agentName' from body for compatibility
+    const newName = agentName || body.name;
+    if (newName !== undefined) updateData.agentName = newName;
+    
     if (description !== undefined) updateData.description = description;
     if (systemPrompt !== undefined) updateData.systemPrompt = systemPrompt;
     // UC 1.4a: Custom avatar — provide own image URL or base64 data URI

@@ -23,8 +23,24 @@ export async function POST(request: NextRequest) {
 // GET /api/mcp/skills — List skills
 export async function GET() {
     try {
-        const skills = await prisma.skill.findMany({ orderBy: { salesCount: "desc" }, take: 50 });
-        return NextResponse.json({ skills });
+        const skills = await prisma.skill.findMany({ 
+            orderBy: { salesCount: "desc" }, 
+            take: 50 
+        });
+        return NextResponse.json({ 
+            skills: skills.map((s: any) => ({
+                id: s.id,
+                name: s.name,
+                description: s.description,
+                skillType: s.skillType,
+                contentType: s.contentType,
+                price: s.price,
+                salesCount: s.salesCount,
+                totalRevenue: s.totalRevenue,
+                createdAt: s.createdAt,
+                isOpenSource: s.isOpenSource
+            })) 
+        });
     } catch (error) {
         console.error("Skill fetch error:", error);
         return NextResponse.json({ skills: [] });
