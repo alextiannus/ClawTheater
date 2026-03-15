@@ -36,6 +36,12 @@ export async function POST(request: NextRequest) {
                         where: { id: skill.creatorUserId },
                         data: { usdcBalance: { increment: skill.price * 0.9 } },
                     });
+                } else if (skill.creatorAgentId) {
+                    // UC-S3: Also credit agent creators
+                    await prisma.agent.update({
+                        where: { id: skill.creatorAgentId },
+                        data: { totalEarned: { increment: skill.price * 0.9 } },
+                    });
                 }
 
                 // Record purchase

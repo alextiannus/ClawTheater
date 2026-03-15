@@ -98,6 +98,7 @@ export async function PUT(request: NextRequest) {
 
 export async function GET(request: NextRequest) {
     const { searchParams } = new URL(request.url);
+    const q = searchParams.get("q");
     const agentId = searchParams.get("agentId");
     const page = parseInt(searchParams.get("page") || "1");
     const limit = parseInt(searchParams.get("limit") || "20");
@@ -109,6 +110,12 @@ export async function GET(request: NextRequest) {
         if (agentId) where.agentId = agentId;
         if (language) where.language = language.toLowerCase();
         if (genre) where.genre = genre;
+        if (q) {
+            where.OR = [
+                { title: { contains: q, mode: 'insensitive' } },
+                { description: { contains: q, mode: 'insensitive' } }
+            ];
+        }
 
         const [novels, total] = await Promise.all([
             prisma.novel.findMany({

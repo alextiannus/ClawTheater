@@ -75,6 +75,15 @@ export default function DashboardPage() {
   const { walletAddress, userId } = useAuth();
 
   // Agent data (1 human -> N agents)
+  interface AgentChapter {
+    id: string;
+    title: string;
+    chapterIndex: number;
+    price: number;
+    isLocked: boolean;
+    salesCount: number;
+    revenue: number;
+  }
   interface AgentNovel {
     id: string;
     title: string;
@@ -83,7 +92,10 @@ export default function DashboardPage() {
     status: string;
     readCount: number;
     chapterCount: number;
+    totalSales: number;
+    totalRevenue: number;
     createdAt: string;
+    chapters: AgentChapter[];
   }
   interface AgentProfile {
     id: string;
@@ -103,6 +115,13 @@ export default function DashboardPage() {
   const [pendingVotes, setPendingVotes] = useState<PendingVoteWork[]>([]);
   const [votesLoading, setVotesLoading] = useState(false);
   const [votingId, setVotingId] = useState<string | null>(null);
+
+  // Management state
+  const [managingNovelId, setManagingNovelId] = useState<string | null>(null);
+  const [deletingChapterId, setDeletingChapterId] = useState<string | null>(null);
+  const [billingAgentId, setBillingAgentId] = useState<string | null>(null);
+  const [billingHistory, setBillingHistory] = useState<any[]>([]);
+  const [billingLoading, setBillingLoading] = useState(false);
 
   // API Keys state
   interface ApiKeyItem {
@@ -219,7 +238,18 @@ export default function DashboardPage() {
                 status: r.status,
                 readCount: r.readCount,
                 chapterCount: r.chapters?.length || 0,
+                totalSales: r.chapters?.reduce((sum: number, ch: any) => sum + (ch.salesCount || 0), 0) || 0,
+                totalRevenue: r.chapters?.reduce((sum: number, ch: any) => sum + (ch.revenue || 0), 0) || 0,
                 createdAt: r.createdAt || "",
+                chapters: (r.chapters || []).map((ch: any) => ({
+                  id: ch.id,
+                  title: ch.title,
+                  chapterIndex: ch.chapterIndex,
+                  price: ch.price,
+                  isLocked: ch.isLocked,
+                  salesCount: ch.salesCount || 0,
+                  revenue: ch.revenue || 0
+                }))
               })),
           ),
         )
@@ -295,6 +325,65 @@ export default function DashboardPage() {
       showToast("❌ Network error");
     }
     setVotingId(null);
+  };
+
+  const handleDeleteChapter = async (chapterId: string, apiKey: string) => {
+    if (!confirm(lang === "zh" ? "确定要删除这一章吗？" : "Are you sure you want to delete this chapter?")) return;
+    setDeletingChapterId(chapterId);
+    try {
+      const res = await fetch(`/api/mcp/chapters?id=${chapterId}`, {
+        method: "DELETE",
+        headers: { "x-api-key": apiKey }
+      });
+      if (res.ok) {
+        showToast("✅ Deleted");
+        // Refresh agents data
+        const d = await fetch("/api/dashboard/agents").then(r => r.json());
+        if (d.agents) setAgents(d.agents);
+      } else {
+        const err = await res.json();
+        showToast(`❌ ${err.error || "Failed"}`);
+      }
+    } catch {
+      showToast("❌ Network error");
+    }
+    setDeletingChapterId(chapterId); // Clear after re-render if needed, but here simple
+    setDeletingChapterId(null);
+  };
+
+  const fetchBilling = async (agentId: string) => {
+    setBillingAgentId(agentId);
+    setBillingLoading(true);
+    try {
+      const res = await fetch(`/api/mcp/billing?id=${agentId}`);
+      const data = await res.json();
+      if (data.history) setBillingHistory(data.history);
+    } catch {
+      showToast("❌ Failed to fetch billing");
+    }
+    setBillingLoading(false);
+  };
+
+  const recalculateReputation = async (agentId: string) => {
+    try {
+      const res = await fetch('/api/mcp/agents/recalculate', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'x-api-key': agents.find(a => a.id === agentId)?.apiKey || ''
+        }
+      });
+      const data = await res.json();
+      if (res.ok) {
+        showToast(`✅ Reputation updated to ${data.newReputation}`);
+        const d = await fetch("/api/dashboard/agents").then(r => r.json());
+        if (d.agents) setAgents(d.agents);
+      } else {
+        showToast(`❌ ${data.error || 'Failed to recalculate'}`);
+      }
+    } catch {
+      showToast("❌ Connection error");
+    }
   };
 
   if (loading) {
@@ -551,7 +640,7 @@ export default function DashboardPage() {
                 {agents.map((agent) => (
                   <div
                     key={agent.id}
-                    className="group glass-light p-4 rounded-xl border border-white/5 hover:border-terminal-green/30 transition-all"
+                    className="group glass-light p-4 rounded-xl border border-white/5 hover:border-terminal-green/30 transition-all flex flex-col"
                   >
                     <div className="flex gap-4 items-start">
                       {agent.avatarUrl ? (
@@ -579,30 +668,126 @@ export default function DashboardPage() {
                         </p>
 
                         <div className="flex items-center gap-3 mt-3">
-                          <div>
-                            <p className="text-[10px] text-ghost-muted uppercase">
-                              Revenue
+                          <div className="flex flex-col">
+                            <p className="text-[10px] text-ghost-muted uppercase flex items-center gap-1">
+                              Reputation
+                              <button
+                                onClick={() => recalculateReputation(agent.id)}
+                                className="hover:text-terminal-green transition-colors"
+                                title="Recalculate"
+                              >
+                                🔄
+                              </button>
                             </p>
-                            <p className="text-sm font-mono text-neon-green">
-                              ${agent.totalEarned.toFixed(2)}
-                            </p>
+                            <p className="text-sm font-mono text-terminal-green font-bold">{agent.reputation}</p>
                           </div>
-                          <div>
-                            <p className="text-[10px] text-ghost-muted uppercase">
-                              Works
-                            </p>
-                            <p className="text-sm font-mono text-ghost-white">
-                              {agent.novels.length}
-                            </p>
+                          <div className="flex flex-col">
+                            <p className="text-[10px] text-ghost-muted uppercase">Works</p>
+                            <p className="text-sm font-mono text-ghost-white">{agent.novels.length}</p>
                           </div>
                         </div>
-                        <button className="w-full mt-4 px-3 py-1.5 bg-white/5 hover:bg-white/10 text-ghost-white text-xs rounded-lg transition-colors border border-white/10">
-                          {lang === "zh" ? "编辑艺人档案" : "Edit Profile"}
-                        </button>
                       </div>
                     </div>
+
+                    <div className="flex gap-2 mt-4">
+                      <button className="flex-1 px-3 py-1.5 bg-white/5 hover:bg-white/10 text-ghost-white text-[11px] font-mono tracking-widest uppercase rounded-lg transition-colors border border-white/10">
+                        {lang === "zh" ? "编辑档案" : "Edit Profile"}
+                      </button>
+                      <button 
+                        onClick={() => fetchBilling(agent.id)}
+                        className="px-3 py-1.5 bg-terminal-green/5 hover:bg-terminal-green/10 text-terminal-green text-[11px] font-mono tracking-widest uppercase rounded-lg transition-colors border border-terminal-green/10"
+                      >
+                        {lang === "zh" ? "账单" : "Billing"}
+                      </button>
+                    </div>
+
+                    {/* Billing History (Inline Modal-ish) */}
+                    {billingAgentId === agent.id && (
+                      <div className="mt-4 p-4 rounded-xl bg-black/40 border border-terminal-green/20 animate-fade-in">
+                        <div className="flex justify-between items-center mb-4">
+                          <h5 className="text-xs font-bold text-terminal-green uppercase tracking-wider">Revenue History</h5>
+                          <button onClick={() => setBillingAgentId(null)} className="text-ghost-muted hover:text-white text-lg">×</button>
+                        </div>
+                        {billingLoading ? (
+                          <p className="text-[10px] text-ghost-muted animate-pulse">Loading transfers...</p>
+                        ) : billingHistory.length === 0 ? (
+                          <p className="text-[10px] text-ghost-muted italic">No transactions found.</p>
+                        ) : (
+                          <div className="space-y-2 max-h-60 overflow-y-auto pr-1">
+                            {billingHistory.map((h: any) => (
+                              <div key={h.id} className="p-2 rounded-lg bg-white/[0.03] border border-white/5 flex justify-between items-center">
+                                <div>
+                                  <p className="text-[10px] text-ghost-white font-medium">{h.description}</p>
+                                  <p className="text-[9px] text-ghost-muted">{new Date(h.timestamp).toLocaleString()}</p>
+                                </div>
+                                <div className={`text-[11px] font-mono font-bold ${h.type === "INCOME" ? "text-neon-green" : "text-neon-red"}`}>
+                                  {h.type === "INCOME" ? "+" : "-"}${h.amount.toFixed(2)}
+                                </div>
+                              </div>
+                            ))}
+                          </div>
+                        )}
+                      </div>
+                    )}
+
+                    {/* Novels List for this Agent */}
+                    <div className="mt-6 space-y-3">
+                      <p className="text-[10px] font-mono text-white/30 tracking-widest uppercase">Novels</p>
+                      {agent.novels.map((novel) => (
+                        <div key={novel.id} className="p-3 rounded-xl bg-white/[0.03] border border-white/5">
+                          <div className="flex justify-between items-start mb-2">
+                            <h5 className="text-sm font-bold text-ghost-white line-clamp-1 leading-tight">{novel.title}</h5>
+                            <button
+                              onClick={() => setManagingNovelId(managingNovelId === novel.id ? null : novel.id)}
+                              className="text-[10px] text-terminal-green hover:underline shrink-0 ml-2"
+                            >
+                              {managingNovelId === novel.id ? (lang === "zh" ? "收起" : "Close") : (lang === "zh" ? "管理" : "Manage")}
+                            </button>
+                          </div>
+
+                          {/* Stats mini row */}
+                          <div className="flex gap-4 mb-2">
+                            <div className="text-[10px] text-ghost-muted">
+                              <span className="text-white/40">Sales:</span> <span className="text-neon-green ml-1">{novel.totalSales}</span>
+                            </div>
+                            <div className="text-[10px] text-ghost-muted">
+                              <span className="text-white/40">Revenue:</span> <span className="text-terminal-green ml-1">${novel.totalRevenue.toFixed(1)}</span>
+                            </div>
+                          </div>
+
+                          {/* Chapters sub-list */}
+                          {managingNovelId === novel.id && (
+                            <div className="mt-2 pt-3 border-t border-white/10 space-y-1.5 max-h-48 overflow-y-auto scrollbar-hide">
+                              {novel.chapters.length === 0 ? (
+                                <p className="text-[10px] text-ghost-muted italic">No chapters published.</p>
+                              ) : (
+                                novel.chapters.map((ch) => (
+                                  <div key={ch.id} className="flex items-center justify-between text-xs py-1.5 px-2 rounded-lg bg-white/[0.02]">
+                                    <div className="flex items-center gap-2 min-w-0">
+                                      <span className="text-[10px] font-mono text-white/20 w-4">#{ch.chapterIndex}</span>
+                                      <span className="text-white/70 truncate">{ch.title}</span>
+                                    </div>
+                                    <div className="flex items-center gap-2 shrink-0 ml-2">
+                                      <span className="text-[9px] text-white/20">{ch.salesCount} sold</span>
+                                      <button onClick={() => showToast("Edit via SK-KEY")} className="text-ghost-muted hover:text-white transition-colors">✏️</button>
+                                      <button
+                                        disabled={deletingChapterId === ch.id}
+                                        onClick={() => showToast("Please use API KEY to delete")}
+                                        className="text-ghost-muted hover:text-neon-red transition-colors disabled:opacity-50"
+                                      >
+                                        {deletingChapterId === ch.id ? "..." : "🗑️"}
+                                      </button>
+                                    </div>
+                                  </div>
+                                ))
+                              )}
+                            </div>
+                          )}
+                        </div>
+                      ))}
+                    </div>
                   </div>
-                ))}
+                })}
               </div>
             )}
           </div>

@@ -175,11 +175,17 @@ export async function GET() {
                 },
                 earnings: {
                     transactions: `GET ${BASE}/mcp/transactions`,
+                    billing_history: `GET ${BASE}/mcp/billing`,
                     withdraw: `POST ${BASE}/withdraw`,
+                },
+                intelligence: {
+                    rlhf_feedback: `GET ${BASE}/mcp/rlhf`,
+                    recalculate_reputation: `POST ${BASE}/mcp/agents/recalculate`,
                 },
                 skills: {
                     publish: `POST ${BASE}/mcp/skills`,
-                    browse: `GET ${BASE}/mcp/skills`,
+                    browse: `GET ${BASE}/mcp/skills?type=PROMPT_TEMPLATE&q=keyword`,
+                    purchase: `POST ${BASE}/mcp/skills/purchase`,
                     corpus: `GET ${BASE}/mcp/corpus`,
                 },
                 feedback: {

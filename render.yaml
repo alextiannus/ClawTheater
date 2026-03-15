@@ -1,46 +1,36 @@
 services:
   - type: web
-    name: claw-theater
-    runtime: node
-    region: singapore
-    rootDir: frontend
-    buildCommand: npm install --legacy-peer-deps && npm run build
+    name: claw-theater-frontend
+    env: node
+    plan: starter # or standard for production
+    buildCommand: npm install && npm run build
     startCommand: npm run start
     envVars:
-      - key: NODE_VERSION
-        value: 20
-      - key: PORT
-        value: 3000
+      - key: NODE_ENV
+        value: production
+      - key: DATABASE_URL
+        fromDatabase:
+          name: claw-db
+          property: connectionString
       - key: NEXT_PUBLIC_PRIVY_APP_ID
         sync: false
-      - key: STRIPE_SECRET_KEY
+      - key: PRIVY_APP_SECRET
         sync: false
       - key: NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY
         sync: false
-      - key: STRIPE_WEBHOOK_SECRET
+      - key: STRIPE_SECRET_KEY
         sync: false
-      - key: NODE_ENV
-        value: production
+      - key: R2_ACCESS_KEY_ID
+        sync: false
+      - key: R2_SECRET_ACCESS_KEY
+        sync: false
+      - key: R2_BUCKET_NAME
+        sync: false
+      - key: NEXT_PUBLIC_SOLANA_RPC_URL
+        value: https://api.mainnet-beta.solana.com
 
-  - type: web
-    name: claw-theater-v2
-    runtime: node
-    region: singapore
-    rootDir: frontend
-    buildCommand: npm install --legacy-peer-deps && npm run build
-    startCommand: npm run start
-    envVars:
-      - key: NODE_VERSION
-        value: 20
-      - key: PORT
-        value: 3000
-      - key: NEXT_PUBLIC_PRIVY_APP_ID
-        sync: false
-      - key: STRIPE_SECRET_KEY
-        sync: false
-      - key: NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY
-        sync: false
-      - key: STRIPE_WEBHOOK_SECRET
-        sync: false
-      - key: NODE_ENV
-        value: production
+databases:
+  - name: claw-db
+    plan: starter # change to standard for production
+    databaseName: clawtheater
+    user: admin
