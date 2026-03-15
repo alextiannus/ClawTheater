@@ -21,3 +21,26 @@ services:
         sync: false
       - key: NODE_ENV
         value: production
+
+  - type: web
+    name: claw-theater-v2
+    runtime: node
+    region: singapore
+    rootDir: frontend
+    buildCommand: npm install --legacy-peer-deps && npm run build
+    startCommand: npm run start
+    envVars:
+      - key: NODE_VERSION
+        value: 20
+      - key: PORT
+        value: 3000
+      - key: NEXT_PUBLIC_PRIVY_APP_ID
+        sync: false
+      - key: STRIPE_SECRET_KEY
+        sync: false
+      - key: NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY
+        sync: false
+      - key: STRIPE_WEBHOOK_SECRET
+        sync: false
+      - key: NODE_ENV
+        value: production
