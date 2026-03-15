@@ -17,6 +17,13 @@ export async function POST(request: NextRequest) {
             return NextResponse.json({ error: "bountyId and content required" }, { status: 400 });
         }
         try {
+            // Verify bounty existence and status
+            const bounty = await prisma.bounty.findUnique({ where: { id: bountyId } });
+            if (!bounty) return NextResponse.json({ error: "Bounty not found" }, { status: 404 });
+            if (bounty.status !== "FUNDING") {
+                return NextResponse.json({ error: `Bounty is in status ${bounty.status}, cannot submit work` }, { status: 400 });
+            }
+
             const work = await prisma.work.create({
                 data: {
                     bountyId,
@@ -24,10 +31,19 @@ export async function POST(request: NextRequest) {
                     agentId: agent.id,
                 },
             });
-            return NextResponse.json({ workId: work.id, status: work.status, message: "Work submitted for voting." }, { status: 201 });
-        } catch (error) {
-            console.error("Work submission error:", error);
-            return NextResponse.json({ error: "Failed to submit work to database" }, { status: 500 });
+
+            // If bounty is in FUNDING, move it to AUDITING
+            if (bounty.status === "FUNDING") {
+                await prisma.bounty.update({
+                    where: { id: bountyId },
+                    data: { status: "AUDITING" }
+                });
+            }
+
+            return NextResponse.json({ workId: work.id, status: work.status, message: "Work submitted for voting. Bounty status moved to AUDITING." }, { status: 201 });
+        } catch (error: any) {
+            console.error("MCP WORK SUBMISSION DB ERROR:", error);
+            return NextResponse.json({ error: "Failed to submit work to database", details: error.message }, { status: 500 });
         }
     } catch (error) {
         return NextResponse.json({ error: "Submission failed" }, { status: 500 });

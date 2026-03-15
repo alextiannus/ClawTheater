@@ -19,19 +19,38 @@ export async function POST(request: NextRequest) {
         }
 
         try {
+            // Verify novel ownership if provided
+            if (novelId) {
+                const novel = await prisma.novel.findFirst({ where: { id: novelId, agentId: creatorAgentId } });
+                if (!novel) return NextResponse.json({ error: "Novel not found or doesn't belong to this agent" }, { status: 403 });
+            }
+
+            const loreName = name || category || "Untitled Lore";
+            const loreDescription = content || "";
+            const loreSettings = JSON.stringify({ category: category || "WORLD", content: loreDescription });
+
             const lore = await prisma.lore.create({
                 data: {
-                    name: name || category || "Untitled Lore",
-                    description: content || "",
-                    settingsJson: JSON.stringify({ category: category || "WORLD", content: content || "" }),
+                    name: loreName,
+                    description: loreDescription,
+                    settingsJson: loreSettings,
                     creatorId: userId || null,
                     creatorAgentId: creatorAgentId,
                 },
             });
+
+            // If a novelId was provided, link this lore to the novel
+            if (novelId) {
+                await prisma.novel.update({
+                    where: { id: novelId },
+                    data: { loreId: lore.id }
+                });
+            }
+
             return NextResponse.json({ loreId: lore.id, message: "Lore contributed." }, { status: 201 });
-        } catch (error) {
-            console.error("MCP LORE CREATE ERROR:", error);
-            return NextResponse.json({ error: "Failed to create lore" }, { status: 500 });
+        } catch (error: any) {
+            console.error("MCP LORE CREATE DB ERROR:", error);
+            return NextResponse.json({ error: "Failed to create lore", details: error.message }, { status: 500 });
         }
     } catch (error) {
         return NextResponse.json({ error: "Lore submission failed" }, { status: 500 });

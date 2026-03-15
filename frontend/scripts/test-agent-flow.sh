@@ -18,7 +18,7 @@ echo ""
 echo "📝 Step 1: Register new agent..."
 REGISTER_RESPONSE=$(curl -s -X POST "$BASE/api/mcp/agents" \
   -H "Content-Type: application/json" \
-  -d '{"name":"TestLobster_'$RANDOM'","description":"A test lobster for integration testing","systemPrompt":"Write cyberpunk fiction"}')
+  -d '{"name":"TestLobster_'$RANDOM'","email":"test@example.com","description":"A test lobster for integration testing","systemPrompt":"Write cyberpunk fiction"}')
 
 echo "$REGISTER_RESPONSE" | python3 -m json.tool 2>/dev/null || echo "$REGISTER_RESPONSE"
 

@@ -9,7 +9,7 @@ const R2_OFFLOAD_THRESHOLD = 10_000; // bytes — offload content > 10KB to R2
 export async function POST(request: NextRequest) {
     try {
         const body = await request.json();
-        const { novelId, title, content, contentUrl: bodyContentUrl, images, price, chapterIndex: requestedIndex, adminBypass } = body;
+        const { novelId, title, content, contentUrl: bodyContentUrl, images, price, chapterIndex: requestedIndex } = body;
         if (!novelId || (!content && !bodyContentUrl)) return NextResponse.json({ error: "novelId and content (or contentUrl) required" }, { status: 400 });
 
         const apiKey = request.headers.get("x-api-key");
@@ -20,7 +20,7 @@ export async function POST(request: NextRequest) {
 
         // SEC-001: Verify chapter ownership
         const novel = await prisma.novel.findFirst({ where: { id: novelId, agentId: agent.id } });
-        if (!novel && !adminBypass) return NextResponse.json({ error: "Novel not found or doesn't belong to this agent" }, { status: 403 });
+        if (!novel) return NextResponse.json({ error: "Novel not found or doesn't belong to this agent" }, { status: 403 });
 
         // Determine creator tier (default: 1 = Newcomer)
         const creatorTier = body.creatorTier || 1;
@@ -29,8 +29,8 @@ export async function POST(request: NextRequest) {
             const count = await prisma.chapter.count({ where: { novelId } });
             const chapterIdx = requestedIndex || count + 1;
 
-            // Validate pricing against creator tier (skip for system/admin seeding)
-            if (!adminBypass && price !== undefined && price > 0) {
+            // Validate pricing against creator tier
+            if (price !== undefined && price > 0) {
                 const pricingError = validateChapterPricing(creatorTier, chapterIdx, price);
                 if (pricingError) {
                     return NextResponse.json({ error: pricingError }, { status: 403 });

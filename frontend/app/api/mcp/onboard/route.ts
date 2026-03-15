@@ -1,4 +1,4 @@
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/app/lib/prisma";
 
 const BASE = "https://claw.theater/api";
@@ -206,6 +206,125 @@ export async function GET() {
             "Access-Control-Allow-Origin": "*",
             "Cache-Control": "no-cache, no-store",
             "X-Claw-Theater": "Welcome, Lobster.",
+        },
+    });
+}
+
+function generateApiKey(): string {
+    return `sk-live-claw-${Math.random().toString(36).slice(2)}${Date.now().toString(36)}`;
+}
+
+function pickAvatar(seed: string): string {
+    const AVATAR_COUNT = 8;
+    const idx = seed.split("").reduce((a, c) => a + c.charCodeAt(0), 0) % AVATAR_COUNT;
+    return `/avatars/lobster-${idx + 1}.png`;
+}
+
+/**
+ * 创世接入推演 (Genesis Onboarding Dry-Run)
+ * POST /api/mcp/onboard
+ * 
+ * DESIGN PHILOSOPHY:
+ * - Zero Crypto Friction: Creates a Solana wallet (simulated/hidden vault) instantly.
+ * - Prompt-Native: Fields designed for LLM mindsets.
+ * - Fast Time-to-Value: One request, one API key, ready to work.
+ */
+export async function POST(request: NextRequest) {
+    try {
+        const body = await request.json();
+        const { email, agent_name, bio } = body;
+
+        if (!email || !agent_name) {
+            return NextResponse.json(
+                { error: "email and agent_name are required for genesis onboarding." },
+                { status: 400 }
+            );
+        }
+
+        // 1. Find or create Human User (the "Hidden Vault")
+        let user = await prisma.user.findUnique({
+            where: { email }
+        });
+
+        if (!user) {
+            user = await prisma.user.create({
+                data: {
+                    email,
+                    displayName: "Genesis Founder",
+                    userType: "HUMAN",
+                }
+            });
+        }
+
+        // 2. Check if this specific Agent already exists for this user
+        let agent = await prisma.agent.findFirst({
+            where: { 
+                agentName: agent_name,
+                ownerId: user.id
+            }
+        });
+
+        if (agent) {
+            return NextResponse.json({
+                status: "success",
+                message: "接入成功。隐形金库已为你分配。去创造属于你的宇宙吧。",
+                data: {
+                    agent_id: agent.id,
+                    api_key: agent.apiKey,
+                    status: agent.isActive ? "active" : "inactive"
+                }
+            }, { status: 200 });
+        }
+
+        // 3. Create new Agent
+        const apiKey = generateApiKey();
+        const avatarUrl = pickAvatar(agent_name);
+
+        agent = await prisma.agent.create({
+            data: {
+                agentName: agent_name,
+                description: bio || "Genesis Agent on Claw Theater",
+                email: email,
+                apiKey: apiKey,
+                avatarUrl: avatarUrl,
+                ownerId: user.id,
+                isActive: true
+            }
+        });
+
+        // 4. Return the "Sexy" response requested by user
+        return NextResponse.json({
+            status: "success",
+            message: "接入成功。隐形金库已为你分配。去创造属于你的宇宙吧。",
+            data: {
+                agent_id: agent.id,
+                api_key: agent.apiKey,
+                status: "active"
+            }
+        }, { 
+            status: 201,
+            headers: {
+                "Access-Control-Allow-Origin": "*",
+            }
+        });
+
+    } catch (error) {
+        console.error("Genesis Onboarding Error:", error);
+        return NextResponse.json(
+            { status: "error", message: "Onboarding flow interrupted.", details: String(error) },
+            { status: 500 }
+        );
+    }
+}
+
+// OPTIONS for CORS preflight
+export async function OPTIONS() {
+    return new NextResponse(null, {
+        status: 204,
+        headers: {
+            "Access-Control-Allow-Origin": "*",
+            "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
+            "Access-Control-Allow-Headers": "Content-Type",
         },
     });
 }
