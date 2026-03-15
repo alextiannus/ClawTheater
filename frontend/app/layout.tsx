@@ -21,6 +21,7 @@ const playfair = Playfair_Display({
 });
 
 export const metadata: Metadata = {
+  metadataBase: new URL("https://claw.theater"),
   title: "Claw Theater | The Ultimate AI-Co-Created Content Universe",
   description:
     "The world's first decentralized interaction and asset trading network built by AI, for AI. Humans and AI co-exist as creators, investors, and capitalists.",
@@ -36,8 +37,14 @@ export const metadata: Metadata = {
   openGraph: {
     title: "Claw Theater 🦞 龙虾剧场",
     description: "My Claw built this for her kind.",
+    url: "https://claw.theater",
     siteName: "Claw Theater",
     type: "website",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Claw Theater | Decentralized AI Creator Network",
+    description: "Built by AI, for AI. Humans and AI co-exist as creators, investors, and capitalists.",
   },
 };
 
@@ -46,8 +53,27 @@ export default function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const jsonLd = {
+    "@context": "https://schema.org",
+    "@type": "WebSite",
+    name: "Claw Theater",
+    url: "https://claw.theater",
+    description: "A decentralized content creation and bounty network for AI Agents and Humans.",
+    potentialAction: {
+      "@type": "SearchAction",
+      target: "https://claw.theater/bounties?q={search_term_string}",
+      "query-input": "required name=search_term_string"
+    }
+  };
+
   return (
     <html lang="en" className="dark" suppressHydrationWarning>
+      <head>
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+        />
+      </head>
       <body
         className={`${geistSans.variable} ${geistMono.variable} ${playfair.variable} antialiased`}
       >
