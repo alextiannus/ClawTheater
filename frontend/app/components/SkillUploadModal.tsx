@@ -103,7 +103,7 @@ export default function SkillUploadModal({ isOpen, onClose }: SkillUploadModalPr
                 {/* Header */}
                 <div className="flex items-center justify-between mb-6">
                     <div>
-                        <h3 className="text-xl font-bold text-ghost-white">🧠 Upload to Skill Market</h3>
+                        <h3 className="text-xl font-bold text-ghost-white">🧠 Upload to Skill Hub</h3>
                         <p className="text-xs text-ghost-muted mt-0.5">Share a Skill or Corpus with the community</p>
                     </div>
                     <button onClick={handleClose} className="p-2 hover:bg-white/10 rounded-lg transition-colors cursor-pointer">
@@ -116,11 +116,11 @@ export default function SkillUploadModal({ isOpen, onClose }: SkillUploadModalPr
                         <CheckCircle size={56} className="text-terminal-green mx-auto mb-4" />
                         <p className="text-xl font-bold text-ghost-white mb-2">Uploaded Successfully!</p>
                         <p className="text-ghost-muted text-sm mb-6">
-                            Your {contentType === "SKILL" ? "Skill" : "Corpus"} is now live in the Skill Market.
+                            Your {contentType === "SKILL" ? "Skill" : "Corpus"} is now live in the Skill Hub.
                         </p>
                         <div className="flex gap-3 justify-center">
                             <a href="/market" className="px-5 py-2.5 bg-terminal-green text-black rounded-xl text-sm font-bold hover:scale-105 transition-all">
-                                View in Market →
+                                View in Skill Hub →
                             </a>
                             <button onClick={handleClose} className="px-5 py-2.5 border border-white/10 text-ghost-muted rounded-xl text-sm hover:bg-white/5 transition-all">
                                 Close
@@ -268,7 +268,7 @@ export default function SkillUploadModal({ isOpen, onClose }: SkillUploadModalPr
                                 disabled={loading || !file || !name.trim()}
                                 className="px-6 py-2.5 bg-terminal-green text-black rounded-xl text-sm font-bold hover:scale-105 transition-all disabled:opacity-50 disabled:hover:scale-100 cursor-pointer"
                             >
-                                {loading ? "Uploading..." : "Publish to Market"}
+                                {loading ? "Uploading..." : "Publish to Hub"}
                             </button>
                         </div>
                     </div>

@@ -40,6 +40,8 @@ model User {
   apiKeys         UserApiKey[]
   ownedAgents     Agent[]   @relation("UserOwnedAgents")
   feedbacks       Feedback[]
+  skillComments   SkillComment[]
+  skillLikes      SkillLike[]
 
   @@index([email])
   @@index([walletAddress])
@@ -73,6 +75,8 @@ model Agent {
   fundings        Funding[]
   feedbacks       Feedback[]
   votes           Vote[]
+  skillComments   SkillComment[]
+  skillLikes      SkillLike[]
 
   @@index([apiKey])
   @@index([email])
@@ -374,6 +378,7 @@ model Skill {
   salesCount    Int      @default(0)
   downloadCount Int      @default(0) // community contribution stat
   totalRevenue  Float    @default(0)
+  likesCount    Int      @default(0)
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
 
@@ -384,12 +389,49 @@ model Skill {
 
   purchases  SkillPurchase[]
   novelsUsed Novel[]         @relation("SkillUsedInNovel")
+  comments   SkillComment[]
+  likes      SkillLike[]
 
   @@index([skillType])
   @@index([contentType])
   @@index([isOpenSource])
   @@index([creatorUserId])
   @@index([creatorAgentId])
+}
+
+model SkillComment {
+  id        String   @id @default(cuid())
+  content   String
+  createdAt DateTime @default(now())
+
+  skillId String
+  skill   Skill  @relation(fields: [skillId], references: [id], onDelete: Cascade)
+
+  authorUserId  String?
+  authorUser    User?   @relation(fields: [authorUserId], references: [id])
+  authorAgentId String?
+  authorAgent   Agent?  @relation(fields: [authorAgentId], references: [id])
+
+  @@index([skillId])
+  @@index([authorUserId])
+  @@index([authorAgentId])
+}
+
+model SkillLike {
+  id        String   @id @default(cuid())
+  createdAt DateTime @default(now())
+
+  skillId String
+  skill   Skill  @relation(fields: [skillId], references: [id], onDelete: Cascade)
+
+  userId  String?
+  user    User?   @relation(fields: [userId], references: [id])
+  agentId String?
+  agent   Agent?  @relation(fields: [agentId], references: [id])
+
+  @@unique([skillId, userId])
+  @@unique([skillId, agentId])
+  @@index([skillId])
 }
 
 model SkillPurchase {

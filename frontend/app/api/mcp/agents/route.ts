@@ -46,6 +46,14 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    // SEC-003: Input validation
+    if (name.length > 50) {
+      return NextResponse.json({ error: "Agent name must be 50 characters or fewer" }, { status: 400 });
+    }
+    if (/<[^>]+>/.test(name)) {
+      return NextResponse.json({ error: "Agent name must not contain HTML tags" }, { status: 400 });
+    }
+
     if (walletAddress && !isValidSolanaAddress(walletAddress)) {
       return NextResponse.json(
         { error: "Invalid Solana wallet address format" },
@@ -203,6 +211,36 @@ export async function GET(request: NextRequest) {
     if (!agent)
       return NextResponse.json({ error: "Agent not found" }, { status: 404 });
 
+    // Compute tier progression
+    const TIERS = [
+      { tier: 1, name: "Newcomer 🌱", salesThreshold: 5, earnedThreshold: 50 },
+      { tier: 2, name: "Rising ⭐", salesThreshold: 20, earnedThreshold: 200 },
+      { tier: 3, name: "Popular 🔥", salesThreshold: 50, earnedThreshold: 1000 },
+    ];
+    const currentTierInfo = TIERS[Math.min(agent.creatorTier - 1, TIERS.length - 1)];
+    const nextTierInfo = TIERS[agent.creatorTier]; // undefined if at max
+
+    // Count stats for tier progress
+    const [novelCount, skillCount, workCount] = await Promise.all([
+      prisma.novel.count({ where: { agentId: agent.id } }),
+      prisma.skill.count({ where: { creatorAgentId: agent.id } }),
+      prisma.work.count({ where: { agentId: agent.id, status: "APPROVED" } }),
+    ]);
+
+    const tierProgress = nextTierInfo ? {
+      nextTierName: nextTierInfo.name,
+      upgradeRequirements: {
+        sales: nextTierInfo.salesThreshold,
+        totalEarnedUSDC: nextTierInfo.earnedThreshold,
+      },
+      currentProgress: {
+        totalEarned: agent.totalEarned,
+        approvedWorks: workCount,
+        earnedPct: Math.min(100, Math.round((agent.totalEarned / nextTierInfo.earnedThreshold) * 100)),
+      },
+      message: `Earn $${(nextTierInfo.earnedThreshold - agent.totalEarned).toFixed(2)} more USDC to reach ${nextTierInfo.name}`,
+    } : { message: "You have reached the highest creator tier! 🏆" };
+
     return NextResponse.json({
       agentId: agent.id,
       agentName: agent.agentName,
@@ -214,6 +252,9 @@ export async function GET(request: NextRequest) {
       reputation: agent.reputation,
       totalEarned: agent.totalEarned,
       creatorTier: agent.creatorTier,
+      creatorTierName: currentTierInfo?.name || "Newcomer 🌱",
+      stats: { novels: novelCount, skills: skillCount, approvedWorks: workCount },
+      tierProgress,
     });
   } catch (error) {
     return NextResponse.json({ error: "Lookup failed" }, { status: 500 });

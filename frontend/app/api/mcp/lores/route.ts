@@ -2,33 +2,33 @@ import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/app/lib/prisma";
 
 // POST /api/mcp/lores — Contribute lore (UC 4.2)
-// Schema: Lore requires name, creatorId (not nullable), uses settingsJson
+// Lores are world-building assets that can be attached to a novel or exist standalone.
 export async function POST(request: NextRequest) {
     const apiKey = request.headers.get("x-api-key");
-    // Lores can be contributed by humans (via UI) or agents (via MCP)
     
     try {
         const body = await request.json();
         const { novelId, category, content, name, userId } = body;
         if (!content && !name) return NextResponse.json({ error: "Lore name or content required" }, { status: 400 });
 
-        let creatorAgentId = null;
+        let creatorAgentId: string | null = null;
         if (apiKey) {
             const agent = await prisma.agent.findUnique({ where: { apiKey } });
             if (agent) creatorAgentId = agent.id;
+            else return NextResponse.json({ error: "Invalid API key" }, { status: 403 });
         }
 
+        // If novelId is given, just verify the novel exists (no ownership check — lore is a contribution)
+        if (novelId) {
+            const novel = await prisma.novel.findUnique({ where: { id: novelId } });
+            if (!novel) return NextResponse.json({ error: "Novel not found" }, { status: 404 });
+        }
+
+        const loreName = name || category || "Untitled Lore";
+        const loreDescription = content || "";
+        const loreSettings = JSON.stringify({ category: category || "WORLD", content: loreDescription });
+
         try {
-            // Verify novel ownership if provided
-            if (novelId) {
-                const novel = await prisma.novel.findFirst({ where: { id: novelId, agentId: creatorAgentId } });
-                if (!novel) return NextResponse.json({ error: "Novel not found or doesn't belong to this agent" }, { status: 403 });
-            }
-
-            const loreName = name || category || "Untitled Lore";
-            const loreDescription = content || "";
-            const loreSettings = JSON.stringify({ category: category || "WORLD", content: loreDescription });
-
             const lore = await prisma.lore.create({
                 data: {
                     name: loreName,
@@ -47,13 +47,18 @@ export async function POST(request: NextRequest) {
                 });
             }
 
-            return NextResponse.json({ loreId: lore.id, message: "Lore contributed." }, { status: 201 });
+            return NextResponse.json({
+                loreId: lore.id,
+                name: loreName,
+                royaltyPct: 10,
+                message: "Lore contributed. You will earn 10% royalty on any bounty resolved using this lore.",
+            }, { status: 201 });
         } catch (error: any) {
-            console.error("MCP LORE CREATE DB ERROR:", error);
+            console.error("[lores] DB error:", { errorCode: error.code, errorMessage: error.message });
             return NextResponse.json({ error: "Failed to create lore", details: error.message }, { status: 500 });
         }
-    } catch (error) {
-        return NextResponse.json({ error: "Lore submission failed" }, { status: 500 });
+    } catch (error: any) {
+        return NextResponse.json({ error: "Lore submission failed", details: error.message }, { status: 500 });
     }
 }
 

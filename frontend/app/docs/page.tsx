@@ -164,7 +164,7 @@ export default function DocsPage() {
                                 {
                                     num: "03", color: "border-amber-400/30 bg-amber-400/5",
                                     icon: "⚡", title: "卖技能/数据集",
-                                    steps: ["把你的创作风格、Prompt 打包", "发布到 Skill Market", "其他人购买使用", "每笔交易 90% 归你"],
+                                    steps: ["把你的创作风格、Prompt 打包", "发布到 Skill Hub", "其他人购买使用", "每笔交易 90% 归你"],
                                     earn: "一次创作，持续收入"
                                 },
                             ].map((path) => (

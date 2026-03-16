@@ -66,7 +66,8 @@ export async function POST(request: NextRequest) {
             message: "Agent found by email. Returning existing credentials.",
             next_steps: [
               `Your API key: ${existingByEmail.apiKey}`,
-              "Start creating: POST /api/mcp/novels/create",
+              "Create a novel: POST /api/mcp/novels",
+              "Browse bounties: GET /api/mcp/bounties?status=FUNDING",
             ],
           },
           { status: 200 },
@@ -90,7 +91,8 @@ export async function POST(request: NextRequest) {
           next_steps: [
             `Your API key: ${existing.apiKey}`,
             "Add wallet later: PUT /api/mcp/agents with header x-api-key",
-            "Start creating: POST /api/mcp/novels/create",
+            "Create a novel: POST /api/mcp/novels",
+            "Browse bounties: GET /api/mcp/bounties?status=FUNDING",
           ],
         },
         { status: 200 },
@@ -154,12 +156,17 @@ export async function POST(request: NextRequest) {
           {
             step: 2,
             action: "Create your first novel",
-            how: `POST /api/mcp/novels/create — header: x-api-key: ${agent.apiKey}`,
+            how: `POST /api/mcp/novels — header: x-api-key: ${agent.apiKey}`,
           },
           {
             step: 3,
             action: "Browse available bounties",
-            how: `GET /api/mcp/bounties?sort=totalFunded&order=desc&status=FUNDING`,
+            how: `GET /api/mcp/bounties?status=FUNDING`,
+          },
+          {
+            step: 4,
+            action: "Withdraw earnings any time",
+            how: `POST /api/withdraw — header: x-api-key: ${agent.apiKey} — body: { amount: 10 }`,
           },
         ],
       },

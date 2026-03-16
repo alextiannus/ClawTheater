@@ -126,9 +126,9 @@ export default function MarketPage() {
         API: "API",
     };
 
-    // Skills Market is cross-language — show ALL skills to encourage cross-cultural inspiration
+    // Skills Hub — skills-only marketplace. Datasets are shared via Discord community.
     const filtered = filter === "All"
-        ? skills
+        ? skills.filter((s) => s.type !== "DATASET")
         : skills.filter((s) => s.type === typeMap[filter]);
 
     const triggerDownload = (name: string, content: any, fileName?: string) => {
@@ -245,7 +245,7 @@ export default function MarketPage() {
                     {/* Filter bar */}
                     <div className="glass-card p-4 mb-8 flex flex-wrap gap-3 items-center">
                         <span className="text-sm text-ghost-muted">Type:</span>
-                        {["All", "Skills", "Dataset", "API"].map((f) => (
+                        {["All", "Skills", "API"].map((f) => (
                             <button
                                 key={f}
                                 onClick={() => setFilter(f)}
@@ -262,10 +262,34 @@ export default function MarketPage() {
                             onClick={() => setShowUploadModal(true)}
                             className="px-4 py-1.5 text-sm bg-neon-green/10 text-neon-green border border-neon-green/30 rounded-lg hover:bg-neon-green/20 transition-all"
                         >
-                            + Upload Skill
+                            + Publish Skill
                         </button>
-                        <span className="text-sm text-ghost-muted font-mono">{filtered.length} items</span>
+                        <span className="text-sm text-ghost-muted font-mono">{filtered.length} skills</span>
                     </div>
+
+                    {/* ═══ Discord Community CTA ═══ */}
+                    <a
+                        href="https://discord.gg/pFrCtMVT"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="block mb-6 p-5 rounded-xl border border-indigo-500/30 bg-gradient-to-r from-indigo-500/[0.06] to-transparent hover:border-indigo-500/50 hover:from-indigo-500/10 transition-all group"
+                    >
+                        <div className="flex items-center justify-between">
+                            <div className="flex items-center gap-4">
+                                <div className="w-10 h-10 rounded-xl bg-indigo-500/20 flex items-center justify-center shrink-0">
+                                    <span className="text-xl">💬</span>
+                                </div>
+                                <div>
+                                    <div className="flex items-center gap-2 mb-0.5">
+                                        <span className="text-sm font-semibold text-white">Openclaw Creator Community</span>
+                                        <span className="text-[10px] font-mono text-indigo-400 bg-indigo-500/10 border border-indigo-500/20 px-2 py-0.5 rounded-full">DISCORD</span>
+                                    </div>
+                                    <p className="text-xs text-white/40">Share training datasets, discuss AI writing techniques, and get early access. Free to join.</p>
+                                </div>
+                            </div>
+                            <span className="text-indigo-400 text-sm font-medium group-hover:translate-x-1 transition-transform shrink-0 ml-4">Join → discord.gg/pFrCtMVT</span>
+                        </div>
+                    </a>
 
                     {/* ═══ PINNED: Claw Creator Skill ═══ */}
                     <div className="mb-6 p-6 rounded-xl border border-terminal-green/30 bg-gradient-to-r from-terminal-green/[0.04] to-transparent relative overflow-hidden">
@@ -287,7 +311,7 @@ export default function MarketPage() {
                                     <button onClick={() => setFilter("API")} className="text-terminal-green hover:underline cursor-pointer">📄 View API →</button>
                                 </div>
                             </div>
-                            <div className="flex items-center gap-3 shrink-0">
+                            <div className="flex items-center gap-2 shrink-0">
                                 <span className="text-xl font-bold font-mono text-terminal-green">FREE</span>
                                 <a
                                     href="/api/mcp/onboard"
@@ -383,7 +407,7 @@ export default function MarketPage() {
                             {loading ? (
                                 <div className="text-center py-20">
                                     <p className="text-4xl mb-4 animate-pulse">🦞</p>
-                                    <p className="text-ghost-muted">Loading marketplace...</p>
+                                    <p className="text-ghost-muted">Loading Skill Hub...</p>
                                 </div>
                             ) : filtered.length === 0 ? (
                                 <div className="text-center py-20">
@@ -396,7 +420,7 @@ export default function MarketPage() {
                                         <div key={skill.id} className="glass-card p-6 flex flex-col md:flex-row items-start md:items-center gap-4 hover:scale-[1.005] transition-all duration-200">
                                             <div className="flex-1">
                                                 <div className="flex items-center gap-3 mb-2 flex-wrap">
-                                                    <h3 className="text-lg font-semibold text-ghost-white">{skill.name}</h3>
+                                                    <a href={`/market/${skill.id}`} className="text-lg font-semibold text-ghost-white hover:text-terminal-green transition-colors">{skill.name}</a>
                                                     <span className={`text-xs px-2 py-0.5 rounded-full ${typeLabels[skill.type]?.style || "text-ghost-muted bg-white/10"}`}>
                                                         {typeLabels[skill.type]?.label || skill.type}
                                                     </span>
@@ -421,10 +445,11 @@ export default function MarketPage() {
                                                     )}
                                                 </div>
                                             </div>
-                                            <div className="flex items-center gap-3 shrink-0">
+                                            <div className="flex items-center gap-2 shrink-0">
                                                 <span className="text-xl font-bold font-mono text-terminal-green">
                                                     {skill.isOpenSource ? "FREE" : `$${skill.price}`}
                                                 </span>
+                                                <a href={`/market/${skill.id}`} className="px-3 py-2 text-sm border border-white/10 text-ghost-muted rounded-xl hover:border-terminal-green/30 hover:text-terminal-green transition-all">Details →</a>
                                                 {skill.isOpenSource ? (
                                                      <button
                                                         onClick={() => handlePurchase(skill.id, true)}
@@ -455,8 +480,8 @@ export default function MarketPage() {
                 {showUploadModal && (
                     <div className="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 flex items-center justify-center p-4">
                         <div className="glass-card p-8 max-w-lg w-full">
-                            <h3 className="text-2xl font-bold text-ghost-white mb-2">📝 Upload Skill</h3>
-                            <p className="text-sm text-ghost-muted mb-6">Share your prompt templates, workflows, or datasets with the community.</p>
+                            <h3 className="text-2xl font-bold text-ghost-white mb-2">📝 Publish a Skill</h3>
+                            <p className="text-sm text-ghost-muted mb-6">Share your prompt templates and workflows with the community.<br/><span className="text-indigo-400">💬 Training datasets? Share in <a href="https://discord.gg/pFrCtMVT" target="_blank" rel="noopener noreferrer" className="underline hover:text-indigo-300">Discord →</a></span></p>
 
                             <div className="space-y-4">
                                 <div>
@@ -521,7 +546,7 @@ export default function MarketPage() {
                                     disabled={actionLoading}
                                     className="px-6 py-2.5 bg-neon-green text-obsidian rounded-xl text-sm font-bold hover:scale-105 transition-all glow-green disabled:opacity-50"
                                 >
-                                    {actionLoading ? "Publishing..." : "Publish to Market"}
+                                    {actionLoading ? "Publishing..." : "Publish to Hub"}
                                 </button>
                             </div>
                         </div>

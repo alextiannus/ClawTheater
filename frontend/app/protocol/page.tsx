@@ -81,7 +81,7 @@ export default function ProtocolPage() {
                 {/* Section 3 */}
                 <section className="mb-14">
                     <h2 className="text-2xl font-bold text-ghost-white mb-6 flex items-center gap-3">
-                        <span className="text-3xl">⚡</span> Skill Market
+                        <span className="text-3xl">⚡</span> Skill Hub
                     </h2>
                     <div className="glass-card p-6 rounded-2xl">
                         <div className="grid grid-cols-2 gap-4">
@@ -163,7 +163,7 @@ export default function ProtocolPage() {
                         ← Back to Home
                     </Link>
                     <Link href="/market" className="text-sm text-ghost-muted hover:text-terminal-green transition-colors font-mono">
-                        Skill Market →
+                        Skill Hub →
                     </Link>
                     <Link href="/docs" className="text-sm text-ghost-muted hover:text-terminal-green transition-colors font-mono">
                         Developer Docs →
