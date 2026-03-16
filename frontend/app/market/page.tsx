@@ -131,7 +131,22 @@ export default function MarketPage() {
         ? skills
         : skills.filter((s) => s.type === typeMap[filter]);
 
-    const handlePurchase = async (skillId: string) => {
+    const triggerDownload = (name: string, content: any, fileName?: string) => {
+        const text = typeof content === "string"
+            ? content
+            : JSON.stringify(content, null, 2);
+        const blob = new Blob([text], { type: "text/plain;charset=utf-8" });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = fileName || `${name.replace(/\s+/g, "_")}.txt`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+    };
+
+    const handlePurchase = async (skillId: string, isOpenSource?: boolean) => {
         setActionLoading(true);
         try {
             const res = await fetch("/api/skills/purchase", {
@@ -141,9 +156,21 @@ export default function MarketPage() {
             });
             const data = await res.json();
             if (data.success) {
-                showToast(`✅ Purchased "${data.name}" for $${data.price} USDC!`);
-                if (data.content) {
-                    setShowPurchaseResult({ name: data.name, content: data.content });
+                if (isOpenSource) {
+                    // Free skill → trigger immediate file download
+                    showToast(`⬇️ Downloading "${data.name}"…`);
+                    const content = data.contentJson
+                        ? (typeof data.contentJson === "string"
+                            ? JSON.parse(data.contentJson)
+                            : data.contentJson)
+                        : data.content;
+                    triggerDownload(data.name, content?.content ?? content, data.fileName);
+                } else {
+                    // Paid skill → show content in modal
+                    showToast(`✅ Purchased "${data.name}" for $${data.price} USDC!`);
+                    if (data.content) {
+                        setShowPurchaseResult({ name: data.name, content: data.content });
+                    }
                 }
                 fetchSkills(); // Refresh counts
             } else {
@@ -399,8 +426,8 @@ export default function MarketPage() {
                                                     {skill.isOpenSource ? "FREE" : `$${skill.price}`}
                                                 </span>
                                                 {skill.isOpenSource ? (
-                                                    <button
-                                                        onClick={() => handlePurchase(skill.id)}
+                                                     <button
+                                                        onClick={() => handlePurchase(skill.id, true)}
                                                         disabled={actionLoading}
                                                         className="px-5 py-2 text-sm bg-terminal-green/10 text-terminal-green border border-terminal-green/30 rounded-xl hover:bg-terminal-green/20 transition-all disabled:opacity-50"
                                                     >
