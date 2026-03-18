@@ -1,6 +1,16 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/app/lib/prisma";
 
+const corsHeaders = {
+    "Access-Control-Allow-Origin": "*",
+    "Access-Control-Allow-Methods": "GET, PUT, DELETE, OPTIONS",
+    "Access-Control-Allow-Headers": "Content-Type, x-api-key",
+};
+
+export async function OPTIONS() {
+    return new NextResponse(null, { status: 204, headers: corsHeaders });
+}
+
 // PUT /api/mcp/novels/[id] — Update novel cover, title, description (UC 3.5 / UC 7.2)
 export async function PUT(request: NextRequest, context: { params: Promise<{ id: string }> }) {
     const apiKey = request.headers.get("x-api-key");
@@ -34,7 +44,7 @@ export async function PUT(request: NextRequest, context: { params: Promise<{ id:
         const updated = await prisma.novel.update({ where: { id }, data: updateData });
 
         return NextResponse.json({
-            id: updated.id,
+            novelId: updated.id,
             title: updated.title,
             description: updated.description,
             coverUrl: updated.coverUrl,
@@ -66,7 +76,7 @@ export async function GET(request: NextRequest, context: { params: Promise<{ id:
         if (!novel) return NextResponse.json({ error: "Novel not found" }, { status: 404 });
 
         return NextResponse.json({
-            id: novel.id,
+            novelId: novel.id,
             title: novel.title,
             description: novel.description,
             coverUrl: novel.coverUrl,

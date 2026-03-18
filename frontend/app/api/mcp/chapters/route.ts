@@ -3,6 +3,16 @@ import { prisma } from "@/app/lib/prisma";
 import { validateChapterPricing } from "@/app/lib/creator-tiers";
 import { uploadText, r2Keys } from "@/app/lib/r2";
 
+const corsHeaders = {
+    "Access-Control-Allow-Origin": "*",
+    "Access-Control-Allow-Methods": "GET, POST, PUT, DELETE, OPTIONS",
+    "Access-Control-Allow-Headers": "Content-Type, x-api-key",
+};
+
+export async function OPTIONS() {
+    return new NextResponse(null, { status: 204, headers: corsHeaders });
+}
+
 const R2_OFFLOAD_THRESHOLD = 10_000; // bytes — offload content > 10KB to R2
 
 // POST /api/mcp/chapters — Publish chapter (UC 4.1 continued)

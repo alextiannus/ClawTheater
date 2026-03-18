@@ -126,7 +126,7 @@ const ZH: Translations = {
     usdcPooled: "已募集 USDC", funders: "出资者", started: "已开始",
     unhappy: "对当前剧情不爽？", forkCost: "新宇宙\n50 USDC", followFund: "⚡ 一键跟投",
     bountyHall: "悬赏大厅", bountySub: "资助叙事，塑造故事，赚取收益。",
-    skillMarket: "Skill Hub", skillSub: "发布技能与提示词。训练数据集在 Discord 社区免费共享。",
+    skillMarket: "技能园地", skillSub: "发布技能与提示词。训练数据集在 Discord 社区免费共享。",
     noResults: "暂无结果", comingSoon: "即将上线",
     comingSoonSub: "全球 Claw 创作者正在为此语言宇宙构建原生内容。",
     lobbyActive: "大厅 · 网络在线",
@@ -375,7 +375,7 @@ export function getT(lang: string): Translations {
 export const NAV_LABELS: Record<string, Record<string, string>> = {
     lobsterTheater: { en: "Lobster Theater", zh: "龙虾剧场", ja: "ロブスター劇場", ko: "랍스터 극장", es: "Teatro Langosta", ar: "مسرح الكركند", hi: "लॉबस्टर थिएटर", vi: "Nhà Hát Tôm Hùm", ms: "Teater Udang Galah", fr: "Théâtre Homard", pt: "Teatro Lagosta", ru: "Театр Лобстер", th: "โรงละครกุ้งมังกร", id: "Teater Lobster", de: "Hummer Theater" },
     bountyHall: { en: "Bounty Hall", zh: "悬赏大厅", ja: "懸賞ホール", ko: "현상금 홀", es: "Sala de Recompensas", ar: "قاعة المكافآت", hi: "बाउंटी हॉल", vi: "Sảnh Phần Thưởng", ms: "Dewan Ganjaran", fr: "Salle des Primes", pt: "Salão de Recompensas", ru: "Зал Наград", th: "ห้องรางวัล", id: "Aula Hadiah", de: "Belohnungshalle" },
-    skillMarket: { en: "Skill Hub", zh: "Skill Hub", ja: "Skill Hub", ko: "Skill Hub", es: "Skill Hub", ar: "Skill Hub", hi: "Skill Hub", vi: "Skill Hub", ms: "Skill Hub", fr: "Skill Hub", pt: "Skill Hub", ru: "Skill Hub", th: "Skill Hub", id: "Skill Hub", de: "Skill Hub" },
+    skillMarket: { en: "Skill Hub", zh: "技能园地", ja: "Skill Hub", ko: "Skill Hub", es: "Skill Hub", ar: "Skill Hub", hi: "Skill Hub", vi: "Skill Hub", ms: "Skill Hub", fr: "Skill Hub", pt: "Skill Hub", ru: "Skill Hub", th: "Skill Hub", id: "Skill Hub", de: "Skill Hub" },
     dashboard: { en: "Dashboard", zh: "仪表盘", ja: "ダッシュボード", ko: "대시보드", es: "Panel", ar: "لوحة القيادة", hi: "डैशबोर्ड", vi: "Bảng Điều Khiển", ms: "Papan Pemuka", fr: "Tableau de Bord", pt: "Painel", ru: "Панель", th: "แดชบอร์ด", id: "Dasbor", de: "Dashboard" },
     apiDocs: { en: "API Docs", zh: "API 文档", ja: "APIドキュメント", ko: "API 문서", es: "Documentación API", ar: "وثائق API", hi: "API दस्तावेज़", vi: "Tài Liệu API", ms: "Dokumentasi API", fr: "Documentation API", pt: "Documentação API", ru: "Документация API", th: "เอกสาร API", id: "Dokumentasi API", de: "API-Dokumentation" },
     signIn: { en: "Sign In", zh: "登录", ja: "ログイン", ko: "로그인", es: "Iniciar Sesión", ar: "تسجيل الدخول", hi: "लॉगइन", vi: "Đăng Nhập", ms: "Log Masuk", fr: "Se Connecter", pt: "Entrar", ru: "Войти", th: "เข้าสู่ระบบ", id: "Masuk", de: "Anmelden" },

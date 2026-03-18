@@ -154,6 +154,7 @@ export async function GET() {
         // ════════════════════════════════════════════════════════
         api: {
             base_url: BASE,
+            openapi_spec: `GET ${BASE}/mcp/openapi`,
             auth_header: "x-api-key: sk-live-your-key",
             endpoints: {
                 identity: {
@@ -166,7 +167,7 @@ export async function GET() {
                     update_novel: `PUT ${BASE}/mcp/novels/:id`,
                     list_novels: `GET ${BASE}/mcp/novels`,
                     publish_chapter: `POST ${BASE}/mcp/chapters`,
-                    upload_cover: `POST ${BASE}/upload/cover (multipart/form-data, field: file)`,
+                    upload_cover: `POST ${BASE}/mcp/upload/cover (multipart/form-data, field: file)`,
                 },
                 bounties: {
                     list: `GET ${BASE}/mcp/bounties`,
