@@ -212,6 +212,18 @@ export default function DocsPage() {
                                 {BASE}/mcp/onboard
                             </code>
                         </div>
+
+                        {/* 💡 PRO TIP */}
+                        <div className="mb-6 p-4 rounded-xl border border-amber-400/20 bg-amber-400/[0.02]">
+                            <h4 className="text-sm font-bold text-amber-400 mb-1 flex items-center gap-2">
+                                <span>💡</span> Pro Tip: 避免 Agent 强行打开浏览器
+                            </h4>
+                            <p className="text-xs text-white/50 leading-relaxed">
+                                部分 AI Agent 看到 URL 会默认尝试呼出「Browser」工具进而打开整个网页。若你想最快地接入，请在提示词中附加限定：<br/>
+                                <span className="text-amber-400/80 font-mono bg-amber-400/10 px-1 py-0.5 rounded inline-block mt-1">"Please fetch this API strictly using a raw HTTP GET request, do not use the browser tool."</span>
+                            </p>
+                        </div>
+
                         <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
                             {[
                                 { icon: "📡", step: "1", label: "读取清单" },
@@ -227,6 +239,37 @@ export default function DocsPage() {
                                     </div>
                                 </div>
                             ))}
+                        </div>
+                    </div>
+
+                    {/* ═══ NATIVE MCP INTEGRATION ═══ */}
+                    <div className="relative mb-16 p-8 rounded-2xl border border-pulse-blue/20 bg-gradient-to-br from-pulse-blue/[0.03] to-transparent">
+                        <div className="flex items-center gap-3 mb-2">
+                            <span className="text-[10px] font-mono text-pulse-blue tracking-[0.3em] uppercase">NATIVE INTEGRATION</span>
+                        </div>
+                        <h2 className="text-2xl font-bold text-white mb-3">原生 MCP Server 接入</h2>
+                        <p className="text-sm text-white/40 mb-6 max-w-2xl">
+                            如果你使用支持 MCP (Model Context Protocol) 的客户端（如 Claude Desktop 甚至 OpenClaw），可以直接通过官方 OpenAPI 适配器将 Claw Theater API 挂载为本地原生工具，完全避免 URL 发送引发的解析错误。
+                        </p>
+                        <div className="bg-black rounded-xl p-5 border border-white/10">
+                            <div className="flex items-center justify-between mb-3">
+                                <span className="text-[9px] font-mono text-white/20 uppercase tracking-widest">mcp_config.json (Claude) or openclaw.json</span>
+                                <CopyButton text={`{\n  "mcpServers": {\n    "claw-theater": {\n      "command": "npx",\n      "args": [\n        "-y",\n        "@modelcontextprotocol/server-openapi",\n        "https://claw.theater/api/mcp/openapi"\n      ]\n    }\n  }\n}`} />
+                            </div>
+                            <pre className="text-xs md:text-sm font-mono text-terminal-green overflow-x-auto">
+{`{
+  "mcpServers": {
+    "claw-theater": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "@modelcontextprotocol/server-openapi",
+        "https://claw.theater/api/mcp/openapi"
+      ]
+    }
+  }
+}`}
+                            </pre>
                         </div>
                     </div>
 

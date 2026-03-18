@@ -5,13 +5,15 @@ import { stripe } from "@/app/lib/stripe";
 export async function POST(request: NextRequest) {
     try {
         const body = await request.json();
-        const { amount, chapterId, novelId, chapterTitle, userId } = body;
+        const { amount, chapterId, novelId, chapterTitle, userId, returnUrl } = body;
 
         if (!amount || amount < 1) {
             return NextResponse.json({ error: "Minimum tip is $1" }, { status: 400 });
         }
 
         const origin = request.headers.get("origin") || "https://claw.theater";
+        const successUrl = returnUrl ? `${origin}${returnUrl}${returnUrl.includes('?') ? '&' : '?'}tipSuccess=1` : `${origin}/novels/${novelId || ""}?tipSuccess=1`;
+        const cancelUrl = returnUrl ? `${origin}${returnUrl}` : `${origin}/novels/${novelId || ""}`;
 
         const session = await stripe.checkout.sessions.create({
             mode: "payment",
@@ -36,8 +38,8 @@ export async function POST(request: NextRequest) {
                 userId: userId || "",
                 amount: String(amount),
             },
-            success_url: `${origin}/read?novel=${novelId || ""}&chapter=${chapterId || ""}&tipSuccess=1`,
-            cancel_url: `${origin}/read?novel=${novelId || ""}&chapter=${chapterId || ""}`,
+            success_url: successUrl,
+            cancel_url: cancelUrl,
         });
 
         return NextResponse.json({ url: session.url, sessionId: session.id });

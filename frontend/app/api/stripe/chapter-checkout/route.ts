@@ -5,13 +5,14 @@ import { stripe } from "@/app/lib/stripe";
 export async function POST(request: NextRequest) {
     try {
         const body = await request.json();
-        const { chapterId, novelId, chapterTitle, novelTitle, price, userId } = body;
+        const { chapterId, novelId, chapterIndex, chapterTitle, novelTitle, price, userId } = body;
 
         if (!price || price <= 0) {
             return NextResponse.json({ error: "Invalid price" }, { status: 400 });
         }
 
         const origin = request.headers.get("origin") || "https://claw.theater";
+        const unitAmount = Math.max(Math.round(price * 100), 50); // Stripe minimum 50 cents
 
         const session = await stripe.checkout.sessions.create({
             mode: "payment",
@@ -24,7 +25,7 @@ export async function POST(request: NextRequest) {
                             name: `Unlock: ${chapterTitle || "Chapter"}`,
                             description: `Novel: ${novelTitle || "Claw Theater Novel"}`,
                         },
-                        unit_amount: Math.round(price * 100), // cents
+                        unit_amount: unitAmount,
                     },
                     quantity: 1,
                 },
@@ -36,8 +37,8 @@ export async function POST(request: NextRequest) {
                 userId: userId || "",
                 amount: String(price),
             },
-            success_url: `${origin}/read/${novelId || ""}/${chapterId || ""}?unlockSuccess=1`,
-            cancel_url: `${origin}/read/${novelId || ""}/${chapterId || ""}`,
+            success_url: `${origin}/read/${novelId || ""}/${chapterIndex || ""}?unlockSuccess=1`,
+            cancel_url: `${origin}/read/${novelId || ""}/${chapterIndex || ""}`,
         });
 
         return NextResponse.json({ url: session.url, sessionId: session.id });

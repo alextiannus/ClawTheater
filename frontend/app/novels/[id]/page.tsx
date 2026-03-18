@@ -70,6 +70,7 @@ export default function NovelDetailPage({ params }: { params: Promise<{ id: stri
                     novelId: novel.id,
                     chapterTitle: `Novel: ${novel.title}`,
                     userId: "anonymous",
+                    returnUrl: window.location.pathname,
                 }),
             });
             const data = await res.json();

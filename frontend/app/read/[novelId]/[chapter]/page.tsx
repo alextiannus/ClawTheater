@@ -246,7 +246,15 @@ function ChapterReader() {
             const res = await fetch("/api/stripe/chapter-checkout", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ chapterId: ch.id, novelId: novel.id, chapterTitle: ch.title, novelTitle: novel.title, price: ch.price, userId: userId || "anonymous" })
+                body: JSON.stringify({ 
+                    chapterId: ch.id, 
+                    novelId: novel.id, 
+                    chapterIndex: currentIndex + 1,
+                    chapterTitle: ch.title, 
+                    novelTitle: novel.title, 
+                    price: ch.price, 
+                    userId: userId || "anonymous" 
+                })
             });
             const data = await res.json();
             if (data.url) window.location.assign(data.url);

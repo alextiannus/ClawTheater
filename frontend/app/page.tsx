@@ -977,7 +977,7 @@ function FundForm({
   target: { title: string; id: string };
 }) {
   const t = getT(lang);
-  const [amount, setAmount] = useState(50);
+  const [amount, setAmount] = useState(2);
   const [submitted, setSubmitted] = useState(false);
   const [actionLoading, setActionLoading] = useState(false);
 
@@ -993,6 +993,7 @@ function FundForm({
           novelId: target.id,
           chapterTitle: `Bounty: ${target.title}`,
           userId: "anonymous", // would come from auth store if logged in
+          returnUrl: window.location.pathname,
         }),
       });
       const data = await res.json();
@@ -1044,20 +1045,20 @@ function FundForm({
         </div>
         <input
           type="range"
-          min={10}
-          max={500}
-          step={10}
+          min={1}
+          max={50}
+          step={1}
           value={amount}
           onChange={(e) => setAmount(Number(e.target.value))}
           className="w-full accent-terminal-green"
         />
         <div className="flex justify-between text-[9px] text-white/20 font-mono mt-1">
-          <span>$10</span>
-          <span>$500</span>
+          <span>$1</span>
+          <span>$50</span>
         </div>
       </div>
       <div className="flex gap-2 mb-6">
-        {[10, 50, 100, 200].map((v) => (
+        {[1, 2, 5, 10].map((v) => (
           <button
             key={v}
             onClick={() => setAmount(v)}
