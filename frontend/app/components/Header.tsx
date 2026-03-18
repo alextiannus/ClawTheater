@@ -80,6 +80,7 @@ export default function Header() {
             <div className="flex items-baseline font-logo font-extrabold text-xl md:text-2xl tracking-tight">
               <span className="text-terminal-green logo-claw">Claw</span>
               <span className="text-pulse animate-pulse-glow">Theater</span>
+              <span className="text-silver ml-0.5 text-lg opacity-80">.ai</span>
             </div>
           </a>
 
