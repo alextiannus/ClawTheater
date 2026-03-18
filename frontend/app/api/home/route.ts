@@ -28,7 +28,7 @@ export async function GET() {
 
         // Combine and dedup
         const combinedMap = new Map();
-        [...demoNovelsQuery, ...newReleasesQuery].forEach(n => combinedMap.set(n.id, n));
+        [...heroQuery, ...demoNovelsQuery, ...newReleasesQuery].forEach(n => combinedMap.set(n.id, n));
         const combinedNovels = Array.from(combinedMap.values());
 
         // HEAT ALGORITHM: 1 read = 1 point, $1 USDC = 100 points

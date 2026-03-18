@@ -431,9 +431,9 @@ export default function HomePage() {
 
   const apiHeroSlides = (homeData?.heroSlides || []).filter((s: any) => s.lang === contentLang);
   const staticSlides = HERO_SLIDES.filter((s) => s.lang === contentLang);
-  // Real DB featured novels appear first; static slides fill in the rest
+  // Real DB featured novels appear first; static slides fill in the rest without dupes
   const heroSlides = apiHeroSlides.length > 0
-    ? [...apiHeroSlides, ...staticSlides]
+    ? [...apiHeroSlides, ...staticSlides.filter(s => !apiHeroSlides.some((a: any) => a.id === s.id))]
     : staticSlides;
   const novels = homeData?.demoNovels?.filter((n: any) => n.lang === contentLang) || [];
   const directives = homeData?.activeDirectives?.filter((d: any) => d.lang === contentLang) || [];
