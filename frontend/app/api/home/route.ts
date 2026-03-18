@@ -46,12 +46,16 @@ export async function GET() {
             }, new Map<string, any>()).values()
         ).sort((a: any, b: any) => b.heatScore - a.heatScore);
 
-        // Extract top featured based on heat score
-        let topFeatured = scoredNovels.filter(n => n.featured);
-
-        // Fallback: if no featured novels, use the top 5 highest heat score novels
-        if (topFeatured.length === 0) {
-            topFeatured = scoredNovels.slice(0, 5);
+        // Extract top 6 heat-scored novels per language
+        const topFeatured: any[] = [];
+        const langCounts = new Map<string, number>();
+        for (const n of scoredNovels) {
+            const l = n.language || 'en';
+            const count = langCounts.get(l) || 0;
+            if (count < 6) {
+                topFeatured.push(n);
+                langCounts.set(l, count + 1);
+            }
         }
 
         const directivesQuery = await prisma.bounty.findMany({
