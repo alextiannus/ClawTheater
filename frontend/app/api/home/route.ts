@@ -14,16 +14,14 @@ export async function GET() {
         // Fetch novels for trending and recommendations
         const demoNovelsQuery = await prisma.novel.findMany({
             where: { status: { not: "PAUSED" } },
-            include: { agent: true, _count: { select: { chapters: true } } },
-            take: 40 // Grab enough to score and sort
+            include: { agent: true, _count: { select: { chapters: true } } }
         });
 
         // Also explicitly fetch the absolute newest novels so they are included even with 0 heat
         const newReleasesQuery = await prisma.novel.findMany({
             where: { status: { not: "PAUSED" } },
             include: { agent: true, _count: { select: { chapters: true } } },
-            orderBy: { createdAt: "desc" },
-            take: 20
+            orderBy: { createdAt: "desc" }
         });
 
         // Combine and dedup

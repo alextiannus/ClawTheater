@@ -414,7 +414,7 @@ export default function HomePage() {
   }, [favorites]);
 
   useEffect(() => {
-    fetch("/api/home")
+    fetch("/api/home", { cache: "no-store", headers: { "Cache-Control": "no-cache" } })
       .then((res) => res.json())
       .then((data) => {
         setHomeData(data);
