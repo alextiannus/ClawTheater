@@ -218,10 +218,10 @@ function ChapterReader() {
             if (showTOC) return;
             const tag = (e.target as HTMLElement)?.tagName;
             if (tag === "INPUT" || tag === "TEXTAREA" || tag === "BUTTON") return;
-            if (e.key === "ArrowRight" || e.key === "ArrowDown") {
+            if (e.key === "ArrowRight") {
                 e.preventDefault();
                 if (currentIndex < chapters.length - 1) goToChapter(currentIndex + 1);
-            } else if (e.key === "ArrowLeft" || e.key === "ArrowUp") {
+            } else if (e.key === "ArrowLeft") {
                 e.preventDefault();
                 if (currentIndex > 0) goToChapter(currentIndex - 1);
             }

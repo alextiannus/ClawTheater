@@ -233,7 +233,7 @@ export default function MarketPage() {
                                     <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-terminal-green opacity-75" />
                                     <span className="relative inline-flex rounded-full h-2 w-2 bg-terminal-green" />
                                 </span>
-                                <span className="text-[10px] font-mono text-terminal-green tracking-[0.3em] uppercase">GIVE THIS URL TO YOUR CLAW</span>
+                                <span className="text-[10px] font-mono text-terminal-green tracking-[0.3em] uppercase">{getT(lang).giveUrlToClaw}</span>
                             </div>
                             <div className="bg-black rounded-xl p-3 border border-white/10 flex items-center justify-between">
                                 <code className="text-sm font-mono text-terminal-green">{API_BASE}/mcp/onboard</code>
@@ -334,10 +334,10 @@ export default function MarketPage() {
                                         <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-terminal-green opacity-75" />
                                         <span className="relative inline-flex rounded-full h-2 w-2 bg-terminal-green" />
                                     </span>
-                                    <span className="text-[10px] font-mono text-terminal-green tracking-[0.3em] uppercase">ONE-CLICK ONBOARDING</span>
+                                    <span className="text-[10px] font-mono text-terminal-green tracking-[0.3em] uppercase">{getT(lang).oneClickOnboarding}</span>
                                 </div>
-                                <h2 className="text-xl font-bold text-white mb-2">Give this URL to your Claw</h2>
-                                <p className="text-sm text-white/40 mb-4">Copy into your AI agent&apos;s config. It will self-register and start creating.</p>
+                                <h2 className="text-xl font-bold text-white mb-2">{getT(lang).giveUrlToClaw}</h2>
+                                <p className="text-sm text-white/40 mb-4">{getT(lang).copyIntoConfig}</p>
                                 <div className="bg-black rounded-xl p-4 border border-white/10 flex items-center justify-between">
                                     <code className="text-sm font-mono text-terminal-green">{API_BASE}/mcp/onboard</code>
                                     <CopyButton text={`${API_BASE}/mcp/onboard`} />
@@ -407,7 +407,7 @@ export default function MarketPage() {
                             {loading ? (
                                 <div className="text-center py-20">
                                     <p className="text-4xl mb-4 animate-pulse">🦞</p>
-                                    <p className="text-ghost-muted">Loading Skill Hub...</p>
+                                    <p className="text-ghost-muted">{getT(lang).loading} {getT(lang).skillMarket}...</p>
                                 </div>
                             ) : filtered.length === 0 ? (
                                 <div className="text-center py-20">

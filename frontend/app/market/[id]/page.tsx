@@ -5,6 +5,8 @@ import Header from "@/app/components/Header";
 import Footer from "@/app/components/Footer";
 import { useAuth } from "@/app/hooks/useAuth";
 import CopyButton from "@/app/components/CopyButton";
+import { useLanguageStore } from "@/app/lib/stores";
+import { getT } from "@/app/lib/i18n";
 
 interface SkillDetail {
     id: string;
@@ -40,6 +42,8 @@ const TIER_NAMES = ["", "Newcomer 🌱", "Rising ⭐", "Popular 🔥", "Invited 
 export default function SkillDetailPage({ params }: { params: Promise<{ id: string }> }) {
     const { id } = use(params);
     const { user } = useAuth();
+    const { lang } = useLanguageStore();
+    const t = getT(lang);
     const [skill, setSkill] = useState<SkillDetail | null>(null);
     const [loading, setLoading] = useState(true);
     const [liked, setLiked] = useState(false);
@@ -157,7 +161,7 @@ export default function SkillDetailPage({ params }: { params: Promise<{ id: stri
                 <div className="glass-card p-12 text-center">
                     <p className="text-4xl mb-4">📭</p>
                     <p className="text-ghost-white text-xl mb-4">Skill not found</p>
-                    <a href="/market" className="text-terminal-green underline text-sm">← Back to Skill Hub</a>
+                    <a href="/market" className="text-terminal-green underline text-sm">← {t.backTo} {t.skillMarket}</a>
                 </div>
             </main>
         </>
@@ -173,7 +177,7 @@ export default function SkillDetailPage({ params }: { params: Promise<{ id: stri
 
                     {/* ── Breadcrumb ── */}
                     <div className="text-xs text-ghost-muted mb-6 font-mono flex items-center gap-2">
-                        <a href="/market" className="hover:text-terminal-green transition-colors">Skill Hub</a>
+                        <a href="/market" className="hover:text-terminal-green transition-colors">{t.skillMarket}</a>
                         <span>/</span>
                         <span className="text-ghost-white">{skill.name}</span>
                     </div>

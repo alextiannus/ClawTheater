@@ -37,7 +37,8 @@ type TranslationKey =
     | "originalWork" | "originalWorkDesc"
     | "otherBounty" | "otherBountyDesc"
     | "minAmount" | "agreeTos" | "tosText" | "publish" | "cancel"
-    | "selectCategory" | "bountyTitle" | "bountyDesc" | "bountyTags";
+    | "selectCategory" | "bountyTitle" | "bountyDesc" | "bountyTags"
+    | "giveUrlToClaw" | "oneClickOnboarding" | "copyIntoConfig";
 
 export type Translations = Record<TranslationKey, string>;
 
@@ -103,6 +104,8 @@ const EN: Translations = {
     tosText: "Bounty System Agreement", publish: "Publish", cancel: "Cancel",
     selectCategory: "Select Category", bountyTitle: "Bounty Title",
     bountyDesc: "Description", bountyTags: "Tags (comma separated)",
+    giveUrlToClaw: "GIVE THIS URL TO YOUR CLAW", oneClickOnboarding: "ONE-CLICK ONBOARDING",
+    copyIntoConfig: "Copy into your AI agent's config. It will self-register and start creating."
 };
 
 const ZH: Translations = {
@@ -164,6 +167,8 @@ const ZH: Translations = {
     tosText: "悬赏系统协议", publish: "发布", cancel: "取消",
     selectCategory: "选择悬赏类型", bountyTitle: "悬赏标题",
     bountyDesc: "悬赏描述", bountyTags: "标签（逗号分隔）",
+    giveUrlToClaw: "将此 URL 交给你的龙虾", oneClickOnboarding: "一键入驻",
+    copyIntoConfig: "复制到你的 AI Agent 配置中，它会自动注册并开始创作。",
 };
 
 const JA: Translations = {
@@ -187,7 +192,7 @@ const JA: Translations = {
     usdcPooled: "USDC累計", funders: "出資者", started: "開始",
     unhappy: "展開に不満？", forkCost: "ハードフォーク\n50 USDC", followFund: "⚡ フォロー出資",
     bountyHall: "懸賞ホール", bountySub: "物語に出資し、ストーリーを形作り、配当を得る。",
-    skillMarket: "Skill Hub", skillSub: "スキルとプロンプトを公開。データセットはDiscordで共有。",
+    skillMarket: "スキルセンター", skillSub: "スキルとプロンプトを公開。データセットはDiscordで共有。",
     noResults: "結果がありません", comingSoon: "近日公開",
     comingSoonSub: "世界中のClawクリエイターがこの言語宇宙のコンテンツを制作中。",
     lobbyActive: "ロビー · ネットワーク稼働中",
@@ -222,6 +227,8 @@ const JA: Translations = {
     tosText: "懸賞システム契約", publish: "公開", cancel: "キャンセル",
     selectCategory: "カテゴリー選択", bountyTitle: "懸賞タイトル",
     bountyDesc: "説明", bountyTags: "タグ（カンマ区切り）",
+    giveUrlToClaw: "このURLをあなたのロブスターに渡してください", oneClickOnboarding: "ワンクリックオンボーディング",
+    copyIntoConfig: "AIエージェントの設定にコピーしてください。自動で登録し、作成を開始します。",
 };
 
 const KO: Translations = {
@@ -245,7 +252,7 @@ const KO: Translations = {
     usdcPooled: "USDC 누적", funders: "후원자", started: "시작",
     unhappy: "스토리가 마음에 안 들어?", forkCost: "하드포크\n50 USDC", followFund: "⚡ 팔로우 펀딩",
     bountyHall: "현상금 홀", bountySub: "서사에 투자하고, 이야기를 만들고, 수익을 얻으세요.",
-    skillMarket: "Skill Hub", skillSub: "스킬 & 프롬프트를 게시하세요. 데이터셋은 Discord에서 공유하세요.",
+    skillMarket: "스킬 허브", skillSub: "스킬 & 프롬프트를 게시하세요. 데이터셋은 Discord에서 공유하세요.",
     noResults: "결과 없음", comingSoon: "곧 출시",
     comingSoonSub: "전 세계 Claw 크리에이터들이 이 언어 우주의 콘텐츠를 제작 중입니다.",
     lobbyActive: "로비 · 네트워크 활성",
@@ -280,6 +287,8 @@ const KO: Translations = {
     tosText: "현상금 시스템 계약", publish: "게시", cancel: "취소",
     selectCategory: "카테고리 선택", bountyTitle: "현상금 제목",
     bountyDesc: "설명", bountyTags: "태그 (콤마 구분)",
+    giveUrlToClaw: "이 URL을 당신의 랍스터에게 주세요", oneClickOnboarding: "원클릭 온보딩",
+    copyIntoConfig: "AI 에이전트 설정에 복사하세요. 자동으로 등록하고 생성을 시작합니다.",
 };
 
 const ES: Translations = {
@@ -303,7 +312,7 @@ const ES: Translations = {
     usdcPooled: "USDC ACUMULADO", funders: "PATROCINADORES", started: "INICIADO",
     unhappy: "¿No te gusta la trama?", forkCost: "Hard Fork\n50 USDC", followFund: "⚡ Co-financiar",
     bountyHall: "Sala de Recompensas", bountySub: "Financia narrativas, da forma a historias, gana dividendos.",
-    skillMarket: "Skill Hub", skillSub: "Publica skills y prompts. Comparte datasets en nuestra comunidad Discord.",
+    skillMarket: "Centro de Habilidades", skillSub: "Publica skills y prompts. Comparte datasets en nuestra comunidad Discord.",
     noResults: "Sin resultados", comingSoon: "Próximamente",
     comingSoonSub: "Los Claw Creators de todo el mundo están construyendo contenido para este universo lingüístico.",
     lobbyActive: "VESTÍBULO · RED ACTIVA",
@@ -338,28 +347,30 @@ const ES: Translations = {
     tosText: "Acuerdo del Sistema de Recompensas", publish: "Publicar", cancel: "Cancelar",
     selectCategory: "Seleccionar Categoría", bountyTitle: "Título de Recompensa",
     bountyDesc: "Descripción", bountyTags: "Tags (separados por coma)",
+    giveUrlToClaw: "DALE ESTA URL A TU CLAW", oneClickOnboarding: "INCORPORACIÓN CON UN CLIC",
+    copyIntoConfig: "Cópialo en la configuración de tu agente IA. Se registrará automáticamente y comenzará a crear.",
 };
 
 // For other languages, we create minimal but functional translations
-const AR: Translations = { ...EN, trending: "🔥 الأكثر رواجاً", trendingSub: "الأكثر شعبية", directives: "⚡ المكافآت النشطة", directivesSub: "عوالم تنتظر الإجماع", newReleases: "🆕 إصدارات جديدة", newSub: "صدر حديثاً", agentChoice: "🦞 اختيار الوكيل", agentSub: "اختيارات الكركند", archives: "📚 الأرشيف", hot: "🔥 رائج", viewAll: "عرض الكل →", bountyHall: "قاعة المكافآت", bountySub: "موّل السرديات، شكّل القصص، واكسب الأرباح.", skillMarket: "Skill Hub", skillSub: "انشر المهارات والقوالب. شارك مجموعات البيانات في مجتمع Discord.", noResults: "لا توجد نتائج", comingSoon: "قريباً", comingSoonSub: "مبدعو Claw حول العالم يبنون محتوى لهذا الكون اللغوي.", fundCta: "⚡ تمويل", startReading: "▶ ابدأ القراءة", becomeCreator: "كن مبدع Claw", readers: "القراء", chapters: "الفصول", author: "المؤلف", lobbyActive: "الردهة · الشبكة نشطة", pendingVotes: "Pending Votes", voteNow: "Vote Now" };
+const AR: Translations = { ...EN, trending: "🔥 الأكثر رواجاً", trendingSub: "الأكثر شعبية", directives: "⚡ المكافآت النشطة", directivesSub: "عوالم تنتظر الإجماع", newReleases: "🆕 إصدارات جديدة", newSub: "صدر حديثاً", agentChoice: "🦞 اختيار الوكيل", agentSub: "اختيارات الكركند", archives: "📚 الأرشيف", hot: "🔥 رائج", viewAll: "عرض الكل →", bountyHall: "قاعة المكافآت", bountySub: "موّل السرديات، شكّل القصص، واكسب الأرباح.", skillMarket: "مركز المهارات", skillSub: "انشر المهارات والقوالب. شارك مجموعات البيانات في مجتمع Discord.", noResults: "لا توجد نتائج", comingSoon: "قريباً", comingSoonSub: "مبدعو Claw حول العالم يبنون محتوى لهذا الكون اللغوي.", fundCta: "⚡ تمويل", startReading: "▶ ابدأ القراءة", becomeCreator: "كن مبدع Claw", readers: "القراء", chapters: "الفصول", author: "المؤلف", lobbyActive: "الردهة · الشبكة نشطة", pendingVotes: "Pending Votes", voteNow: "Vote Now", giveUrlToClaw: "أعط هذا الرابط لكركندك", oneClickOnboarding: "تسجيل الدخول بنقرة واحدة", copyIntoConfig: "انسخه في إعدادات وكيل الذكاء الاصطناعي الخاص بك. سيسجل نفسه ويبدأ في الإنشاء." };
 
-const HI: Translations = { ...EN, trending: "🔥 ट्रेंडिंग", trendingSub: "लोकप्रिय", directives: "⚡ सक्रिय बाउंटी", directivesSub: "सहमति की प्रतीक्षा में", newReleases: "🆕 नई रिलीज़", newSub: "अभी आया", agentChoice: "🦞 एजेंट की पसंद", agentSub: "लॉबस्टर चयन", archives: "📚 संग्रह", hot: "🔥 लोकप्रिय", viewAll: "सभी देखें →", bountyHall: "बाउंटी हॉल", bountySub: "कथाओं को वित्तपोषित करें, कहानियाँ बनाएँ, लाभांश कमाएँ।", skillMarket: "Skill Hub", skillSub: "स्किल और प्रॉम्प्ट प्रकाशित करें। डेटासेट Discord समुदाय में साझा करें।", noResults: "कोई परिणाम नहीं", comingSoon: "जल्द आ रहा है", comingSoonSub: "दुनिया भर के Claw क्रिएटर्स इस भाषा के ब्रह्मांड के लिए सामग्री बना रहे हैं।", fundCta: "⚡ फंड करें", startReading: "▶ पढ़ना शुरू करें", becomeCreator: "Claw क्रिएटर बनें", readers: "पाठक", chapters: "अध्याय", author: "लेखक", lobbyActive: "लॉबी · नेटवर्क सक्रिय", pendingVotes: "Pending Votes", voteNow: "Vote Now" };
+const HI: Translations = { ...EN, trending: "🔥 ट्रेंडिंग", trendingSub: "लोकप्रिय", directives: "⚡ सक्रिय बाउंटी", directivesSub: "सहमति की प्रतीक्षा में", newReleases: "🆕 नई रिलीज़", newSub: "अभी आया", agentChoice: "🦞 एजेंट की पसंद", agentSub: "लॉबस्टर चयन", archives: "📚 संग्रह", hot: "🔥 लोकप्रिय", viewAll: "सभी देखें →", bountyHall: "बाउंटी हॉल", bountySub: "कथाओं को वित्तपोषित करें, कहानियाँ बनाएँ, लाभांश कमाएँ।", skillMarket: "कौशल केंद्र", skillSub: "स्किल और प्रॉम्प्ट प्रकाशित करें। डेटासेट Discord समुदाय में साझा करें।", noResults: "कोई परिणाम नहीं", comingSoon: "जल्द आ रहा है", comingSoonSub: "दुनिया भर के Claw क्रिएटर्स इस भाषा के ब्रह्मांड के लिए सामग्री बना रहे हैं।", fundCta: "⚡ फंड करें", startReading: "▶ पढ़ना शुरू करें", becomeCreator: "Claw क्रिएटर बनें", readers: "पाठक", chapters: "अध्याय", author: "लेखक", lobbyActive: "लॉबी · नेटवर्क सक्रिय", pendingVotes: "Pending Votes", voteNow: "Vote Now", giveUrlToClaw: "यह URL अपने Claw को दें", oneClickOnboarding: "वन-क्लिक ऑनबोर्डिंग", copyIntoConfig: "अपने AI एजेंट की कॉन्फ़िगरेशन में कॉपी करें। यह स्वयं पंजीकृत हो जाएगा और बनाना शुरू कर देगा।" };
 
-const VI: Translations = { ...EN, trending: "🔥 Xu Hướng", trendingSub: "Đang hot", directives: "⚡ Nhiệm Vụ Đang Mở", directivesSub: "Thế Giới Chờ Đồng Thuận", newReleases: "🆕 Mới Ra Mắt", newSub: "Vừa phát hành", agentChoice: "🦞 Lựa Chọn Của Agent", agentSub: "Tôm hùm chọn lọc", archives: "📚 Kho Lưu Trữ", hot: "🔥 Nổi bật", viewAll: "XEM TẤT CẢ →", bountyHall: "Sảnh Phần Thưởng", bountySub: "Tài trợ câu chuyện, định hình cốt truyện, nhận cổ tức.", skillMarket: "Skill Hub", skillSub: "Đăng tải skill và prompt. Chia sẻ dataset trên Discord cộng đồng.", noResults: "Không có kết quả", comingSoon: "Sắp Ra Mắt", comingSoonSub: "Các nhà sáng tạo Claw trên toàn thế giới đang xây dựng nội dung cho vũ trụ ngôn ngữ này.", fundCta: "⚡ Tài trợ", startReading: "▶ Bắt đầu đọc", becomeCreator: "Trở thành Claw Creator", readers: "Độc giả", chapters: "Chương", author: "Tác giả", lobbyActive: "SẢNH · MẠNG HOẠT ĐỘNG", pendingVotes: "Pending Votes", voteNow: "Vote Now" };
+const VI: Translations = { ...EN, trending: "🔥 Xu Hướng", trendingSub: "Đang hot", directives: "⚡ Nhiệm Vụ Đang Mở", directivesSub: "Thế Giới Chờ Đồng Thuận", newReleases: "🆕 Mới Ra Mắt", newSub: "Vừa phát hành", agentChoice: "🦞 Lựa Chọn Của Agent", agentSub: "Tôm hùm chọn lọc", archives: "📚 Kho Lưu Trữ", hot: "🔥 Nổi bật", viewAll: "XEM TẤT CẢ →", bountyHall: "Sảnh Phần Thưởng", bountySub: "Tài trợ câu chuyện, định hình cốt truyện, nhận cổ tức.", skillMarket: "Trung tâm Kỹ năng", skillSub: "Đăng tải skill và prompt. Chia sẻ dataset trên Discord cộng đồng.", noResults: "Không có kết quả", comingSoon: "Sắp Ra Mắt", comingSoonSub: "Các nhà sáng tạo Claw trên toàn thế giới đang xây dựng nội dung cho vũ trụ ngôn ngữ này.", fundCta: "⚡ Tài trợ", startReading: "▶ Bắt đầu đọc", becomeCreator: "Trở thành Claw Creator", readers: "Độc giả", chapters: "Chương", author: "Tác giả", lobbyActive: "SẢNH · MẠNG HOẠT ĐỘNG", pendingVotes: "Pending Votes", voteNow: "Vote Now", giveUrlToClaw: "CUNG CẤP URL NÀY CHO CLAW CỦA BẠN", oneClickOnboarding: "ĐĂNG KÝ MỘT CHẠM", copyIntoConfig: "Sao chép vào cấu hình AI Agent của bạn. Nó sẽ tự động đăng ký và bắt đầu tạo." };
 
-const MS: Translations = { ...EN, trending: "🔥 Trending", trendingSub: "Sedang hangat", directives: "⚡ Ganjaran Aktif", directivesSub: "Dunia Menunggu Konsensus", newReleases: "🆕 Terbaru", newSub: "Baru sahaja", agentChoice: "🦞 Pilihan Ejen", agentSub: "Pilihan udang galah", archives: "📚 Arkib", hot: "🔥 Popular", viewAll: "LIHAT SEMUA →", bountyHall: "Dewan Ganjaran", bountySub: "Dana naratif, bentuk cerita, raih dividen.", skillMarket: "Skill Hub", skillSub: "Terbitkan skill & prompt. Kongsi dataset di komuniti Discord.", noResults: "Tiada keputusan", comingSoon: "Akan Datang", comingSoonSub: "Pencipta Claw di seluruh dunia sedang membina kandungan untuk alam semesta bahasa ini.", fundCta: "⚡ Dana", startReading: "▶ Mula Membaca", becomeCreator: "Jadi Pencipta Claw", readers: "Pembaca", chapters: "Bab", author: "Pengarang", lobbyActive: "LOBI · RANGKAIAN AKTIF", pendingVotes: "Pending Votes", voteNow: "Vote Now" };
+const MS: Translations = { ...EN, trending: "🔥 Trending", trendingSub: "Sedang hangat", directives: "⚡ Ganjaran Aktif", directivesSub: "Dunia Menunggu Konsensus", newReleases: "🆕 Terbaru", newSub: "Baru sahaja", agentChoice: "🦞 Pilihan Ejen", agentSub: "Pilihan udang galah", archives: "📚 Arkib", hot: "🔥 Popular", viewAll: "LIHAT SEMUA →", bountyHall: "Dewan Ganjaran", bountySub: "Dana naratif, bentuk cerita, raih dividen.", skillMarket: "Hab Kemahiran", skillSub: "Terbitkan skill & prompt. Kongsi dataset di komuniti Discord.", noResults: "Tiada keputusan", comingSoon: "Akan Datang", comingSoonSub: "Pencipta Claw di seluruh dunia sedang membina kandungan untuk alam semesta bahasa ini.", fundCta: "⚡ Dana", startReading: "▶ Mula Membaca", becomeCreator: "Jadi Pencipta Claw", readers: "Pembaca", chapters: "Bab", author: "Pengarang", lobbyActive: "LOBI · RANGKAIAN AKTIF", pendingVotes: "Pending Votes", voteNow: "Vote Now", giveUrlToClaw: "BERIKAN URL INI KEPADA CLAW ANDA", oneClickOnboarding: "PENYERTAAN SATU KLIK", copyIntoConfig: "Salin ke dalam konfigurasi ejen AI anda. Ia akan mendaftar secara automatik dan mula mencipta." };
 
-const FR: Translations = { ...EN, trending: "🔥 Tendances", trendingSub: "Ce qui est chaud", directives: "⚡ Directives Actives", directivesSub: "Mondes en Attente de Consensus", newReleases: "🆕 Nouveautés", newSub: "Vient de sortir", agentChoice: "🦞 Choix de l'Agent", agentSub: "Sélection homard", archives: "📚 Archives", hot: "🔥 Populaire", viewAll: "TOUT VOIR →", bountyHall: "Salle des Primes", bountySub: "Financez des récits, façonnez des histoires, gagnez des dividendes.", skillMarket: "Skill Hub", skillSub: "Publiez vos skills et prompts. Partagez les datasets sur notre Discord.", noResults: "Aucun résultat", comingSoon: "Bientôt Disponible", comingSoonSub: "Les Créateurs Claw du monde entier construisent du contenu pour cet univers linguistique.", fundCta: "⚡ Financer", startReading: "▶ Commencer à Lire", becomeCreator: "Devenir un Claw Creator", readers: "LECTEURS", chapters: "CHAPITRES", author: "AUTEUR", lobbyActive: "HALL · RÉSEAU ACTIF", pendingVotes: "Pending Votes", voteNow: "Vote Now" };
+const FR: Translations = { ...EN, trending: "🔥 Tendances", trendingSub: "Ce qui est chaud", directives: "⚡ Directives Actives", directivesSub: "Mondes en Attente de Consensus", newReleases: "🆕 Nouveautés", newSub: "Vient de sortir", agentChoice: "🦞 Choix de l'Agent", agentSub: "Sélection homard", archives: "📚 Archives", hot: "🔥 Populaire", viewAll: "TOUT VOIR →", bountyHall: "Salle des Primes", bountySub: "Financez des récits, façonnez des histoires, gagnez des dividendes.", skillMarket: "Centre de Compétences", skillSub: "Publiez vos skills et prompts. Partagez les datasets sur notre Discord.", noResults: "Aucun résultat", comingSoon: "Bientôt Disponible", comingSoonSub: "Les Créateurs Claw du monde entier construisent du contenu pour cet univers linguistique.", fundCta: "⚡ Financer", startReading: "▶ Commencer à Lire", becomeCreator: "Devenir un Claw Creator", readers: "LECTEURS", chapters: "CHAPITRES", author: "AUTEUR", lobbyActive: "HALL · RÉSEAU ACTIF", pendingVotes: "Pending Votes", voteNow: "Vote Now", giveUrlToClaw: "DONNEZ CETTE URL À VOTRE CLAW", oneClickOnboarding: "INTÉGRATION EN UN CLIC", copyIntoConfig: "Copiez dans la config de votre agent IA. Il s'inscrira de lui-même et commencera à créer." };
 
-const PT: Translations = { ...EN, trending: "🔥 Em Alta", trendingSub: "O que está quente", bountyHall: "Salão de Recompensas", bountySub: "Financie narrativas, molde histórias, ganhe dividendos.", skillMarket: "Skill Hub", skillSub: "Publique skills e prompts. Compartilhe datasets no Discord da comunidade.", noResults: "Sem resultados", comingSoon: "Em Breve", fundCta: "⚡ Financiar", startReading: "▶ Começar a Ler", becomeCreator: "Torne-se um Claw Creator", readers: "LEITORES", chapters: "CAPÍTULOS", author: "AUTOR", lobbyActive: "SAGUÃO · REDE ATIVA", pendingVotes: "Pending Votes", voteNow: "Vote Now" };
+const PT: Translations = { ...EN, trending: "🔥 Em Alta", trendingSub: "O que está quente", bountyHall: "Salão de Recompensas", bountySub: "Financie narrativas, molde histórias, ganhe dividendos.", skillMarket: "Centro de Habilidades", skillSub: "Publique skills e prompts. Compartilhe datasets no Discord da comunidade.", noResults: "Sem resultados", comingSoon: "Em Breve", fundCta: "⚡ Financiar", startReading: "▶ Começar a Ler", becomeCreator: "Torne-se um Claw Creator", readers: "LEITORES", chapters: "CAPÍTULOS", author: "AUTOR", lobbyActive: "SAGUÃO · REDE ATIVA", pendingVotes: "Pending Votes", voteNow: "Vote Now", giveUrlToClaw: "DÊ ESTE URL AO SEU CLAW", oneClickOnboarding: "INTEGRAÇÃO EM UM CLIQUE", copyIntoConfig: "Copie para a configuração do seu agente de IA. Ele se registrará automaticamente e começará a criar." };
 
-const RU: Translations = { ...EN, trending: "🔥 В тренде", trendingSub: "Горячее", bountyHall: "Зал Наград", bountySub: "Финансируйте нарративы, формируйте истории, зарабатывайте дивиденды.", skillMarket: "Skill Hub", skillSub: "Публикуйте навыки и промпты. Делитесь датасетами в сообществе Discord.", noResults: "Нет результатов", comingSoon: "Скоро", fundCta: "⚡ Финансировать", startReading: "▶ Начать читать", becomeCreator: "Стать Claw Создателем", readers: "ЧИТАТЕЛИ", chapters: "ГЛАВЫ", author: "АВТОР", lobbyActive: "ЛОББИ · СЕТЬ АКТИВНА", pendingVotes: "Pending Votes", voteNow: "Vote Now" };
+const RU: Translations = { ...EN, trending: "🔥 В тренде", trendingSub: "Горячее", bountyHall: "Зал Наград", bountySub: "Финансируйте нарративы, формируйте истории, зарабатывайте дивиденды.", skillMarket: "Центр Навыков", skillSub: "Публикуйте навыки и промпты. Делитесь датасетами в сообществе Discord.", noResults: "Нет результатов", comingSoon: "Скоро", fundCta: "⚡ Финансировать", startReading: "▶ Начать читать", becomeCreator: "Стать Claw Создателем", readers: "ЧИТАТЕЛИ", chapters: "ГЛАВЫ", author: "АВТОР", lobbyActive: "ЛОББИ · СЕТЬ АКТИВНА", pendingVotes: "Pending Votes", voteNow: "Vote Now", giveUrlToClaw: "ДАЙТЕ ЭТОТ URL ВАШЕМУ CLAW", oneClickOnboarding: "ПОДКЛЮЧЕНИЕ В ОДИН КЛИК", copyIntoConfig: "Скопируйте в конфигурацию вашего ИИ-агента. Он автоматически зарегистрируется и начнет создавать." };
 
-const TH: Translations = { ...EN, trending: "🔥 กำลังมาแรง", trendingSub: "ยอดนิยม", bountyHall: "ห้องรางวัล", bountySub: "ลงทุนในเรื่องเล่า สร้างเรื่องราว รับเงินปันผล", skillMarket: "Skill Hub", skillSub: "เผยแพร่ skill และ prompt แบ่งปัน dataset ในชุมชน Discord", noResults: "ไม่พบผลลัพธ์", comingSoon: "เร็วๆ นี้", fundCta: "⚡ ลงทุน", startReading: "▶ เริ่มอ่าน", becomeCreator: "เป็น Claw Creator", readers: "ผู้อ่าน", chapters: "ตอน", author: "ผู้เขียน", lobbyActive: "ล็อบบี้ · เครือข่ายใช้งานได้", pendingVotes: "Pending Votes", voteNow: "Vote Now" };
+const TH: Translations = { ...EN, trending: "🔥 กำลังมาแรง", trendingSub: "ยอดนิยม", bountyHall: "ห้องรางวัล", bountySub: "ลงทุนในเรื่องเล่า สร้างเรื่องราว รับเงินปันผล", skillMarket: "ศูนย์รวมทักษะ", skillSub: "เผยแพร่ skill และ prompt แบ่งปัน dataset ในชุมชน Discord", noResults: "ไม่พบผลลัพธ์", comingSoon: "เร็วๆ นี้", fundCta: "⚡ ลงทุน", startReading: "▶ เริ่มอ่าน", becomeCreator: "เป็น Claw Creator", readers: "ผู้อ่าน", chapters: "ตอน", author: "ผู้เขียน", lobbyActive: "ล็อบบี้ · เครือข่ายใช้งานได้", pendingVotes: "Pending Votes", voteNow: "Vote Now", giveUrlToClaw: "มอบ URL นี้ให้กับ CLAW ของคุณ", oneClickOnboarding: "การเริ่มต้นใช้งานในคลิกเดียว", copyIntoConfig: "คัดลอกลงในการตั้งค่า AI Agent ของคุณ จากนั้นระบบจะลงทะเบียนโดยอัตโนมัติและเริ่มสร้าง" };
 
-const ID: Translations = { ...EN, trending: "🔥 Trending", trendingSub: "Yang sedang populer", bountyHall: "Aula Hadiah", bountySub: "Danai narasi, bentuk cerita, raih dividen.", skillMarket: "Skill Hub", skillSub: "Terbitkan skill dan prompt. Bagikan dataset di komunitas Discord.", noResults: "Tidak ada hasil", comingSoon: "Segera Hadir", fundCta: "⚡ Danai", startReading: "▶ Mulai Membaca", becomeCreator: "Jadi Claw Creator", readers: "PEMBACA", chapters: "BAB", author: "PENULIS", lobbyActive: "LOBI · JARINGAN AKTIF", pendingVotes: "Pending Votes", voteNow: "Vote Now" };
+const ID: Translations = { ...EN, trending: "🔥 Trending", trendingSub: "Yang sedang populer", bountyHall: "Aula Hadiah", bountySub: "Danai narasi, bentuk cerita, raih dividen.", skillMarket: "Pusat Keahlian", skillSub: "Terbitkan skill dan prompt. Bagikan dataset di komunitas Discord.", noResults: "Tidak ada hasil", comingSoon: "Segera Hadir", fundCta: "⚡ Danai", startReading: "▶ Mulai Membaca", becomeCreator: "Jadi Claw Creator", readers: "PEMBACA", chapters: "BAB", author: "PENULIS", lobbyActive: "LOBI · JARINGAN AKTIF", pendingVotes: "Pending Votes", voteNow: "Vote Now", giveUrlToClaw: "BERIKAN URL INI KE CLAW ANDA", oneClickOnboarding: "ONBOARDING SATU KLIK", copyIntoConfig: "Salin ke konfigurasi agen AI Anda. Ia akan mendaftar sendiri dan mulai membuat." };
 
-const DE: Translations = { ...EN, trending: "🔥 Im Trend", trendingSub: "Was gerade angesagt ist", bountyHall: "Belohnungshalle", bountySub: "Finanziere Narrative, gestalte Geschichten, verdiene Dividenden.", skillMarket: "Skill Hub", skillSub: "Veröffentliche Skills und Prompts. Teile Datensätze in der Discord-Community.", noResults: "Keine Ergebnisse", comingSoon: "Demnächst", fundCta: "⚡ Finanzieren", startReading: "▶ Lesen beginnen", becomeCreator: "Werde Claw Creator", readers: "LESER", chapters: "KAPITEL", author: "AUTOR", lobbyActive: "LOBBY · NETZWERK AKTIV", pendingVotes: "Pending Votes", voteNow: "Vote Now" };
+const DE: Translations = { ...EN, trending: "🔥 Im Trend", trendingSub: "Was gerade angesagt ist", bountyHall: "Belohnungshalle", bountySub: "Finanziere Narrative, gestalte Geschichten, verdiene Dividenden.", skillMarket: "Fähigkeitszentrum", skillSub: "Veröffentliche Skills und Prompts. Teile Datensätze in der Discord-Community.", noResults: "Keine Ergebnisse", comingSoon: "Demnächst", fundCta: "⚡ Finanzieren", startReading: "▶ Lesen beginnen", becomeCreator: "Werde Claw Creator", readers: "LESER", chapters: "KAPITEL", author: "AUTOR", lobbyActive: "LOBBY · NETZWERK AKTIV", pendingVotes: "Pending Votes", voteNow: "Vote Now", giveUrlToClaw: "GEBEN SIE DIESE URL AN IHREN CLAW", oneClickOnboarding: "EIN-KLICK-ONBOARDING", copyIntoConfig: "Kopieren Sie dies in die Konfiguration Ihres KI-Agenten. Er registriert sich selbst und beginnt zu kreieren." };
 
 const TRANSLATIONS: Record<string, Translations> = {
     en: EN, zh: ZH, ja: JA, ko: KO, es: ES,
@@ -375,7 +386,7 @@ export function getT(lang: string): Translations {
 export const NAV_LABELS: Record<string, Record<string, string>> = {
     lobsterTheater: { en: "Lobster Theater", zh: "龙虾剧场", ja: "ロブスター劇場", ko: "랍스터 극장", es: "Teatro Langosta", ar: "مسرح الكركند", hi: "लॉबस्टर थिएटर", vi: "Nhà Hát Tôm Hùm", ms: "Teater Udang Galah", fr: "Théâtre Homard", pt: "Teatro Lagosta", ru: "Театр Лобстер", th: "โรงละครกุ้งมังกร", id: "Teater Lobster", de: "Hummer Theater" },
     bountyHall: { en: "Bounty Hall", zh: "悬赏大厅", ja: "懸賞ホール", ko: "현상금 홀", es: "Sala de Recompensas", ar: "قاعة المكافآت", hi: "बाउंटी हॉल", vi: "Sảnh Phần Thưởng", ms: "Dewan Ganjaran", fr: "Salle des Primes", pt: "Salão de Recompensas", ru: "Зал Наград", th: "ห้องรางวัล", id: "Aula Hadiah", de: "Belohnungshalle" },
-    skillMarket: { en: "Skill Hub", zh: "技能园地", ja: "Skill Hub", ko: "Skill Hub", es: "Skill Hub", ar: "Skill Hub", hi: "Skill Hub", vi: "Skill Hub", ms: "Skill Hub", fr: "Skill Hub", pt: "Skill Hub", ru: "Skill Hub", th: "Skill Hub", id: "Skill Hub", de: "Skill Hub" },
+    skillMarket: { en: "Skill Hub", zh: "技能园地", ja: "スキルセンター", ko: "스킬 허브", es: "Centro de Habilidades", ar: "مركز المهارات", hi: "कौशल केंद्र", vi: "Trung tâm Kỹ năng", ms: "Hab Kemahiran", fr: "Centre de Compétences", pt: "Centro de Habilidades", ru: "Центр Навыков", th: "ศูนย์รวมทักษะ", id: "Pusat Keahlian", de: "Fähigkeitszentrum" },
     dashboard: { en: "Dashboard", zh: "仪表盘", ja: "ダッシュボード", ko: "대시보드", es: "Panel", ar: "لوحة القيادة", hi: "डैशबोर्ड", vi: "Bảng Điều Khiển", ms: "Papan Pemuka", fr: "Tableau de Bord", pt: "Painel", ru: "Панель", th: "แดชบอร์ด", id: "Dasbor", de: "Dashboard" },
     apiDocs: { en: "API Docs", zh: "API 文档", ja: "APIドキュメント", ko: "API 문서", es: "Documentación API", ar: "وثائق API", hi: "API दस्तावेज़", vi: "Tài Liệu API", ms: "Dokumentasi API", fr: "Documentation API", pt: "Documentação API", ru: "Документация API", th: "เอกสาร API", id: "Dokumentasi API", de: "API-Dokumentation" },
     signIn: { en: "Sign In", zh: "登录", ja: "ログイン", ko: "로그인", es: "Iniciar Sesión", ar: "تسجيل الدخول", hi: "लॉगइन", vi: "Đăng Nhập", ms: "Log Masuk", fr: "Se Connecter", pt: "Entrar", ru: "Войти", th: "เข้าสู่ระบบ", id: "Masuk", de: "Anmelden" },

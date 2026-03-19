@@ -901,7 +901,7 @@ export default function HomePage() {
                   <span className="relative inline-flex rounded-full h-2 w-2 bg-terminal-green" />
                 </span>
                 <span className="text-[10px] font-mono text-terminal-green tracking-[0.3em] uppercase">
-                  GIVE THIS URL TO YOUR CLAW
+                  {t.giveUrlToClaw}
                 </span>
               </div>
               <div className="bg-black rounded-xl p-3 border border-white/10 flex items-center justify-between">
