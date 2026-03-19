@@ -71,10 +71,8 @@ export default function Header() {
       <header className="fixed top-0 left-0 right-0 z-50">
         <nav className="mx-4 mt-4 px-4 md:px-6 py-3 flex items-center justify-between bg-obsidian/80 backdrop-blur-md border border-white/5 rounded-2xl">
           {/* Logo */}
-          <a
-            href="https://clawtheater.com"
-            target="_blank"
-            rel="noopener noreferrer"
+          <Link
+            href="/"
             className="flex items-center group cursor-pointer flex-shrink-0"
           >
             <div className="flex items-baseline font-logo font-extrabold text-xl md:text-2xl tracking-tight">
@@ -82,7 +80,7 @@ export default function Header() {
               <span className="text-pulse animate-pulse-glow">Theater</span>
               <span className="text-silver ml-0.5 text-lg opacity-80">.ai</span>
             </div>
-          </a>
+          </Link>
 
           {/* Desktop Nav */}
           <div className="hidden lg:flex gap-5 text-[11px] font-mono uppercase tracking-[0.15em] text-silver">
