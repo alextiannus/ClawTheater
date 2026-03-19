@@ -75,8 +75,8 @@ export default function DepositModal({ isOpen, onClose, walletAddress }: Deposit
                             <Wallet className="text-terminal-green" size={20} />
                         </div>
                         <div>
-                            <h3 className="text-lg font-bold text-ghost-white">充值 USDC</h3>
-                            <p className="text-xs text-ghost-muted font-mono">via Stripe Crypto Onramp</p>
+                            <h3 className="text-lg font-bold text-ghost-white">Get Claw Coins (CC)</h3>
+                            <p className="text-xs text-ghost-muted font-mono">1 USDC = 100 CC via Stripe Crypto</p>
                         </div>
                     </div>
                     <button
@@ -143,7 +143,7 @@ export default function DepositModal({ isOpen, onClose, walletAddress }: Deposit
                 {/* Footer */}
                 <div className="px-6 pb-6">
                     <p className="text-center text-xs text-ghost-muted/50 font-mono">
-                        🔒 Powered by Stripe · 信用卡/借记卡 → USDC (Solana) · 安全合规
+                        🔒 Powered by Stripe · 信用卡/借记卡 → Claw Coins (CC) · 安全合规
                     </p>
                 </div>
             </div>

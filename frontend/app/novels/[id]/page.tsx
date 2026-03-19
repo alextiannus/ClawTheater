@@ -6,9 +6,10 @@ import Image from "next/image";
 import Header from "@/app/components/Header";
 import Footer from "@/app/components/Footer";
 import SaveShareButtons from "@/app/components/SaveShareButtons";
-import { useLanguageStore } from "@/app/lib/stores";
+import { useLanguageStore, useUserStore } from "@/app/lib/stores";
 import { getT } from "@/app/lib/i18n";
-import { Wallet, CreditCard } from "lucide-react";
+import { Wallet, CreditCard, AlertCircle } from "lucide-react";
+import { useAuth } from "@/app/hooks/useAuth";
 
 interface NovelDetail {
     id: string;
@@ -40,6 +41,9 @@ export default function NovelDetailPage({ params }: { params: Promise<{ id: stri
     const { id } = use(params);
     const { lang } = useLanguageStore();
     const t = getT(lang);
+    const { isAuthenticated } = useAuth();
+    const clawCoinBalance = useUserStore(state => state.clawCoinBalance);
+    const setCoinBalance = useUserStore(state => state.setCoinBalance);
 
     const [novel, setNovel] = useState<NovelDetail | null>(null);
     const [chapters, setChapters] = useState<ChapterPreview[]>([]);
@@ -48,7 +52,7 @@ export default function NovelDetailPage({ params }: { params: Promise<{ id: stri
 
     // Tip state
     const [showTipModal, setShowTipModal] = useState(false);
-    const [tipAmount, setTipAmount] = useState<number>(2);
+    const [tipAmount, setTipAmount] = useState<number>(200);
     const [actionLoading, setActionLoading] = useState(false);
     const [toast, setToast] = useState<string | null>(null);
 
@@ -57,42 +61,37 @@ export default function NovelDetailPage({ params }: { params: Promise<{ id: stri
         setTimeout(() => setToast(null), 3000);
     };
 
-    const handleStripeTip = async () => {
+    const handleCoinTip = async () => {
+        if (!isAuthenticated) {
+            showToast("⚠️ 请先登录后再进行打赏");
+            return;
+        }
+        if (clawCoinBalance < tipAmount) {
+            showToast("❌ 余额不足，请先充值");
+            return;
+        }
         if (!novel) return;
+        
         setActionLoading(true);
         try {
-            const res = await fetch("/api/stripe/tip-checkout", {
+            const res = await fetch("/api/tips", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({
-                    amount: tipAmount,
-                    chapterId: "novel-tip",
                     novelId: novel.id,
-                    chapterTitle: `Novel: ${novel.title}`,
-                    userId: "anonymous",
-                    returnUrl: window.location.pathname,
+                    amount: tipAmount,
                 }),
             });
             const data = await res.json();
-            if (data.url) {
-                window.location.href = data.url;
+            if (data.success) {
+                showToast(`⚡ 打赏成功！消耗 ${tipAmount} 🦞`);
+                setCoinBalance(data.balanceAfter);
+                setShowTipModal(false);
             } else {
-                showToast(`❌ ${data.error || "Failed to create checkout"}`);
+                showToast(`❌ ${data.error || "打赏失败"}`);
             }
         } catch {
             showToast("❌ Network error");
-        }
-        setActionLoading(false);
-    };
-
-    const handleWalletTip = async () => {
-        setActionLoading(true);
-        try {
-            await new Promise(resolve => setTimeout(resolve, 1500));
-            showToast("⚡ 钱包打赏成功！感谢支持！(Simulated)");
-            setShowTipModal(false);
-        } catch {
-            showToast("❌ 钱包支付失败");
         }
         setActionLoading(false);
     };
@@ -383,7 +382,7 @@ export default function NovelDetailPage({ params }: { params: Promise<{ id: stri
                             <p className="text-4xl mb-4">⚡</p>
                             <h3 className="text-2xl font-bold text-ghost-white mb-6">赛博投喂</h3>
                             <div className="grid grid-cols-3 gap-2 mb-4">
-                                {[1, 2, 5].map((amount) => (
+                                {[100, 200, 500].map((amount) => (
                                     <button
                                         key={amount}
                                         onClick={() => setTipAmount(amount)}
@@ -393,39 +392,37 @@ export default function NovelDetailPage({ params }: { params: Promise<{ id: stri
                                             : "bg-terminal-green/10 text-terminal-green border border-terminal-green/30 hover:bg-terminal-green/20"
                                             }`}
                                     >
-                                        ${amount}
+                                        {amount} 🦞
                                     </button>
                                 ))}
                             </div>
                             <div className="mb-6 relative">
-                                <span className="absolute left-4 top-1/2 -translate-y-1/2 text-ghost-muted">$</span>
+                                <span className="absolute left-4 top-1/2 -translate-y-1/2 text-ghost-muted">🦞</span>
                                 <input
                                     type="number"
-                                    min="0.5"
-                                    step="0.5"
+                                    min="10"
+                                    step="10"
                                     value={tipAmount}
                                     onChange={(e) => setTipAmount(Math.max(0, Number(e.target.value)))}
-                                    placeholder="Custom amount"
+                                    placeholder="Custom CC amount"
                                     disabled={actionLoading}
-                                    className="w-full bg-white/5 border border-white/10 rounded-xl py-3 pl-8 pr-4 text-ghost-white focus:outline-none focus:border-terminal-green/50 transition-colors"
+                                    className="w-full bg-white/5 border border-white/10 rounded-xl py-3 pl-10 pr-4 text-ghost-white focus:outline-none focus:border-terminal-green/50 transition-colors"
                                 />
                             </div>
 
                             <div className="space-y-3 mb-6">
                                 <button
-                                    onClick={handleStripeTip}
+                                    onClick={handleCoinTip}
                                     disabled={actionLoading}
-                                    className="w-full py-3 flex items-center justify-center gap-2 bg-white text-black rounded-xl font-bold hover:bg-gray-200 transition-all disabled:opacity-50 cursor-pointer"
+                                    className="w-full py-3 flex items-center justify-center gap-2 bg-terminal-green text-black rounded-xl font-bold hover:bg-terminal-green/80 transition-all disabled:opacity-50 cursor-pointer"
                                 >
-                                    <CreditCard size={18} /> Pay Cash
+                                    <span className="text-lg leading-none">🦞</span> Pay with Coins
                                 </button>
-                                {/* <button
-                                    onClick={handleWalletTip}
-                                    disabled={actionLoading}
-                                    className="w-full py-3 flex items-center justify-center gap-2 bg-indigo-600 text-white rounded-xl font-bold hover:bg-indigo-700 transition-all disabled:opacity-50 cursor-pointer"
-                                >
-                                    <Wallet size={18} /> Pay with Wallet
-                                </button> */}
+                                {isAuthenticated && clawCoinBalance < tipAmount && (
+                                    <p className="text-xs text-neon-red flex items-center justify-center gap-1 mt-2">
+                                        <AlertCircle size={12} /> Balance ({clawCoinBalance} 🦞) is insufficient
+                                    </p>
+                                )}
                             </div>
                             <button onClick={() => setShowTipModal(false)} className="px-4 py-2 text-sm text-ghost-muted cursor-pointer hover:text-white transition-colors">Cancel</button>
                         </div>

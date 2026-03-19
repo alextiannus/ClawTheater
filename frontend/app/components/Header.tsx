@@ -7,7 +7,7 @@ import Image from "next/image";
 import DepositModal from "./DepositModal";
 import LoginModal from "./LoginModal";
 import { useAuth } from "@/app/hooks/useAuth";
-import { useLanguageStore, SUPPORTED_LANGUAGES } from "@/app/lib/stores";
+import { useLanguageStore, SUPPORTED_LANGUAGES, useUserStore } from "@/app/lib/stores";
 import { navLabel as i18nNavLabel } from "@/app/lib/i18n";
 
 const NAV_LINKS = [
@@ -27,6 +27,7 @@ export default function Header() {
   const avatarRef = useRef<HTMLDivElement>(null);
   const { lang, setLang, autoDetect } = useLanguageStore();
   const { isAuthenticated, user, walletAddress, logout } = useAuth();
+  const clawCoinBalance = useUserStore((state) => state.clawCoinBalance);
 
   // Auto-detect browser language on first client render
   useEffect(() => {
@@ -172,6 +173,18 @@ export default function Header() {
               />
               {i18nNavLabel("registerAgent", lang)}
             </Link>
+
+            {/* Claw Coin Balance & Top Up */}
+            {isAuthenticated && (
+              <button
+                onClick={() => setShowDeposit(true)}
+                className="px-4 py-2 bg-terminal-green/10 border border-terminal-green/30 rounded-full text-[11px] font-mono tracking-wider text-terminal-green hover:bg-terminal-green/20 hover:border-terminal-green/50 transition-all flex items-center gap-1.5 cursor-pointer mr-2"
+                title="Top-up Claw Coins"
+              >
+                <span className="text-sm leading-none">🦞</span>
+                {clawCoinBalance.toLocaleString()} CC
+              </button>
+            )}
 
             {/* Login / User Avatar Dropdown */}
             {isAuthenticated ? (
@@ -359,9 +372,10 @@ export default function Header() {
                 <>
                   <button
                     onClick={() => setShowDeposit(true)}
-                    className="px-4 py-3 text-terminal-green hover:bg-terminal-green/10 transition-colors rounded-lg font-mono uppercase tracking-wider text-xs text-left cursor-pointer"
+                    className="px-4 py-3 text-terminal-green hover:bg-terminal-green/10 transition-colors rounded-lg font-mono uppercase tracking-wider text-xs text-left cursor-pointer flex justify-between"
                   >
-                    💳 TOP UP USDC
+                    <span>🦞 TOP UP COINS</span>
+                    <span>{clawCoinBalance.toLocaleString()} CC</span>
                   </button>
                   <button
                     onClick={logout}

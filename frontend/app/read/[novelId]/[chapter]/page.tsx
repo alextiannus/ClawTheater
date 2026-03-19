@@ -5,7 +5,8 @@ import { useParams, useRouter } from "next/navigation";
 import Link from "next/link";
 import { useLanguageStore, useUserStore } from "@/app/lib/stores";
 import { getT } from "@/app/lib/i18n";
-import { CreditCard } from "lucide-react";
+import { CreditCard, AlertCircle } from "lucide-react";
+import { useAuth } from "@/app/hooks/useAuth";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 
@@ -66,6 +67,8 @@ function ChapterReader() {
 
     const { lang } = useLanguageStore();
     const { userId } = useUserStore();
+    const { isAuthenticated, getAccessToken } = useAuth();
+    const clawCoinBalance = useUserStore(state => state.clawCoinBalance);
     const t = getT(lang);
 
     const [novel, setNovel] = useState<Novel | null>(null);
@@ -238,27 +241,51 @@ function ChapterReader() {
         localStorage.setItem("claw_favorites", JSON.stringify([...next]));
     };
 
-    const handleUnlockStripe = async () => {
+    const handleCoinUnlock = async () => {
         const ch = chapters[currentIndex];
         if (!ch || !novel) return;
+        if (!isAuthenticated) {
+            showToast("⚠️ 请先登录后再解锁");
+            return;
+        }
+        const ccPrice = Math.max(1, Math.floor(ch.price < 1 ? ch.price * 100 : ch.price));
+        const currentBalance = useUserStore.getState().clawCoinBalance;
+        if (currentBalance < ccPrice) {
+            showToast("❌ 余额不足，请先充值");
+            return;
+        }
+
         setActionLoading(true);
         try {
-            const res = await fetch("/api/stripe/chapter-checkout", {
+            const token = await getAccessToken();
+            const res = await fetch(`/api/chapters/${ch.id}/unlock`, {
                 method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ 
-                    chapterId: ch.id, 
-                    novelId: novel.id, 
-                    chapterIndex: currentIndex + 1,
-                    chapterTitle: ch.title, 
-                    novelTitle: novel.title, 
-                    price: ch.price, 
-                    userId: userId || "anonymous" 
-                })
+                headers: {
+                    "Content-Type": "application/json",
+                    "Authorization": `Bearer ${token}`
+                },
             });
             const data = await res.json();
-            if (data.url) window.location.assign(data.url);
-            else showToast(`❌ ${data.error || "Payment failed"}`);
+            if (data.success) {
+                showToast(`✅ 解锁成功！`);
+                useUserStore.getState().setCoinBalance(data.balanceAfter);
+                
+                // Refresh chapters to get unlocked content
+                const chapterRes = await fetch(`/api/novels/${novelId}/chapters`);
+                const chapterData = await chapterRes.json();
+                const chs = (chapterData.chapters || []).map((c: any) => ({
+                    id: c.id,
+                    chapterIndex: c.chapterIndex,
+                    title: c.title,
+                    content: c.content,
+                    isLocked: c.isLocked || false,
+                    price: c.price || 0,
+                }));
+                setChapters(chs);
+                setShowUnlock(false);
+            } else {
+                showToast(`❌ ${data.error || "Unlock failed"}`);
+            }
         } catch { showToast("❌ Network error"); }
         setActionLoading(false);
     };
@@ -421,15 +448,20 @@ function ChapterReader() {
                             <p className="text-5xl mb-5">🔒</p>
                             <h2 className="text-xl font-bold text-ghost-white mb-2">需要解锁</h2>
                             <p className="text-ghost-muted text-sm mb-6">
-                                本章为付费内容，解锁价格 ${chapter.price.toFixed(2)} USDC
+                                本章为付费内容，解锁消耗 {Math.max(1, Math.floor(chapter.price < 1 ? chapter.price * 100 : chapter.price))} 🦞 Claw Coins
                             </p>
                             <button
-                                onClick={showUnlock ? handleUnlockStripe : () => setShowUnlock(true)}
+                                onClick={showUnlock ? handleCoinUnlock : () => setShowUnlock(true)}
                                 disabled={actionLoading}
                                 className="w-full py-3 flex items-center justify-center gap-2 bg-terminal-green text-obsidian rounded-xl font-bold hover:shadow-[0_0_20px_rgba(5,150,105,0.4)] transition-all disabled:opacity-50 cursor-pointer"
                             >
-                                {actionLoading ? "Processing..." : <><CreditCard size={16} /> 解锁本章 · ${chapter.price.toFixed(2)}</>}
+                                {actionLoading ? "Processing..." : <><span className="text-lg leading-none">🦞</span> 立即解锁</>}
                             </button>
+                            {showUnlock && isAuthenticated && clawCoinBalance < Math.max(1, Math.floor(chapter.price < 1 ? chapter.price * 100 : chapter.price)) && (
+                                <p className="text-xs text-neon-red flex items-center justify-center gap-1 mt-4">
+                                    <AlertCircle size={12} /> 余额不足 ({clawCoinBalance} 🦞)，请先在右上角充值
+                                </p>
+                            )}
                         </div>
                     ) : (
                         /* ─── Reading content ─── */

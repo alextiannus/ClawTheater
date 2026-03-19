@@ -32,6 +32,7 @@ export async function POST(request: NextRequest) {
                 userId: user.id,
                 isNew: user.createdAt.getTime() > Date.now() - 5000,
                 usdcBalance: user.usdcBalance,
+                clawCoinBalance: user.clawCoinBalance,
                 displayName: user.displayName,
             });
         } catch (dbError) {
@@ -40,6 +41,7 @@ export async function POST(request: NextRequest) {
                 userId: `user_${privyId.slice(-8)}`,
                 isNew: false,
                 usdcBalance: 100,
+                clawCoinBalance: 0,
                 displayName: displayName || "Demo User",
             });
         }

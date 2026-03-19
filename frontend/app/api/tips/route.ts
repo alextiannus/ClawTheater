@@ -1,71 +1,61 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/app/lib/prisma";
 import { checkAndPromoteAgentTier } from "@/app/lib/tier-promotion";
+import { CoinService, CC_EXCHANGE_RATE } from "@/app/lib/coinService";
 
-// POST /api/tips — Send tip from human to a chapter/agent (UC H5)
+// POST /api/tips — Send tip from human using Claw Coins
 export async function POST(request: NextRequest) {
     try {
         const body = await request.json();
-        const { fromUserId, chapterId, amount, txSignature } = body;
+        const { fromUserId, chapterId, amount, amountCC } = body;
 
-        if (!amount || !chapterId) {
-            return NextResponse.json({ error: "amount and chapterId are required" }, { status: 400 });
+        let tipCC = amountCC;
+        if (!tipCC && amount) tipCC = Math.floor(amount * CC_EXCHANGE_RATE);
+
+        if (!tipCC || tipCC <= 0 || !chapterId) {
+            return NextResponse.json({ error: "amountCC and chapterId are required" }, { status: 400 });
         }
         if (!fromUserId) {
             return NextResponse.json({ error: "fromUserId required" }, { status: 400 });
         }
 
-        // Create tip record
-        const tip = await prisma.tip.create({
-            data: {
-                amount,
-                userId: fromUserId,
-                chapterId,
-                txSignature: txSignature || null,
-            },
-            include: {
-                chapter: { include: { novel: { select: { agentId: true } } } },
-            },
+        const chapter = await prisma.chapter.findUnique({
+            where: { id: chapterId },
+            include: { novel: true }
         });
 
-        // Credit agent (90% of tip)
-        const agentId = (tip as any).chapter?.novel?.agentId;
-        if (agentId) {
-            await prisma.agent.update({
-                where: { id: agentId },
-                data: { totalEarned: { increment: amount * 0.9 } },
-            });
-            // Check if agent earns a tier promotion
-            checkAndPromoteAgentTier(agentId).catch(() => {});
+        if (!chapter) {
+            return NextResponse.json({ error: "Chapter not found" }, { status: 404 });
         }
 
-        // Deduct from sender's balance
-        try {
-            await prisma.user.update({
-                where: { id: fromUserId },
-                data: { usdcBalance: { decrement: amount } },
-            });
-        } catch { /* non-critical */ }
-
-        // Increment novel tipCount
-        const novelId = (tip as any).chapter?.novel?.id || null;
-        if (novelId) {
-            prisma.novel.update({ where: { id: novelId }, data: { tipCount: { increment: 1 } } }).catch(() => {});
+        const targetId = chapter.novel.agentId;
+        if (!targetId) {
+            // If tipping a purely human-written novel, we'd need their UserId. 
+            // For now, Claw Theater relies heavily on Agents.
+            return NextResponse.json({ error: "Target Agent not found for this novel" }, { status: 404 });
         }
+
+        const result = await CoinService.tip(fromUserId, "AGENT", targetId, tipCC, chapterId);
+
+        if (!result.success) {
+            return NextResponse.json({ error: result.error }, { status: 400 });
+        }
+
+        checkAndPromoteAgentTier(targetId).catch(() => {});
 
         return NextResponse.json({
-            tipId: tip.id,
-            amount,
+            success: true,
+            amountCC: tipCC,
             chapterId,
             split: {
-                creator: amount * 0.9,
-                platform: amount * 0.1
+                creator: Math.floor(tipCC * 0.9),
+                platform: tipCC - Math.floor(tipCC * 0.9)
             },
-            message: `Tip of ${amount} USDC sent! 90% (${amount * 0.9} USDC) → creator.`,
+            message: `Tip of ${tipCC} Claw Coins sent! 90% → creator.`,
         }, { status: 201 });
-    } catch (error) {
+    } catch (error: any) {
         console.error("Tip error:", error);
-        return NextResponse.json({ error: "Tip failed" }, { status: 500 });
+        return NextResponse.json({ error: "Tip failed", details: error.message }, { status: 500 });
     }
 }
 
@@ -79,7 +69,9 @@ export async function GET(request: NextRequest) {
             where: { chapterId },
             orderBy: { createdAt: "desc" },
             take: 50,
+            include: { user: { select: { displayName: true, avatarUrl: true, email: true } } }
         });
+        
         return NextResponse.json({ tips });
     } catch (error) {
         return NextResponse.json({ error: "Failed to fetch tips" }, { status: 500 });

@@ -10,6 +10,7 @@ interface UserState {
     userId: string | null;
     walletAddress: string | null;
     usdcBalance: number;
+    clawCoinBalance: number;
     displayName: string | null;
     agentId: string | null;
     apiKey: string | null;
@@ -19,6 +20,7 @@ interface UserState {
     logout: () => void;
     setWallet: (address: string) => void;
     setBalance: (balance: number) => void;
+    setCoinBalance: (balance: number) => void;
     setUserId: (userId: string) => void;
     setAgentCredentials: (agentId: string, apiKey: string) => void;
 }
@@ -29,6 +31,7 @@ export const useUserStore = create<UserState>((set) => ({
     userId: null,
     walletAddress: null,
     usdcBalance: 0,
+    clawCoinBalance: 0,
     displayName: null,
     agentId: null,
     apiKey: null,
@@ -42,12 +45,14 @@ export const useUserStore = create<UserState>((set) => ({
             userId: null,
             walletAddress: null,
             usdcBalance: 0,
+            clawCoinBalance: 0,
             displayName: null,
             agentId: null,
             apiKey: null,
         }),
     setWallet: (address) => set({ walletAddress: address }),
     setBalance: (balance) => set({ usdcBalance: balance }),
+    setCoinBalance: (balance) => set({ clawCoinBalance: balance }),
     setUserId: (userId) => set({ userId }),
     setAgentCredentials: (agentId, apiKey) => set({ agentId, apiKey }),
 }));

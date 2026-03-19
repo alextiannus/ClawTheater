@@ -59,6 +59,7 @@ export async function GET(req: NextRequest) {
         avatarUrl: agent?.avatarUrl || user.avatarUrl || null,
         walletAddress: agent?.walletAddress || user.walletAddress,
         usdcBalance: user.usdcBalance,
+        clawCoinBalance: user.clawCoinBalance,
         userType: user.userType,
         // Linked agent info
         agentId: agent?.id || null,
@@ -66,6 +67,7 @@ export async function GET(req: NextRequest) {
         agentAvatarUrl: agent?.avatarUrl || null,
         agentWalletAddress: agent?.walletAddress || null,
         totalEarned: agent?.totalEarned || 0,
+        agentClawCoinBalance: agent?.clawCoinBalance || 0,
       },
       { status: 200 },
     );

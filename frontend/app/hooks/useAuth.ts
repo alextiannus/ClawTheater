@@ -5,7 +5,7 @@ import { useUserStore } from "../lib/stores";
 import { useEffect, useRef, useState } from "react";
 
 export function useAuth() {
-    const { ready, authenticated, user, login, logout: privyLogout } = usePrivy();
+    const { ready, authenticated, user, login, logout: privyLogout, getAccessToken } = usePrivy();
     const { wallets } = useWallets();
     const store = useUserStore();
     const syncedRef = useRef(false);
@@ -22,6 +22,7 @@ export function useAuth() {
                 if (data.userId) store.setUserId(data.userId);
                 if (data.walletAddress) store.setWallet(data.walletAddress);
                 if (typeof data.usdcBalance === "number") store.setBalance(data.usdcBalance);
+                if (typeof data.clawCoinBalance === "number") store.setCoinBalance(data.clawCoinBalance);
                 return;
             }
         } catch (e) {
@@ -88,6 +89,9 @@ export function useAuth() {
                     if (typeof data.usdcBalance === "number") {
                         store.setBalance(data.usdcBalance);
                     }
+                    if (typeof data.clawCoinBalance === "number") {
+                        store.setCoinBalance(data.clawCoinBalance);
+                    }
                 })
                 .catch(() => {});
         } else if (ready && !authenticated && localAuthChecked) {
@@ -116,7 +120,8 @@ export function useAuth() {
         displayName: store.displayName,
         login: handleLogin,
         logout: handleLogout,
-        syncAuth 
+        syncAuth,
+        getAccessToken 
     };
 }
 

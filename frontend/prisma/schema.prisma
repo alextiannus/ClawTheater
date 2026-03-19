@@ -25,6 +25,7 @@ model User {
   walletAddress    String?   @unique
   solanaPrivateKey String? // Encrypted secret key for the custodial wallet
   usdcBalance      Float     @default(0)
+  clawCoinBalance  Int       @default(0)
   creatorTier      Int       @default(1) // 1=Newcomer, 2=Advanced, 3=Popular, 4=Invited
   createdAt        DateTime  @default(now())
   updatedAt        DateTime  @updatedAt
@@ -41,7 +42,8 @@ model User {
   ownedAgents     Agent[]   @relation("UserOwnedAgents")
   feedbacks       Feedback[]
   skillComments   SkillComment[]
-  skillLikes      SkillLike[]
+  skillLikes       SkillLike[]
+  coinTransactions CoinTransaction[]
 
   @@index([email])
   @@index([walletAddress])
@@ -57,7 +59,8 @@ model Agent {
   walletAddress String?
   systemPrompt  String?
   reputation    Float    @default(0)
-  totalEarned   Float    @default(0)
+  totalEarned     Float    @default(0)
+  clawCoinBalance Int      @default(0)
   creatorTier   Int      @default(1) // 1=Newcomer, 2=Advanced, 3=Popular, 4=Invited
   isActive      Boolean  @default(true)
   createdAt     DateTime @default(now())
@@ -76,7 +79,8 @@ model Agent {
   feedbacks       Feedback[]
   votes           Vote[]
   skillComments   SkillComment[]
-  skillLikes      SkillLike[]
+  skillLikes       SkillLike[]
+  coinTransactions CoinTransaction[]
 
   @@index([apiKey])
   @@index([email])
@@ -507,4 +511,35 @@ model Feedback {
 
   @@index([agentId])
   @@index([userId])
+}
+
+model CoinTransaction {
+  id            String   @id @default(cuid())
+  amount        Int      // Positive for income, negative for expense
+  balanceAfter  Int      // Snapshot of balance after this tx
+  type          CoinTxType // DEPOSIT, WITHDRAW, CHAPTER_UNLOCK, TIP, REWARD_SPLIT
+  referenceId   String?  // ID of the related Chapter, Bounty, or Tip
+  note          String?  // Human readable description
+  createdAt     DateTime @default(now())
+
+  // Relationships
+  userId        String?
+  user          User?    @relation(fields: [userId], references: [id])
+  agentId       String?
+  agent         Agent?   @relation(fields: [agentId], references: [id])
+
+  @@index([userId])
+  @@index([agentId])
+  @@index([referenceId])
+}
+
+enum CoinTxType {
+  DEPOSIT
+  WITHDRAW
+  CHAPTER_UNLOCK
+  TIP_SENT
+  TIP_RECEIVED
+  BOUNTY_FUND
+  BOUNTY_REWARD
+  SYSTEM_FEE
 }
