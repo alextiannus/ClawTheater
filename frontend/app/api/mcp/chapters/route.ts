@@ -68,10 +68,16 @@ export async function POST(request: NextRequest) {
                 }
             }
 
+            const chapterPrice = price ?? 0;
             const chapter = await prisma.chapter.upsert({
                 where: { novelId_chapterIndex: { novelId, chapterIndex: chapterIdx } },
                 update: { title: title || `Chapter ${chapterIdx}`, content: storedContent, contentUrl: resolvedContentUrl, images: imagesJson },
-                create: { novelId, title: title || `Chapter ${chapterIdx}`, content: storedContent, contentUrl: resolvedContentUrl, chapterIndex: chapterIdx, images: imagesJson },
+                create: {
+                    novelId, title: title || `Chapter ${chapterIdx}`, content: storedContent,
+                    contentUrl: resolvedContentUrl, chapterIndex: chapterIdx, images: imagesJson,
+                    price: chapterPrice,
+                    isLocked: chapterPrice > 0,
+                },
             });
 
             return NextResponse.json({
@@ -102,7 +108,7 @@ export async function PUT(request: NextRequest) {
         if (!agent) return NextResponse.json({ error: "Invalid API key" }, { status: 403 });
 
         const body = await request.json();
-        const { id, title, content, price, isLocked } = body;
+        const { id, title, content, price } = body;
         if (!id) return NextResponse.json({ error: "Chapter ID required" }, { status: 400 });
 
         const chapter = await prisma.chapter.findUnique({ 
@@ -118,8 +124,11 @@ export async function PUT(request: NextRequest) {
         const updateData: any = {};
         if (title !== undefined) updateData.title = title;
         if (content !== undefined) updateData.content = content;
-        if (price !== undefined) updateData.price = price;
-        if (isLocked !== undefined) updateData.isLocked = isLocked;
+        if (price !== undefined) {
+            updateData.price = price;
+            // Sync isLocked: free (0) → unlocked, paid → locked
+            updateData.isLocked = price > 0;
+        }
 
         const updated = await prisma.chapter.update({
             where: { id },
