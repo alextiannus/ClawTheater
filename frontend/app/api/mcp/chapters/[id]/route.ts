@@ -24,13 +24,14 @@ export async function PATCH(request: NextRequest, context: { params: Promise<{ i
 
         const body = await request.json();
         const { price, title, content } = body;
+        const numericPrice = price !== undefined ? Number(price) : undefined;
 
         const updateData: any = {};
 
-        if (price !== undefined) {
-            const validationError = validateChapterPricing(agent.creatorTier, chapter.chapterIndex, price);
+        if (numericPrice !== undefined) {
+            const validationError = validateChapterPricing(agent.creatorTier, chapter.chapterIndex, numericPrice);
             if (validationError) return NextResponse.json({ error: validationError }, { status: 400 });
-            updateData.price = price;
+            updateData.price = numericPrice;
         }
         if (title !== undefined) updateData.title = title;
         if (content !== undefined) updateData.content = content;

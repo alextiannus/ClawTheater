@@ -5,7 +5,7 @@ import { useParams, useRouter } from "next/navigation";
 import Link from "next/link";
 import { useLanguageStore, useUserStore } from "@/app/lib/stores";
 import { getT } from "@/app/lib/i18n";
-import { CreditCard, AlertCircle } from "lucide-react";
+import { CreditCard, AlertCircle, X } from "lucide-react";
 import { useAuth } from "@/app/hooks/useAuth";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
@@ -79,7 +79,9 @@ function ChapterReader() {
     const [loading, setLoading] = useState(true);
     const [showTOC, setShowTOC] = useState(false);
     const [showUnlock, setShowUnlock] = useState(false);
+    const [showUnlockModal, setShowUnlockModal] = useState(false);
     const [actionLoading, setActionLoading] = useState(false);
+    const [checkoutLoading, setCheckoutLoading] = useState(false);
     const [toast, setToast] = useState<string | null>(null);
     const [favorites, setFavorites] = useState<Set<string>>(() => {
         if (typeof localStorage === "undefined") return new Set();
@@ -160,6 +162,41 @@ function ChapterReader() {
             showToast("✅ 已复制引用");
         }
         setSelectionPopup(null);
+    };
+
+    useEffect(() => {
+        const ch = chapters[currentIndex];
+        if (ch && ch.isLocked) {
+             setShowUnlockModal(true);
+        } else {
+             setShowUnlockModal(false);
+        }
+    }, [currentIndex, chapters]);
+
+    const handleDirectCheckout = async (amount: number) => {
+        if (!isAuthenticated || !userId) {
+            showToast("⚠️ 请先登录后再解锁");
+            return;
+        }
+        setCheckoutLoading(true);
+        try {
+            const redirectUrl = window.location.href; // Returns back to the chapter page!
+            const res = await fetch("/api/stripe/deposit-checkout", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ amount, userId, redirectUrl }),
+            });
+            const data = await res.json();
+            if (data.url) {
+                window.location.assign(data.url);
+            } else {
+                showToast(`❌ ${data.error || "Failed to initialize checkout"}`);
+                setCheckoutLoading(false);
+            }
+        } catch {
+            showToast("❌ 网络错误，请重试");
+            setCheckoutLoading(false);
+        }
     };
 
     // ── Data fetching ─────────────────────────────────────────────
@@ -480,25 +517,11 @@ function ChapterReader() {
                                 本章为付费内容，解锁消耗 {Math.max(1, Math.floor(chapter.price < 1 ? chapter.price * 100 : chapter.price))} 🦞 Claw Coins
                             </p>
                             <button
-                                onClick={showUnlock ? handleCoinUnlock : () => setShowUnlock(true)}
-                                disabled={actionLoading}
-                                className="w-full py-3 flex items-center justify-center gap-2 bg-terminal-green text-obsidian rounded-xl font-bold hover:shadow-[0_0_20px_rgba(5,150,105,0.4)] transition-all disabled:opacity-50 cursor-pointer"
+                                onClick={() => setShowUnlockModal(true)}
+                                className="w-full py-3 flex items-center justify-center gap-2 bg-terminal-green text-obsidian rounded-xl font-bold hover:shadow-[0_0_20px_rgba(5,150,105,0.4)] transition-all cursor-pointer"
                             >
-                                {actionLoading ? "Processing..." : <><span className="text-lg leading-none">🦞</span> 立即解锁</>}
+                                <span className="text-lg leading-none">🦞</span> 打开订阅面板
                             </button>
-                            {showUnlock && isAuthenticated && clawCoinBalance < Math.max(1, Math.floor(chapter.price < 1 ? chapter.price * 100 : chapter.price)) && (
-                                <div className="mt-4 pt-4 border-t border-white/10">
-                                    <p className="text-xs text-neon-red flex items-center justify-center gap-1 mb-4">
-                                        <AlertCircle size={12} /> 余额不足 ({clawCoinBalance} 🦞)
-                                    </p>
-                                    <p className="text-sm text-ghost-white mb-3">快速补充 Claw Coin：</p>
-                                    <div className="grid grid-cols-3 gap-2">
-                                        <button onClick={() => setDepositOpen(true)} className="py-2 bg-terminal-green/10 border border-terminal-green/30 text-terminal-green hover:bg-terminal-green/20 rounded-lg text-sm transition-all focus:outline-none focus:ring-2 focus:ring-terminal-green/50 cursor-pointer">500 🦞<br/><span className="text-xs opacity-70">$5</span></button>
-                                        <button onClick={() => setDepositOpen(true)} className="py-2 bg-terminal-green/10 border border-terminal-green/30 text-terminal-green hover:bg-terminal-green/20 rounded-lg text-sm transition-all focus:outline-none focus:ring-2 focus:ring-terminal-green/50 cursor-pointer">1000 🦞<br/><span className="text-xs opacity-70">$10</span></button>
-                                        <button onClick={() => setDepositOpen(true)} className="py-2 bg-terminal-green/10 border border-terminal-green/30 text-terminal-green hover:bg-terminal-green/20 rounded-lg text-sm transition-all focus:outline-none focus:ring-2 focus:ring-terminal-green/50 cursor-pointer">5000 🦞<br/><span className="text-xs opacity-70">$50</span></button>
-                                    </div>
-                                </div>
-                            )}
                             {isAuthenticated && (
                                 <label className="flex items-center justify-center gap-2 mt-5 cursor-pointer text-sm mb-2">
                                     <input
@@ -674,6 +697,62 @@ function ChapterReader() {
                                     {ch.isLocked && <span className="ml-2 text-xs text-ghost-muted/40">${ch.price.toFixed(2)}</span>}
                                 </button>
                             ))}
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {/* ── UNLOCK / RECHARGE MODAL ── */}
+            {showUnlockModal && chapter?.isLocked && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm">
+                    <div className="glass-card max-w-sm w-full p-6 relative animate-in zoom-in-95 duration-200">
+                        <button onClick={() => setShowUnlockModal(false)} className="absolute top-4 right-4 text-ghost-muted hover:text-white cursor-pointer"><X size={20} /></button>
+                        <div className="text-center mb-6">
+                            <p className="text-4xl mb-4">🔓</p>
+                            <h3 className="text-xl font-bold text-ghost-white mb-2">订阅最新章节</h3>
+                            <p className="text-sm text-ghost-muted mb-6">
+                                解锁本章需要 {Math.max(1, Math.floor(chapter.price < 1 ? chapter.price * 100 : chapter.price))} 🦞 Claw Coins
+                            </p>
+                            
+                            {/* If sufficient balance, just show unlock button */}
+                            {isAuthenticated && clawCoinBalance >= Math.max(1, Math.floor(chapter.price < 1 ? chapter.price * 100 : chapter.price)) ? (
+                                <button
+                                    onClick={handleCoinUnlock}
+                                    disabled={actionLoading}
+                                    className="w-full py-4 bg-terminal-green text-obsidian rounded-xl font-bold flex flex-col items-center justify-center gap-1 hover:shadow-[0_0_20px_rgba(57,255,20,0.3)] transition-all disabled:opacity-50 cursor-pointer"
+                                >
+                                    {actionLoading ? "解锁中..." : (
+                                        <><span>立即解锁</span><span className="text-xs font-normal">余额: {clawCoinBalance} 🦞</span></>
+                                    )}
+                                </button>
+                            ) : (
+                                /* Not enough balance or not authenticated: Show recharge options directly */
+                                <div>
+                                    <div className="mb-5">
+                                        <p className="text-sm text-neon-red font-semibold mb-1">
+                                            {isAuthenticated ? `余额不足 (${clawCoinBalance} 🦞)` : '请先登录'}
+                                        </p>
+                                        <p className="text-xs text-ghost-muted">请选择充值金额，支付后即可解锁</p>
+                                    </div>
+                                    <div className="grid grid-cols-1 gap-3">
+                                        {[ {cc: 500, usd: 5}, {cc: 1000, usd: 10}, {cc: 5000, usd: 50} ].map(opt => (
+                                            <button
+                                                key={opt.usd}
+                                                onClick={() => handleDirectCheckout(opt.usd)}
+                                                disabled={checkoutLoading}
+                                                className="w-full py-3 bg-terminal-green/10 border border-terminal-green/30 hover:bg-terminal-green/20 text-terminal-green rounded-xl flex items-center justify-between px-5 transition-all focus:outline-none focus:ring-2 focus:ring-terminal-green/50 disabled:opacity-50 cursor-pointer"
+                                            >
+                                                <span className="font-bold flex items-center gap-2">
+                                                    <span className="text-lg leading-none">🦞</span> {opt.cc}
+                                                </span>
+                                                <span className="text-sm bg-obsidian/50 px-2 py-1 rounded-md border border-terminal-green/20 font-mono">
+                                                    $ {opt.usd.toFixed(2)}
+                                                </span>
+                                            </button>
+                                        ))}
+                                    </div>
+                                </div>
+                            )}
                         </div>
                     </div>
                 </div>

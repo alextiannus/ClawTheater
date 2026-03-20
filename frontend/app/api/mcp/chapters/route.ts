@@ -20,6 +20,8 @@ export async function POST(request: NextRequest) {
     try {
         const body = await request.json();
         const { novelId, title, content, contentUrl: bodyContentUrl, images, price, chapterIndex: requestedIndex } = body;
+        const numericPrice = price !== undefined ? Number(price) : undefined;
+
         if (!novelId || (!content && !bodyContentUrl)) return NextResponse.json({ error: "novelId and content (or contentUrl) required" }, { status: 400 });
 
         const apiKey = request.headers.get("x-api-key");
@@ -40,8 +42,8 @@ export async function POST(request: NextRequest) {
             const chapterIdx = requestedIndex || count + 1;
 
             // Validate pricing against creator tier
-            if (price !== undefined && price > 0) {
-                const pricingError = validateChapterPricing(creatorTier, chapterIdx, price);
+            if (numericPrice !== undefined && numericPrice > 0) {
+                const pricingError = validateChapterPricing(creatorTier, chapterIdx, numericPrice);
                 if (pricingError) {
                     return NextResponse.json({ error: pricingError }, { status: 403 });
                 }
@@ -68,10 +70,18 @@ export async function POST(request: NextRequest) {
                 }
             }
 
+            const updatePayload: any = { title: title || `Chapter ${chapterIdx}`, content: storedContent, contentUrl: resolvedContentUrl, images: imagesJson };
+            const createPayload: any = { novelId, title: title || `Chapter ${chapterIdx}`, content: storedContent, contentUrl: resolvedContentUrl, chapterIndex: chapterIdx, images: imagesJson };
+
+            if (numericPrice !== undefined) {
+                updatePayload.price = numericPrice;
+                createPayload.price = numericPrice;
+            }
+
             const chapter = await prisma.chapter.upsert({
                 where: { novelId_chapterIndex: { novelId, chapterIndex: chapterIdx } },
-                update: { title: title || `Chapter ${chapterIdx}`, content: storedContent, contentUrl: resolvedContentUrl, images: imagesJson },
-                create: { novelId, title: title || `Chapter ${chapterIdx}`, content: storedContent, contentUrl: resolvedContentUrl, chapterIndex: chapterIdx, images: imagesJson },
+                update: updatePayload,
+                create: createPayload,
             });
 
             return NextResponse.json({
@@ -103,6 +113,8 @@ export async function PUT(request: NextRequest) {
 
         const body = await request.json();
         const { id, title, content, price, isLocked } = body;
+        const numericPrice = price !== undefined ? Number(price) : undefined;
+
         if (!id) return NextResponse.json({ error: "Chapter ID required" }, { status: 400 });
 
         const chapter = await prisma.chapter.findUnique({ 
@@ -118,7 +130,7 @@ export async function PUT(request: NextRequest) {
         const updateData: any = {};
         if (title !== undefined) updateData.title = title;
         if (content !== undefined) updateData.content = content;
-        if (price !== undefined) updateData.price = price;
+        if (numericPrice !== undefined) updateData.price = numericPrice;
         if (isLocked !== undefined) updateData.isLocked = isLocked;
 
         const updated = await prisma.chapter.update({
