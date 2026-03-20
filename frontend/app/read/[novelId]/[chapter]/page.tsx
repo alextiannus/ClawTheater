@@ -9,6 +9,7 @@ import { CreditCard, AlertCircle } from "lucide-react";
 import { useAuth } from "@/app/hooks/useAuth";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
+import DepositModal from "@/app/components/DepositModal";
 
 interface Chapter {
     id: string;
@@ -69,6 +70,7 @@ function ChapterReader() {
     const { userId } = useUserStore();
     const { isAuthenticated, getAccessToken } = useAuth();
     const clawCoinBalance = useUserStore(state => state.clawCoinBalance);
+    const walletAddress = useUserStore(state => state.walletAddress);
     const t = getT(lang);
 
     const [novel, setNovel] = useState<Novel | null>(null);
@@ -84,6 +86,17 @@ function ChapterReader() {
         try { return new Set(JSON.parse(localStorage.getItem("claw_favorites") || "[]")); }
         catch { return new Set(); }
     });
+    const [autoUnlock, setAutoUnlock] = useState(() => {
+        if (typeof localStorage === "undefined") return false;
+        return localStorage.getItem("claw_autoUnlock") === "true";
+    });
+    const [depositOpen, setDepositOpen] = useState(false);
+
+    useEffect(() => {
+        if (typeof localStorage !== "undefined") {
+            localStorage.setItem("claw_autoUnlock", String(autoUnlock));
+        }
+    }, [autoUnlock]);
 
     // ── UX Features ──────────────────────────────────────────────
     const [scrollProgress, setScrollProgress] = useState(0);
@@ -246,12 +259,13 @@ function ChapterReader() {
         if (!ch || !novel) return;
         if (!isAuthenticated) {
             showToast("⚠️ 请先登录后再解锁");
+            setAutoUnlock(false);
             return;
         }
         const ccPrice = Math.max(1, Math.floor(ch.price < 1 ? ch.price * 100 : ch.price));
-        const currentBalance = useUserStore.getState().clawCoinBalance;
-        if (currentBalance < ccPrice) {
+        if (clawCoinBalance < ccPrice) {
             showToast("❌ 余额不足，请先充值");
+            setAutoUnlock(false);
             return;
         }
 
@@ -285,10 +299,25 @@ function ChapterReader() {
                 setShowUnlock(false);
             } else {
                 showToast(`❌ ${data.error || "Unlock failed"}`);
+                setAutoUnlock(false);
             }
-        } catch { showToast("❌ Network error"); }
+        } catch { 
+            showToast("❌ Network error");
+            setAutoUnlock(false);
+        }
         setActionLoading(false);
     };
+
+    useEffect(() => {
+        const ch = chapters[currentIndex];
+        if (ch && ch.isLocked && autoUnlock && isAuthenticated && !actionLoading) {
+            const ccPrice = Math.max(1, Math.floor(ch.price < 1 ? ch.price * 100 : ch.price));
+            if (clawCoinBalance >= ccPrice) {
+                handleCoinUnlock();
+            }
+        }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [currentIndex, chapters, autoUnlock, isAuthenticated]);
 
     const postComment = async () => {
         if (!newComment.trim() || !chapters[currentIndex]) return;
@@ -458,9 +487,30 @@ function ChapterReader() {
                                 {actionLoading ? "Processing..." : <><span className="text-lg leading-none">🦞</span> 立即解锁</>}
                             </button>
                             {showUnlock && isAuthenticated && clawCoinBalance < Math.max(1, Math.floor(chapter.price < 1 ? chapter.price * 100 : chapter.price)) && (
-                                <p className="text-xs text-neon-red flex items-center justify-center gap-1 mt-4">
-                                    <AlertCircle size={12} /> 余额不足 ({clawCoinBalance} 🦞)，请先在右上角充值
-                                </p>
+                                <div className="mt-4 pt-4 border-t border-white/10">
+                                    <p className="text-xs text-neon-red flex items-center justify-center gap-1 mb-4">
+                                        <AlertCircle size={12} /> 余额不足 ({clawCoinBalance} 🦞)
+                                    </p>
+                                    <p className="text-sm text-ghost-white mb-3">快速补充 Claw Coin：</p>
+                                    <div className="grid grid-cols-3 gap-2">
+                                        <button onClick={() => setDepositOpen(true)} className="py-2 bg-terminal-green/10 border border-terminal-green/30 text-terminal-green hover:bg-terminal-green/20 rounded-lg text-sm transition-all focus:outline-none focus:ring-2 focus:ring-terminal-green/50 cursor-pointer">500 🦞<br/><span className="text-xs opacity-70">$5</span></button>
+                                        <button onClick={() => setDepositOpen(true)} className="py-2 bg-terminal-green/10 border border-terminal-green/30 text-terminal-green hover:bg-terminal-green/20 rounded-lg text-sm transition-all focus:outline-none focus:ring-2 focus:ring-terminal-green/50 cursor-pointer">1000 🦞<br/><span className="text-xs opacity-70">$10</span></button>
+                                        <button onClick={() => setDepositOpen(true)} className="py-2 bg-terminal-green/10 border border-terminal-green/30 text-terminal-green hover:bg-terminal-green/20 rounded-lg text-sm transition-all focus:outline-none focus:ring-2 focus:ring-terminal-green/50 cursor-pointer">5000 🦞<br/><span className="text-xs opacity-70">$50</span></button>
+                                    </div>
+                                </div>
+                            )}
+                            {isAuthenticated && (
+                                <label className="flex items-center justify-center gap-2 mt-5 cursor-pointer text-sm mb-2">
+                                    <input
+                                        type="checkbox"
+                                        checked={autoUnlock}
+                                        onChange={(e) => setAutoUnlock(e.target.checked)}
+                                        className="accent-terminal-green w-4 h-4 cursor-pointer"
+                                    />
+                                    <span className={theme === "sepia" ? "text-[#3d2b1f]/70" : "text-ghost-muted"}>
+                                        自动购买下一章 (自动扣收 🦞)
+                                    </span>
+                                </label>
                             )}
                         </div>
                     ) : (
@@ -651,6 +701,11 @@ function ChapterReader() {
                 </div>
             )}
 
+            <DepositModal 
+                isOpen={depositOpen} 
+                onClose={() => setDepositOpen(false)} 
+                walletAddress={walletAddress || undefined} 
+            />
         </div>
     );
 }

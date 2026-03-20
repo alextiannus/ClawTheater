@@ -12,6 +12,7 @@ export async function GET(
             where: { id },
             include: {
                 chapters: {
+                    where: { NOT: [{ title: { contains: "已删除" } }, { title: { contains: "DELETED" } }] },
                     orderBy: { chapterIndex: "asc" },
                     select: { id: true, title: true, chapterIndex: true, price: true, isLocked: true, readCount: true, createdAt: true },
                 },
