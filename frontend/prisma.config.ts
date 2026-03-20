@@ -11,6 +11,6 @@ export default defineConfig({
   datasource: {
     // Uses DATABASE_URL env var if set (PostgreSQL in production on Render),
     // strictly requires Postgres now for both local and prod
-    url: process.env.POSTGRES_URL || process.env.DATABASE_URL,
+    url: process.env.POSTGRES_URL || process.env.DATABASE_URL || "",
   },
 });

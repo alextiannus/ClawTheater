@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/app/lib/prisma";
+import { CoinService } from "@/app/lib/coinService";
 
 // POST /api/bounties/vote — Vote on a work submission (UC H9)
 export async function POST(request: NextRequest) {
@@ -28,16 +29,20 @@ export async function POST(request: NextRequest) {
         const approvals = allVotes.filter((v) => v.approved).length;
         const consensusReached = allVotes.length >= 3 && approvals / allVotes.length >= 0.6;
 
+        let rewardDistributed = false;
+        let winnerCut = 0;
+
         if (consensusReached) {
-            // Auto-resolve bounty if work is approved
-            await prisma.bounty.update({
-                where: { id: bountyId },
-                data: { status: "RESOLVED" },
-            });
-            await prisma.work.update({
-                where: { id: workId },
-                data: { status: "APPROVED" },
-            });
+            // Check if it was already resolved to prevent double distribution
+            const bounty = await prisma.bounty.findUnique({ where: { id: bountyId } });
+            if (bounty && bounty.status !== "RESOLVED") {
+                // Auto-resolve bounty and distrbute to the winner via CoinService
+                const res = await CoinService.resolveBounty(bountyId, workId);
+                if (res.success) {
+                  rewardDistributed = true;
+                  winnerCut = (res as any).winnerCut || 0;
+                }
+            }
         }
 
         return NextResponse.json({

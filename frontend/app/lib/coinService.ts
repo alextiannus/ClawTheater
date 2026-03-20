@@ -249,5 +249,129 @@ export const CoinService = {
       console.error("Tip Error:", e);
       return { success: false, error: e.message };
     }
+  },
+
+  /**
+   * Funds an existing bounty
+   */
+  fundBounty: async (funderType: "USER" | "AGENT", funderId: string, bountyId: string, amountCC: number) => {
+    try {
+      return await prisma.$transaction(async (tx) => {
+        // 1. Deduct from Funder
+        let balanceAfter = 0;
+        if (funderType === "USER") {
+          const user = await tx.user.findUnique({ where: { id: funderId } });
+          if (!user || user.clawCoinBalance < amountCC) throw new Error("Insufficient Claw Coins");
+
+          const u = await tx.user.update({
+            where: { id: funderId },
+            data: { clawCoinBalance: { decrement: amountCC } },
+          });
+          balanceAfter = u.clawCoinBalance;
+
+          await tx.coinTransaction.create({
+            data: { amount: -amountCC, balanceAfter, type: "BOUNTY_FUND", userId: funderId, referenceId: bountyId, note: "Funded bounty" }
+          });
+        } else {
+          const agent = await tx.agent.findUnique({ where: { id: funderId } });
+          if (!agent || agent.clawCoinBalance < amountCC) throw new Error("Insufficient Claw Coins");
+
+          const a = await tx.agent.update({
+            where: { id: funderId },
+            data: { clawCoinBalance: { decrement: amountCC } },
+          });
+          balanceAfter = a.clawCoinBalance;
+
+          await tx.coinTransaction.create({
+            data: { amount: -amountCC, balanceAfter, type: "BOUNTY_FUND", agentId: funderId, referenceId: bountyId, note: "Funded bounty" }
+          });
+        }
+
+        // 2. Add to Bounty and create Funding record
+        const bounty = await tx.bounty.update({
+          where: { id: bountyId },
+          data: { totalFunded: { increment: amountCC } }
+        });
+
+        await tx.funding.create({
+          data: {
+            amount: amountCC,
+            bountyId,
+            userId: funderType === "USER" ? funderId : null,
+            agentId: funderType === "AGENT" ? funderId : null,
+          }
+        });
+
+        return { success: true, balanceAfter, bountyTotal: bounty.totalFunded };
+      });
+    } catch (e: any) {
+      console.error("Fund Bounty Error:", e);
+      return { success: false, error: e.message };
+    }
+  },
+
+  /**
+   * Resolves a bounty and distributes the locked funds
+   */
+  resolveBounty: async (bountyId: string, winnerWorkId: string) => {
+    try {
+      return await prisma.$transaction(async (tx) => {
+        const bounty = await tx.bounty.findUnique({ where: { id: bountyId } });
+        if (!bounty) throw new Error("Bounty not found");
+        if (bounty.status === "RESOLVED") throw new Error("Bounty already resolved");
+
+        const work = await tx.work.findUnique({ where: { id: winnerWorkId } });
+        if (!work) throw new Error("Winning work not found");
+
+        const poolCC = bounty.totalFunded;
+        
+        // 90% to winner, 10% to platform
+        const winnerCut = Math.floor(poolCC * 0.9);
+        const platformCut = poolCC - winnerCut;
+
+        // Reward the Agent who submitted the work
+        const a = await tx.agent.update({
+          where: { id: work.agentId },
+          data: { clawCoinBalance: { increment: winnerCut } }
+        });
+
+        await tx.coinTransaction.create({
+          data: {
+            amount: winnerCut,
+            balanceAfter: a.clawCoinBalance,
+            type: "BOUNTY_REWARD",
+            agentId: work.agentId,
+            referenceId: bountyId,
+            note: "Earned from Bounty completion"
+          }
+        });
+
+        // Resolve Bounty and Work Status
+        await tx.bounty.update({
+          where: { id: bountyId },
+          data: { status: "RESOLVED" }
+        });
+        await tx.work.update({
+          where: { id: winnerWorkId },
+          data: { status: "APPROVED" }
+        });
+
+        // Create a SYSTEM_FEE transaction log for the treasury
+        await tx.coinTransaction.create({
+          data: {
+            amount: platformCut,
+            balanceAfter: 0, // Treasury has no bounded entity
+            type: "SYSTEM_FEE",
+            referenceId: bountyId,
+            note: "Platform fee from bounty resolution"
+          }
+        });
+
+        return { success: true, winnerCut, platformCut };
+      });
+    } catch (e: any) {
+      console.error("Resolve Bounty Error:", e);
+      return { success: false, error: e.message };
+    }
   }
 };

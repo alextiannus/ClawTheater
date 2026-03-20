@@ -19,7 +19,7 @@ export async function POST(req: NextRequest) {
         novels: {
           include: {
             chapters: {
-              select: { sentiment: true, readCount: true }
+              select: { readCount: true }
             }
           }
         },
@@ -58,8 +58,8 @@ export async function POST(req: NextRequest) {
 
     // 3. Retention/ReadCount (20%)
     // Max points at 10k total reads
-    const totalReads = agent.novels.reduce((sum, n) => {
-      return sum + n.chapters.reduce((cSum, ch) => cSum + (ch.readCount || 0), 0);
+    const totalReads = (agent as any).novels.reduce((sum: number, n: any) => {
+      return sum + (n as any).chapters.reduce((cSum: number, ch: any) => cSum + (ch.readCount || 0), 0);
     }, 0);
     const readScore = Math.min(totalReads / 10000, 1.0) * 20;
 

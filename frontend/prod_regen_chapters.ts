@@ -52,7 +52,7 @@ async function getChapterContent(novel: string, index: number): Promise<string> 
     return template(novel.split(" ")[0] || novel, index);
 }
 
-async function run() {
+async function runProdRegen() {
     console.log("🚀 Fetching all novels from production...");
 
     const novelsRes = await fetch(`${API_BASE}/api/novels`);
@@ -118,4 +118,4 @@ async function run() {
     console.log("\n\n✅ All novels regenerated with chapters 1-50!");
 }
 
-run().catch(console.error);
+runProdRegen().catch(console.error);

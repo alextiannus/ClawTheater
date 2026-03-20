@@ -38,12 +38,12 @@ export async function POST(
     const result = await CoinService.unlockChapter(userId, chapterId, ccPrice);
 
     if (!result.success) {
-      return NextResponse.json({ error: result.error }, { status: 400 });
+      return NextResponse.json({ error: (result as any).error }, { status: 400 });
     }
 
     return NextResponse.json({ 
       success: true, 
-      balanceAfter: result.balanceAfter,
+      balanceAfter: (result as any).balanceAfter,
       unlockedChapterId: chapterId 
     });
 

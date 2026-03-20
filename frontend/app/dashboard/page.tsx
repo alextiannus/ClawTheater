@@ -370,7 +370,7 @@ export default function DashboardPage() {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'x-api-key': agents.find(a => a.id === agentId)?.apiKey || ''
+          'x-api-key': (agents.find(a => a.id === agentId) as any)?.apiKey || ''
         }
       });
       const data = await res.json();
@@ -679,7 +679,7 @@ export default function DashboardPage() {
                                 🔄
                               </button>
                             </p>
-                            <p className="text-sm font-mono text-terminal-green font-bold">{agent.reputation}</p>
+                            <p className="text-sm font-mono text-terminal-green font-bold">{(agent as any).reputation}</p>
                           </div>
                           <div className="flex flex-col">
                             <p className="text-[10px] text-ghost-muted uppercase">Works</p>

@@ -20,11 +20,12 @@ export default function AuthProvider({ children }: { children: React.ReactNode }
                     showWalletLoginFirst: false,
                 },
                 embeddedWallets: {
-                    createOnLogin: "all-users",
+                    // @ts-ignore
+                    createOnLogin: "all-users" as any,
                 },
                 externalWallets: {
                     solana: {
-                        connectors: typeof window !== "undefined" ? solanaConnectors : [],
+                        connectors: typeof window !== "undefined" ? solanaConnectors : ([] as any),
                     },
                 },
             }}

@@ -1,82 +1,68 @@
 "use client";
 
-import { useState, useCallback, useEffect } from "react";
-import { Wallet, X, AlertTriangle } from "lucide-react";
+import { useState } from "react";
+import { CreditCard, X, Loader2 } from "lucide-react";
+import { useAuth } from "@/app/hooks/useAuth";
 
 interface DepositModalProps {
     isOpen: boolean;
     onClose: () => void;
-    walletAddress?: string;
+    walletAddress?: string; // Kept for prop compatibility but unused
 }
 
-export default function DepositModal({ isOpen, onClose, walletAddress }: DepositModalProps) {
+export default function DepositModal({ isOpen, onClose }: DepositModalProps) {
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
-    const [onrampUrl, setOnrampUrl] = useState<string | null>(null);
-    const [isCreatingWallet, setIsCreatingWallet] = useState(false);
+    const [amount, setAmount] = useState<number>(5);
+    const { userId } = useAuth();
 
-    const initOnramp = useCallback(async () => {
-        if (!isOpen) return;
+    const handleCheckout = async () => {
+        if (!userId) {
+            setError("You must be logged in to buy Claw Coins.");
+            return;
+        }
+        if (amount < 1) {
+            setError("Minimum purchase is $1");
+            return;
+        }
 
         setLoading(true);
         setError(null);
 
         try {
-            const res = await fetch("/api/stripe/onramp-session", {
+            const res = await fetch("/api/stripe/deposit-checkout", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ walletAddress }),
+                body: JSON.stringify({ amount, userId }),
             });
             const data = await res.json();
 
-            if (data.error) {
-                setError(data.error);
+            if (data.url) {
+                window.location.assign(data.url);
+            } else {
+                setError(data.error || "Failed to initialize checkout");
                 setLoading(false);
-                return;
             }
-
-            // Use the redirect URL or show demo
-            if (data.redirectUrl) {
-                setOnrampUrl(data.redirectUrl);
-            } else if (data.clientSecret) {
-                // Demo mode — show success message
-                setOnrampUrl(null);
-                setError(null);
-            }
-
-            setLoading(false);
         } catch (err: any) {
-            setError(err?.message || "Failed to initialize deposit");
+            setError("Network error. Please try again.");
             setLoading(false);
         }
-    }, [isOpen, walletAddress]);
-
-    useEffect(() => {
-        if (isOpen) {
-            initOnramp();
-        }
-        return () => {
-            setOnrampUrl(null);
-            setError(null);
-        };
-    }, [isOpen, initOnramp]);
-
-    
+    };
 
     if (!isOpen) return null;
 
     return (
         <div className="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-            <div className="glass-card w-full max-w-lg overflow-hidden">
+            <div className="glass-card w-full max-w-md overflow-hidden animate-in fade-in zoom-in-95 duration-200">
                 {/* Header */}
                 <div className="flex items-center justify-between p-6 border-b border-white/5">
                     <div className="flex items-center gap-3">
                         <div className="w-10 h-10 bg-terminal-green/20 rounded-xl flex items-center justify-center">
-                            <Wallet className="text-terminal-green" size={20} />
+                            <span className="text-xl">🦞</span>
                         </div>
                         <div>
-                            <h3 className="text-lg font-bold text-ghost-white">Get Claw Coins (CC)</h3>
-                            <p className="text-xs text-ghost-muted font-mono">1 USDC = 100 CC via Stripe Crypto</p>
+                            <h3 className="text-lg font-bold text-ghost-white">Buy Claw Coins (CC)</h3>
+                            <p className="text-xs text-ghost-muted font-mono">1 USD = 100 CC</p>
                         </div>
                     </div>
                     <button
@@ -89,61 +75,77 @@ export default function DepositModal({ isOpen, onClose, walletAddress }: Deposit
 
                 {/* Content */}
                 <div className="p-6">
-                    {loading && (
-                        <div className="text-center py-12">
-                            <p className="text-4xl mb-4 animate-pulse">💳</p>
-                            <p className="text-ghost-muted">Loading Stripe Onramp...</p>
-                        </div>
-                    )}
+                    <div className="text-center mb-6">
+                        <p className="text-ghost-muted text-sm mb-4">
+                            Select a package to top up your account balance.
+                        </p>
+                    </div>
 
-                    {error && (
-                        <div className="text-center py-12">
-                            <p className="text-4xl mb-4">⚠️</p>
-                            <p className="text-neon-red mb-2 font-bold">Error Initializing Deposit</p>
-                            <p className="text-ghost-muted text-sm px-4">{error}</p>
+                    <div className="grid grid-cols-3 gap-3 mb-6">
+                        {[5, 10, 50].map((preset) => (
                             <button
-                                onClick={initOnramp}
-                                className="mt-6 px-6 py-2 border border-terminal-green text-terminal-green rounded-xl text-sm hover:bg-terminal-green/10 transition-all cursor-pointer inline-block"
+                                key={preset}
+                                onClick={() => setAmount(preset)}
+                                className={`py-3 rounded-xl border transition-all cursor-pointer flex flex-col items-center justify-center ${
+                                    amount === preset
+                                        ? "border-terminal-green bg-terminal-green/10 text-terminal-green shadow-[0_0_15px_rgba(57,255,20,0.2)]"
+                                        : "border-white/10 bg-white/5 text-ghost-muted hover:border-white/30 hover:text-white"
+                                }`}
                             >
-                                Retry Connection
+                                <span className="font-bold text-lg">${preset}</span>
+                                <span className="text-[10px] uppercase font-mono mt-1 opacity-70 border-t border-current pt-1">
+                                    {preset * 100} CC
+                                </span>
                             </button>
-                        </div>
-                    )}
+                        ))}
+                    </div>
 
-                    {!loading && !error && onrampUrl && (
-                        <div className="text-center py-8">
-                            <p className="text-4xl mb-4">💳</p>
-                            <p className="text-ghost-white mb-4">Complete your deposit via Stripe</p>
-                            <a
-                                href={onrampUrl}
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                className="inline-block px-8 py-3 bg-terminal-green text-black font-bold rounded-xl hover:scale-105 transition-all"
-                            >
-                                Open Stripe Onramp →
-                            </a>
-                        </div>
-                    )}
-
-                    {!loading && !error && !onrampUrl && (
-                        <div className="text-center py-8">
-                            <p className="text-4xl mb-4">🏦</p>
-                            <p className="text-ghost-white mb-2">Demo Mode</p>
-                            <p className="text-ghost-muted text-sm mb-4">
-                                Stripe Crypto Onramp is configured for demo. In production, users will see the full Stripe deposit flow here.
-                            </p>
-                            <div className="glass-card p-4 text-left">
-                                <p className="text-xs text-ghost-muted mb-1">Wallet</p>
-                                <p className="text-sm font-mono text-terminal-green">{walletAddress || "Not connected"}</p>
+                    <div className="mb-6">
+                        <label className="text-xs font-mono text-ghost-muted uppercase mb-2 block ml-1">
+                            Custom Amount (USD)
+                        </label>
+                        <div className="relative">
+                            <span className="absolute left-4 top-1/2 -translate-y-1/2 text-ghost-muted">$</span>
+                            <input
+                                type="number"
+                                min="1"
+                                step="1"
+                                value={amount || ""}
+                                onChange={(e) => setAmount(Number(e.target.value))}
+                                className="w-full bg-obsidian border border-white/10 rounded-xl py-3 pl-8 pr-4 text-ghost-white placeholder-ghost-muted/50 focus:outline-none focus:border-terminal-green/50 font-bold transition-colors"
+                            />
+                            <div className="absolute right-4 top-1/2 -translate-y-1/2 text-xs font-mono text-terminal-green">
+                                = {amount * 100} CC
                             </div>
                         </div>
+                    </div>
+
+                    {error && (
+                        <div className="mb-6 p-3 bg-neon-red/10 border border-neon-red/30 rounded-xl text-neon-red text-sm text-center">
+                            {error}
+                        </div>
                     )}
+
+                    <button
+                        onClick={handleCheckout}
+                        disabled={loading}
+                        className="w-full py-4 bg-terminal-green text-obsidian rounded-xl font-bold flex items-center justify-center gap-2 hover:shadow-[0_0_20px_rgba(57,255,20,0.3)] transition-all disabled:opacity-50"
+                    >
+                        {loading ? (
+                            <Loader2 size={18} className="animate-spin" />
+                        ) : (
+                            <>
+                                <CreditCard size={18} />
+                                Pay ${amount} with Stripe
+                            </>
+                        )}
+                    </button>
                 </div>
 
                 {/* Footer */}
-                <div className="px-6 pb-6">
-                    <p className="text-center text-xs text-ghost-muted/50 font-mono">
-                        🔒 Powered by Stripe · 信用卡/借记卡 → Claw Coins (CC) · 安全合规
+                <div className="px-6 pb-6 text-center">
+                    <p className="text-xs text-ghost-muted/50 font-mono">
+                        🔒 Secure payments processed by Stripe
                     </p>
                 </div>
             </div>

@@ -227,9 +227,7 @@ export default function Header() {
                             {userName}
                           </div>
                           <div className="text-[10px] font-mono text-white/30 truncate">
-                            {walletAddress
-                              ? `${walletAddress.slice(0, 6)}...${walletAddress.slice(-4)}`
-                              : user?.email?.address || ""}
+                            {user?.email?.address || "Wallet Connected"}
                           </div>
                         </div>
                         {/* Menu items */}

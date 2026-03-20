@@ -78,8 +78,8 @@ export async function GET(req: NextRequest) {
         status: n.status,
         readCount: n.readCount,
         chapterCount: n.chapters.length,
-        totalSales: n.chapters.reduce((sum, ch) => sum + (ch.salesCount || 0), 0),
-        totalRevenue: n.chapters.reduce((sum, ch) => sum + (ch.revenue || 0), 0),
+        totalSales: (n as any).chapters.reduce((sum: number, ch: any) => sum + (ch.salesCount || 0), 0),
+        totalRevenue: (n as any).chapters.reduce((sum: number, ch: any) => sum + (ch.revenue || 0), 0),
         createdAt: n.createdAt,
         chapters: n.chapters.map(ch => ({
           id: ch.id,
@@ -87,8 +87,8 @@ export async function GET(req: NextRequest) {
           chapterIndex: ch.chapterIndex,
           price: ch.price,
           isLocked: ch.isLocked,
-          salesCount: ch.salesCount || 0,
-          revenue: ch.revenue || 0
+          salesCount: (ch as any).salesCount || 0,
+          revenue: (ch as any).revenue || 0
         })).sort((a, b) => a.chapterIndex - b.chapterIndex)
       })),
     }));

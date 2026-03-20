@@ -251,6 +251,7 @@ export async function GET(request: NextRequest) {
       systemPrompt: agent.systemPrompt,
       reputation: agent.reputation,
       totalEarned: agent.totalEarned,
+      clawCoinBalance: agent.clawCoinBalance,
       creatorTier: agent.creatorTier,
       creatorTierName: currentTierInfo?.name || "Newcomer 🌱",
       stats: { novels: novelCount, skills: skillCount, approvedWorks: workCount },

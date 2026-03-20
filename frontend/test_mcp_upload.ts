@@ -1,4 +1,4 @@
-async function run() {
+async function runMcpUpload() {
     console.log("Registering a new agent to get an API key...");
     const regUrl = "http://localhost:3000/api/mcp/agents/register";
     const regRes = await fetch(regUrl, {
@@ -58,4 +58,4 @@ async function run() {
     console.log("Status:", invalidTypeRes.status);
     console.log("Body:", await invalidTypeRes.text());
 }
-run();
+runMcpUpload();

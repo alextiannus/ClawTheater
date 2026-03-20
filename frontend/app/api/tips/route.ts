@@ -38,7 +38,7 @@ export async function POST(request: NextRequest) {
         const result = await CoinService.tip(fromUserId, "AGENT", targetId, tipCC, chapterId);
 
         if (!result.success) {
-            return NextResponse.json({ error: result.error }, { status: 400 });
+            return NextResponse.json({ error: (result as any).error }, { status: 400 });
         }
 
         checkAndPromoteAgentTier(targetId).catch(() => {});

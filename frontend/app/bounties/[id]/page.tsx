@@ -72,24 +72,25 @@ export default function BountyDetailPage({ params }: { params: Promise<{ id: str
         }
         setActionLoading(true);
         try {
-            const res = await fetch("/api/stripe/bounty-checkout", {
+            const res = await fetch("/api/bounties/fund", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({
                     bountyId: bounty.id,
-                    title: bounty.title,
                     amount: Number(fundAmount),
                     userId: user.id
                 }),
             });
             const data = await res.json();
-            if (data.url) {
-                window.location.href = data.url;
+            if (res.ok && data.success) {
+                showToast(`✅ Successfully funded!`);
+                setShowFundModal(false);
+                fetchBounty();
             } else {
-                showToast(`❌ ${data.error || "Failed to initiate payment"}`);
+                showToast(`❌ ${data.error || "Failed to fund bounty"}`);
             }
         } catch {
-            showToast("❌ Network error while connecting to payment provider");
+            showToast("❌ Network error");
         }
         setActionLoading(false);
     };
@@ -179,7 +180,7 @@ export default function BountyDetailPage({ params }: { params: Promise<{ id: str
                         <div className="flex flex-wrap gap-6 text-sm">
                             <div>
                                 <span className="text-ghost-muted">Total Funded: </span>
-                                <span className="font-mono font-bold text-terminal-green">${bounty.totalFunded} USDC</span>
+                                <span className="font-mono font-bold text-terminal-green">🦞 {bounty.totalFunded}</span>
                             </div>
                             <div>
                                 <span className="text-ghost-muted">Consensus: </span>
@@ -234,7 +235,7 @@ export default function BountyDetailPage({ params }: { params: Promise<{ id: str
                                                 style={{ width: `${f.proportion}%` }}
                                             />
                                         </div>
-                                        <span className="text-sm font-mono text-terminal-green w-20 text-right">${f.amount}</span>
+                                        <span className="text-sm font-mono text-terminal-green w-20 text-right">🦞 {f.amount}</span>
                                         <span className="text-xs text-ghost-muted w-10 text-right">{f.proportion}%</span>
                                     </div>
                                 </div>
@@ -332,7 +333,7 @@ export default function BountyDetailPage({ params }: { params: Promise<{ id: str
                                 <div key={i} className="text-center glass-light p-3 rounded-xl">
                                     <p className={`text-2xl font-bold font-mono text-${s.color}`}>{s.pct}%</p>
                                     <p className="text-xs text-ghost-muted mt-1">{s.label}</p>
-                                    <p className="text-sm font-mono text-ghost-white mt-1">${s.amount}</p>
+                                    <p className="text-sm font-mono text-ghost-white mt-1">🦞 {s.amount}</p>
                                 </div>
                             ))}
                         </div>
@@ -345,10 +346,10 @@ export default function BountyDetailPage({ params }: { params: Promise<{ id: str
                         <div className="glass-card p-8 max-w-sm w-full">
                             <h3 className="text-2xl font-bold text-ghost-white mb-2">💰 {t.fundBounty}</h3>
                             <p className="text-sm text-ghost-muted mb-6">
-                                Add USDC to the bounty pool. Your voting weight is proportional to your contribution.
+                                Add Claw Coins to the bounty pool. Your voting weight is proportional to your contribution.
                             </p>
                             <div className="mb-4">
-                                <label className="text-xs text-ghost-muted mb-1 block">Amount (USDC)</label>
+                                <label className="text-xs text-ghost-muted mb-1 block">Amount (🦞)</label>
                                 <input
                                     type="number"
                                     value={fundAmount}
@@ -363,7 +364,7 @@ export default function BountyDetailPage({ params }: { params: Promise<{ id: str
                                         onClick={() => setFundAmount(String(amt))}
                                         className="py-2 bg-white/5 text-ghost-muted rounded-lg text-sm hover:text-terminal-green hover:bg-terminal-green/10 transition-all"
                                     >
-                                        ${amt}
+                                        🦞 {amt}
                                     </button>
                                 ))}
                             </div>
@@ -376,7 +377,7 @@ export default function BountyDetailPage({ params }: { params: Promise<{ id: str
                                     disabled={actionLoading}
                                     className="px-6 py-2.5 bg-terminal-green text-obsidian rounded-xl text-sm font-bold hover:scale-105 transition-all glow-green disabled:opacity-50"
                                 >
-                                    {actionLoading ? "Processing..." : `Fund $${fundAmount} USDC`}
+                                    {actionLoading ? "Processing..." : `Fund ${fundAmount} 🦞`}
                                 </button>
                             </div>
                         </div>

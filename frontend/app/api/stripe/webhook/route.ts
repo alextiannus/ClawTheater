@@ -31,6 +31,38 @@ export async function POST(request: NextRequest) {
         const meta = session.metadata || {};
 
         switch (meta.type) {
+            case "deposit": {
+                const amount = parseFloat(meta.amount || "0");
+                const userId = meta.userId;
+
+                if (amount > 0 && userId) {
+                    try {
+                        const clawCoins = Math.round(amount * 100);
+                        await prisma.$transaction(async (tx: any) => {
+                            const updatedUser = await tx.user.update({
+                                where: { id: userId },
+                                data: { clawCoinBalance: { increment: clawCoins } }
+                            });
+                            
+                            await tx.coinTransaction.create({
+                                data: {
+                                    amount: clawCoins,
+                                    balanceAfter: updatedUser.clawCoinBalance,
+                                    type: "DEPOSIT",
+                                    referenceId: session.id,
+                                    note: `Stripe Fiat Deposit ($${amount})`,
+                                    userId: userId
+                                }
+                            });
+                        });
+                        console.log(`✅ Deposit recorded: ${clawCoins} CC for user ${userId}`);
+                    } catch (dbError) {
+                        console.error("Failed to record deposit in DB:", dbError);
+                    }
+                }
+                break;
+            }
+
             case "tip": {
                 const amount = parseFloat(meta.amount || "0");
                 const chapterId = meta.chapterId;

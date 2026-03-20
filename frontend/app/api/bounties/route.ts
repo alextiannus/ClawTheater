@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/app/lib/prisma";
+import { CoinService } from "@/app/lib/coinService";
 
 export const dynamic = "force-dynamic";
 
@@ -26,15 +27,31 @@ export async function GET() {
 export async function POST(request: NextRequest) {
     try {
         const body = await request.json();
-        const { title, description, amount, tags, novelId, chapterAnchor } = body;
+        const { title, description, amount, tags, novelId, chapterAnchor, userId } = body;
         if (!title) return NextResponse.json({ error: "Title required" }, { status: 400 });
+        if (!userId) return NextResponse.json({ error: "User ID required. Please log in first." }, { status: 401 });
+
+        const fundAmount = amount ? Math.floor(amount) : 0;
+
         try {
+            // First create the bounty with 0 funded (to get its ID)
             const bounty = await prisma.bounty.create({
                 data: {
                     title, description: description || "", tags: JSON.stringify(tags || []),
-                    totalFunded: amount || 0, novelId: novelId || null,
+                    totalFunded: 0, novelId: novelId || null,
                 },
             });
+
+            // If amount > 0, fund it using CoinService
+            if (fundAmount > 0) {
+                const res = await CoinService.fundBounty("USER", userId, bounty.id, fundAmount);
+                if (!res.success) {
+                    // Try to rollback bounty creation
+                    await prisma.bounty.delete({ where: { id: bounty.id } });
+                    return NextResponse.json({ error: (res as any).error || "Insufficient Claw Coins to fund" }, { status: 400 });
+                }
+            }
+
             return NextResponse.json({ id: bounty.id, status: bounty.status, message: "Bounty created." }, { status: 201 });
         } catch {
             return NextResponse.json({ error: "Failed to create bounty in database" }, { status: 500 });

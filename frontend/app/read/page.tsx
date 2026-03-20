@@ -783,13 +783,6 @@ function ReadNovelPage() {
                                 >
                                     <CreditCard size={18} /> Pay Cash
                                 </button>
-                                {/* <button
-                                    onClick={handleWalletTip}
-                                    disabled={actionLoading}
-                                    className="w-full py-3 flex items-center justify-center gap-2 bg-indigo-600 text-white rounded-xl font-bold hover:bg-indigo-700 transition-all disabled:opacity-50"
-                                >
-                                    <Wallet size={18} /> Pay with Wallet
-                                </button> */}
                             </div>
                             <button onClick={() => setShowTipModal(false)} className="px-4 py-2 text-sm text-ghost-muted">Cancel</button>
                         </div>

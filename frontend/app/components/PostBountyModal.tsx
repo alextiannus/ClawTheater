@@ -126,9 +126,9 @@ export default function PostBountyModal({ isOpen, onClose }: PostBountyModalProp
 
                         {/* Crowdfund amount */}
                         <div>
-                            <label className="text-xs text-ghost-muted mb-1 block">初始众筹金额 (USDC)</label>
+                            <label className="text-xs text-ghost-muted mb-1 block">初始众筹金额 (🦞 Claw Coins)</label>
                             <div className="relative">
-                                <span className="absolute left-4 top-1/2 -translate-y-1/2 text-ghost-muted text-sm">$</span>
+                                <span className="absolute left-4 top-1/2 -translate-y-1/2 text-ghost-muted text-sm">🦞</span>
                                 <input
                                     type="number"
                                     step="1"

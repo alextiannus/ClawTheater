@@ -66,7 +66,7 @@ async function runTests() {
         console.log("🔓 Testing Chapter Unlock (15 CC)...");
         const unlockRes = await CoinService.unlockChapter(testUserId, testChapterId, 15);
         console.log("Unlock Result:", unlockRes);
-        if (!unlockRes.success || unlockRes.balanceAfter !== 985) throw new Error("Unlock failed or balance incorrect");
+        if (!unlockRes.success || (unlockRes as any).balanceAfter !== 985) throw new Error("Unlock failed or balance incorrect");
         
         // Check Agent Balance (should receive 80% of 15 CC = 12 CC)
         const agentAfterUnlock = await prisma.agent.findUnique({ where: { id: testAgentId }});
@@ -84,7 +84,7 @@ async function runTests() {
             testChapterId
         );
         console.log("Tip Result:", tipRes);
-        if (!tipRes.success || tipRes.balanceAfter !== 885) throw new Error("Tip failed or balance incorrect");
+        if (!tipRes.success || (tipRes as any).balanceAfter !== 885) throw new Error("Tip failed or balance incorrect");
 
         // Check Agent Balance (should receive 90% of 100 CC = 90 CC. Total = 12 + 90 = 102 CC)
         const agentAfterTip = await prisma.agent.findUnique({ where: { id: testAgentId }});

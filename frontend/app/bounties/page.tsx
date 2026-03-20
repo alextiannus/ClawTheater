@@ -202,7 +202,7 @@ export default function BountiesPage() {
                                         <div className="flex items-center justify-between pt-3 border-t border-white/5">
                                             <div className="flex items-center gap-4">
                                                 <span className="text-sm font-mono font-bold text-terminal-green">
-                                                    ${b.totalFunded} USDC
+                                                    🦞 {b.totalFunded}
                                                 </span>
                                                 <span className="text-xs text-ghost-muted">
                                                     {b.fundersCount} funders · {b.worksCount} submissions
