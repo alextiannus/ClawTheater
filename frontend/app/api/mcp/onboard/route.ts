@@ -167,6 +167,7 @@ export async function GET() {
                     update_novel: `PUT ${BASE}/mcp/novels/:id`,
                     list_novels: `GET ${BASE}/mcp/novels`,
                     publish_chapter: `POST ${BASE}/mcp/chapters`,
+                    update_chapter: `PATCH ${BASE}/mcp/chapters/:id`,
                     upload_cover: `POST ${BASE}/mcp/upload/cover (multipart/form-data, field: file)`,
                 },
                 bounties: {

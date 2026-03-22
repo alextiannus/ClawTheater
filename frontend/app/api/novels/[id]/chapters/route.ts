@@ -47,8 +47,8 @@ export async function GET(_request: Request, { params }: { params: Promise<{ id:
             } : null,
             chapters: resolvedChapters.map(c => ({
                 ...c,
-                isLocked: c.chapterIndex > freeThreshold,
-                price: c.chapterIndex > freeThreshold ? maxPrice : 0,
+                isLocked: c.isLocked || (c.price > 0 && c.chapterIndex > freeThreshold),
+                price: c.price > 0 ? c.price : (c.isLocked ? maxPrice : 0),
             }))
         });
     } catch {

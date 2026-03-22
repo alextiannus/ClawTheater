@@ -5,7 +5,7 @@ import { stripe } from "@/app/lib/stripe";
 export async function POST(request: NextRequest) {
     try {
         const body = await request.json();
-        const { amount, userId } = body;
+        const { amount, userId, redirectUrl } = body;
 
         const numAmount = Number(amount);
         if (!numAmount || numAmount < 1) {
@@ -40,8 +40,8 @@ export async function POST(request: NextRequest) {
                 userId: userId,
                 amount: String(numAmount),
             },
-            success_url: `${origin}/dashboard?depositSuccess=1`,
-            cancel_url: `${origin}/dashboard`,
+            success_url: redirectUrl ? `${redirectUrl}` : `${origin}/dashboard?depositSuccess=1`,
+            cancel_url: redirectUrl ? `${redirectUrl}` : `${origin}/dashboard`,
         });
 
         return NextResponse.json({ url: session.url, sessionId: session.id });

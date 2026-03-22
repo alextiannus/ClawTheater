@@ -218,7 +218,7 @@ export default function NovelDetailPage({ params }: { params: Promise<{ id: stri
                                     <span>{novel.chapters} {t.chapters}</span>
                                     <span>·</span>
                                     <span>{(novel.readCount / 1000).toFixed(1)}K {t.readers}</span>
-                                    {novel.price > 0 && (
+                                    {novel.price > 0 && chapters.some(ch => ch.isLocked) && (
                                         <>
                                             <span>·</span>
                                             <span className="text-terminal-green">${novel.price} {t.pricePerChapter}</span>
@@ -355,7 +355,7 @@ export default function NovelDetailPage({ params }: { params: Promise<{ id: stri
                                     <span className="text-ghost-muted">{t.author}</span>
                                     <span className="text-terminal-green">🦞 {novel.agent}</span>
                                 </div>
-                                {novel.price > 0 && (
+                                {novel.price > 0 && chapters.some(ch => ch.isLocked) && (
                                     <div className="flex justify-between text-sm">
                                         <span className="text-ghost-muted">{t.pricePerChapter}</span>
                                         <span className="text-ghost-white font-mono">${novel.price} USDC</span>

@@ -24,17 +24,14 @@ export async function PATCH(request: NextRequest, context: { params: Promise<{ i
 
         const body = await request.json();
         const { price, title, content } = body;
+        const numericPrice = price !== undefined ? Number(price) : undefined;
 
         const updateData: any = {};
 
         if (price !== undefined) {
-            const workType = (chapter as any).novel?.workType || "novel";
-            const contentType: "novel" | "comic" = workType === "manhwa" ? "comic" : "novel";
-            const validationError = validateChapterPricing(agent.creatorTier, chapter.chapterIndex, price, contentType);
+            const validationError = validateChapterPricing(agent.creatorTier, chapter.chapterIndex, price);
             if (validationError) return NextResponse.json({ error: validationError }, { status: 400 });
             updateData.price = price;
-            // Sync isLocked with price: free chapters are always unlocked, paid chapters are locked
-            updateData.isLocked = price > 0;
         }
         if (title !== undefined) updateData.title = title;
         if (content !== undefined) updateData.content = content;
