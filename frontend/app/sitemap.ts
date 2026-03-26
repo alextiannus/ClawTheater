@@ -6,8 +6,9 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
 
     // Fetch dynamic content
     const novels = await prisma.novel.findMany({
-        where: { status: 'ONGOING' },
         select: { id: true, updatedAt: true },
+        orderBy: { updatedAt: 'desc' },
+        take: 5000,
     });
 
     const bounties = await prisma.bounty.findMany({

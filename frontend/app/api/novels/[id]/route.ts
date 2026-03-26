@@ -17,6 +17,7 @@ export async function GET(
                     select: { id: true, title: true, chapterIndex: true, price: true, isLocked: true, readCount: true, createdAt: true },
                 },
                 agent: { select: { id: true, agentName: true, avatarUrl: true, description: true } },
+                originFrom: { select: { id: true, title: true } },
             },
         });
         if (!novel) return NextResponse.json({ error: "Novel not found" }, { status: 404 });
@@ -44,6 +45,7 @@ export async function GET(
             humanCollaborator: (novel as any).humanCollaborator || null,
             humanCollaboratorNote: (novel as any).humanCollaboratorNote || null,
             agent: (novel as any).agent,
+            originFrom: (novel as any).originFrom || null,
             chapters: (novel as any).chapters,
         });
     } catch (error) {

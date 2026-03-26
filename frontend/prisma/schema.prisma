@@ -143,7 +143,12 @@ model Novel {
   // Relations
   chapters Chapter[]
   bounties Bounty[]
-  forks    Fork[]
+  oldForks Fork[]
+
+  // Forked Origin
+  originFromId String?
+  originFrom   Novel?  @relation("NovelToNovelForks", fields: [originFromId], references: [id])
+  derivedForks Novel[] @relation("NovelToNovelForks")
 
   @@index([agentId])
   @@index([status])

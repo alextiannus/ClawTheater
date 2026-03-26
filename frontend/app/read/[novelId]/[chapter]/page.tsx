@@ -7,9 +7,11 @@ import { useLanguageStore, useUserStore } from "@/app/lib/stores";
 import { getT } from "@/app/lib/i18n";
 import { CreditCard, AlertCircle, X } from "lucide-react";
 import { useAuth } from "@/app/hooks/useAuth";
+import { usePrivy } from "@privy-io/react-auth";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import DepositModal from "@/app/components/DepositModal";
+import { sendGAEvent } from '@next/third-parties/google';
 
 interface Chapter {
     id: string;
@@ -69,6 +71,7 @@ function ChapterReader() {
     const { lang } = useLanguageStore();
     const { userId } = useUserStore();
     const { isAuthenticated, getAccessToken } = useAuth();
+    const { login: privyLogin } = usePrivy();
     const clawCoinBalance = useUserStore(state => state.clawCoinBalance);
     const walletAddress = useUserStore(state => state.walletAddress);
     const t = getT(lang);
@@ -168,10 +171,11 @@ function ChapterReader() {
         const ch = chapters[currentIndex];
         if (ch && ch.isLocked) {
              setShowUnlockModal(true);
+             sendGAEvent({ event: 'intent_unlock_chapter', value: ch.chapterIndex, novelId: novel?.id });
         } else {
              setShowUnlockModal(false);
         }
-    }, [currentIndex, chapters]);
+    }, [currentIndex, chapters, novel?.id]);
 
     const handleDirectCheckout = async (amount: number) => {
         if (!isAuthenticated || !userId) {
@@ -319,6 +323,7 @@ function ChapterReader() {
             const data = await res.json();
             if (data.success) {
                 showToast(`✅ 解锁成功！`);
+                sendGAEvent({ event: 'chapter_unlocked', value: ccPrice, currency: 'CC', novelId: novel?.id });
                 useUserStore.getState().setCoinBalance(data.balanceAfter);
                 
                 // Refresh chapters to get unlocked content
@@ -725,8 +730,23 @@ function ChapterReader() {
                                         <><span>立即解锁</span><span className="text-xs font-normal">余额: {clawCoinBalance} 🦞</span></>
                                     )}
                                 </button>
+                            ) : !isAuthenticated ? (
+                                /* Not authenticated: Show Login Button promoting the 30 tokens */
+                                <div className="space-y-3">
+                                    <button
+                                        onClick={() => {
+                                            sendGAEvent({ event: 'intent_login_triggered', method: 'chapter_unlock' });
+                                            setShowUnlockModal(false);
+                                            privyLogin();
+                                        }}
+                                        className="w-full py-3.5 bg-terminal-green text-obsidian rounded-xl font-bold hover:shadow-[0_0_20px_rgba(57,255,20,0.3)] transition-all cursor-pointer flex flex-col items-center justify-center"
+                                    >
+                                        <span>邮箱验证以继续</span>
+                                        <span className="text-xs mt-0.5 opacity-80">🎁 免费领取 30 Token 直接解锁</span>
+                                    </button>
+                                </div>
                             ) : (
-                                /* Not enough balance or not authenticated: Show recharge options directly */
+                                /* Authenticated but insufficient balance: Show recharge options directly */
                                 <div>
                                     <div className="mb-5">
                                         <p className="text-sm text-neon-red font-semibold mb-1">

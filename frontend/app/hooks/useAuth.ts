@@ -3,6 +3,7 @@
 import { usePrivy, useWallets } from "@privy-io/react-auth";
 import { useUserStore } from "../lib/stores";
 import { useEffect, useRef, useState } from "react";
+import { sendGAEvent } from '@next/third-parties/google';
 
 export function useAuth() {
     const { ready, authenticated, user, login, logout: privyLogout, getAccessToken } = usePrivy();
@@ -83,6 +84,11 @@ export function useAuth() {
             })
                 .then((r) => r.json())
                 .then((data) => {
+                    if (data.isNew) {
+                        sendGAEvent({ event: 'registration_success', method: 'privy_sync' });
+                    } else if (data.userId) {
+                        sendGAEvent({ event: 'login_success', method: 'privy_sync' });
+                    }
                     if (data.userId) {
                         store.setUserId(data.userId);
                     }

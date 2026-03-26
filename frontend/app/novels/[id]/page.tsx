@@ -10,6 +10,8 @@ import { useLanguageStore, useUserStore } from "@/app/lib/stores";
 import { getT } from "@/app/lib/i18n";
 import { Wallet, CreditCard, AlertCircle } from "lucide-react";
 import { useAuth } from "@/app/hooks/useAuth";
+import { usePrivy } from "@privy-io/react-auth";
+import { sendGAEvent } from '@next/third-parties/google';
 
 interface NovelDetail {
     id: string;
@@ -26,6 +28,7 @@ interface NovelDetail {
     description: string;
     workType?: string;
     genre?: string;
+    originFrom?: { id: string; title: string } | null;
 }
 
 interface ChapterPreview {
@@ -42,6 +45,7 @@ export default function NovelDetailPage({ params }: { params: Promise<{ id: stri
     const { lang } = useLanguageStore();
     const t = getT(lang);
     const { isAuthenticated } = useAuth();
+    const { login: privyLogin } = usePrivy();
     const clawCoinBalance = useUserStore(state => state.clawCoinBalance);
     const setCoinBalance = useUserStore(state => state.setCoinBalance);
 
@@ -84,6 +88,7 @@ export default function NovelDetailPage({ params }: { params: Promise<{ id: stri
             });
             const data = await res.json();
             if (data.success) {
+                sendGAEvent({ event: 'tip_completed', value: tipAmount, novelId: novel.id });
                 showToast(`⚡ 打赏成功！消耗 ${tipAmount} 🦞`);
                 setCoinBalance(data.balanceAfter);
                 setShowTipModal(false);
@@ -116,8 +121,10 @@ export default function NovelDetailPage({ params }: { params: Promise<{ id: stri
                         description: data.description || "",
                         workType: data.workType || "novel",
                         genre: data.genre || "其他",
+                        originFrom: data.originFrom || null,
                     });
                     setChapters(data.chapters || []);
+                    sendGAEvent({ event: 'novel_viewed', novelId: data.id });
                 }
                 setLoading(false);
             })
@@ -205,6 +212,14 @@ export default function NovelDetailPage({ params }: { params: Promise<{ id: stri
                                         </span>
                                     )}
                                 </div>
+                                
+                                {novel.originFrom && (
+                                    <div className="flex">
+                                        <Link href={`/novels/${novel.originFrom.id}`} className="text-xs px-3 py-1.5 bg-pulse-blue/10 border border-pulse-blue/30 text-pulse-blue rounded-full hover:bg-pulse-blue/20 transition-all font-medium flex items-center gap-1.5 shadow-[0_0_10px_rgba(0,255,255,0.1)]">
+                                            <span>✧</span> Inspired by Original / Forked from: <span className="font-bold underline underline-offset-2">{novel.originFrom.title}</span>
+                                        </Link>
+                                    </div>
+                                )}
 
                                 {/* Title */}
                                 <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold text-white leading-tight">
@@ -235,7 +250,10 @@ export default function NovelDetailPage({ params }: { params: Promise<{ id: stri
                                         ▶ {t.startReading}
                                     </Link>
                                     <button
-                                        onClick={() => setShowTipModal(true)}
+                                        onClick={() => {
+                                            setShowTipModal(true);
+                                            sendGAEvent({ event: 'intent_tip_clicked', novelId: novel.id });
+                                        }}
                                         className="px-6 py-3.5 bg-terminal-green/10 text-terminal-green border border-terminal-green/30 font-bold rounded-xl text-sm tracking-wider uppercase hover:bg-terminal-green/20 transition-all cursor-pointer"
                                     >
                                         ⚡ {t.fundCta}
@@ -411,20 +429,36 @@ export default function NovelDetailPage({ params }: { params: Promise<{ id: stri
                             </div>
 
                             <div className="space-y-3 mb-6">
-                                <button
-                                    onClick={handleCoinTip}
-                                    disabled={actionLoading}
-                                    className="w-full py-3 flex items-center justify-center gap-2 bg-terminal-green text-black rounded-xl font-bold hover:bg-terminal-green/80 transition-all disabled:opacity-50 cursor-pointer"
-                                >
-                                    <span className="text-lg leading-none">🦞</span> Pay with Coins
-                                </button>
-                                {isAuthenticated && clawCoinBalance < tipAmount && (
-                                    <p className="text-xs text-neon-red flex items-center justify-center gap-1 mt-2">
-                                        <AlertCircle size={12} /> Balance ({clawCoinBalance} 🦞) is insufficient
-                                    </p>
+                                {isAuthenticated ? (
+                                    <>
+                                        <button
+                                            onClick={handleCoinTip}
+                                            disabled={actionLoading}
+                                            className="w-full py-3 flex items-center justify-center gap-2 bg-terminal-green text-black rounded-xl font-bold hover:bg-terminal-green/80 transition-all disabled:opacity-50 cursor-pointer"
+                                        >
+                                            <span className="text-lg leading-none">🦞</span> 打赏 {tipAmount} 🦞
+                                        </button>
+                                        {clawCoinBalance < tipAmount && (
+                                            <p className="text-xs text-neon-red flex items-center justify-center gap-1 mt-2">
+                                                <AlertCircle size={12} /> 余额 ({clawCoinBalance} 🦞) 不足
+                                            </p>
+                                        )}
+                                    </>
+                                ) : (
+                                    <button
+                                        onClick={() => {
+                                            sendGAEvent({ event: 'intent_login_triggered', method: 'tip_modal' });
+                                            setShowTipModal(false);
+                                            privyLogin();
+                                        }}
+                                        className="w-full py-3.5 bg-terminal-green text-obsidian rounded-xl font-bold hover:shadow-[0_0_20px_rgba(57,255,20,0.3)] transition-all cursor-pointer flex flex-col items-center justify-center"
+                                    >
+                                        <span>邮箱验证以继续</span>
+                                        <span className="text-xs mt-0.5 opacity-80">🎁 免费领取 30 Token 直接打赏</span>
+                                    </button>
                                 )}
                             </div>
-                            <button onClick={() => setShowTipModal(false)} className="px-4 py-2 text-sm text-ghost-muted cursor-pointer hover:text-white transition-colors">Cancel</button>
+                            <button onClick={() => setShowTipModal(false)} className="px-4 py-2 text-sm text-ghost-muted cursor-pointer hover:text-white transition-colors">取消</button>
                         </div>
                     </div>
                 )}

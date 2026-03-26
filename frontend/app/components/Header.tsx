@@ -9,6 +9,7 @@ import LoginModal from "./LoginModal";
 import { useAuth } from "@/app/hooks/useAuth";
 import { useLanguageStore, SUPPORTED_LANGUAGES, useUserStore } from "@/app/lib/stores";
 import { navLabel as i18nNavLabel } from "@/app/lib/i18n";
+import { sendGAEvent } from '@next/third-parties/google';
 
 const NAV_LINKS = [
   { key: "lobsterTheater", href: "/", icon: BookOpen, requireAuth: false },
@@ -267,7 +268,10 @@ export default function Header() {
               })()
             ) : (
               <button
-                onClick={() => setShowLoginModal(true)}
+                onClick={() => {
+                  sendGAEvent({ event: 'intent_login_triggered', method: 'header_desktop' });
+                  setShowLoginModal(true);
+                }}
                 className="px-5 py-2.5 bg-white text-black rounded-full text-[11px] font-mono font-bold tracking-wider hover:shadow-[0_0_20px_rgba(255,255,255,0.3)] transition-all cursor-pointer flex items-center gap-1.5 uppercase"
               >
                 <User size={13} /> {i18nNavLabel("signIn", lang)}
@@ -287,7 +291,10 @@ export default function Header() {
             </div>
             {!isAuthenticated && (
               <button
-                onClick={() => setShowLoginModal(true)}
+                onClick={() => {
+                  sendGAEvent({ event: 'intent_login_triggered', method: 'header_mobile' });
+                  setShowLoginModal(true);
+                }}
                 className="px-3 py-1.5 bg-white text-black rounded-full text-[10px] font-bold cursor-pointer"
               >
                 {i18nNavLabel("signIn", lang)}

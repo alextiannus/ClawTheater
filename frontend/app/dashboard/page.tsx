@@ -14,6 +14,7 @@ import { useLanguageStore } from "@/app/lib/stores";
 import { getT } from "@/app/lib/i18n";
 import { getCreatorTier, getTierName } from "@/app/lib/creator-tiers";
 import { useAuth } from "@/app/hooks/useAuth";
+import { usePrivy } from "@privy-io/react-auth";
 
 interface DashboardData {
   user: {
@@ -73,6 +74,7 @@ export default function DashboardPage() {
   const { lang } = useLanguageStore();
   const t = getT(lang);
   const { walletAddress, userId } = useAuth();
+  const { exportWallet } = usePrivy();
 
   // Agent data (1 human -> N agents)
   interface AgentChapter {
@@ -527,38 +529,45 @@ export default function DashboardPage() {
         {activeTab === "overview" && (
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
             {/* Quick Actions */}
-            <div className="glass-card p-6">
+            <div className="glass-card p-6 flex flex-col h-full">
               <h3 className="text-lg font-semibold text-ghost-white mb-4">
                 Quick Actions
               </h3>
-              <div className="grid grid-cols-2 gap-3">
+              <div className="grid grid-cols-2 md:grid-cols-3 gap-3 flex-1">
                 <button
                   onClick={() => setShowDeposit(true)}
-                  className="p-4 rounded-xl bg-terminal-green/10 text-terminal-green border border-terminal-green/30 hover:bg-terminal-green/20 transition-all text-center cursor-pointer"
+                  className="p-4 rounded-xl bg-terminal-green/10 text-terminal-green border border-terminal-green/30 hover:bg-terminal-green/20 transition-all text-center cursor-pointer flex flex-col items-center justify-center"
                 >
                   <p className="text-2xl mb-1">🏦</p>
                   <p className="text-sm font-medium">Deposit USDC</p>
                 </button>
                 <button
                   onClick={() => setShowWithdraw(true)}
-                  className="p-4 rounded-xl bg-pulse-blue/10 text-pulse-blue border border-pulse-blue/30 hover:bg-pulse-blue/20 transition-all text-center cursor-pointer"
+                  className="p-4 rounded-xl bg-pulse-blue/10 text-pulse-blue border border-pulse-blue/30 hover:bg-pulse-blue/20 transition-all text-center cursor-pointer flex flex-col items-center justify-center"
                 >
                   <p className="text-2xl mb-1">💸</p>
                   <p className="text-sm font-medium">Withdraw</p>
                 </button>
                 <button
                   onClick={() => setShowSkillModal(true)}
-                  className="p-4 rounded-xl bg-neon-green/10 text-neon-green border border-neon-green/30 hover:bg-neon-green/20 transition-all text-center cursor-pointer"
+                  className="p-4 rounded-xl bg-neon-green/10 text-neon-green border border-neon-green/30 hover:bg-neon-green/20 transition-all text-center cursor-pointer flex flex-col items-center justify-center"
                 >
                   <p className="text-2xl mb-1">🧠</p>
-                  <p className="text-sm font-medium">Upload Skill / Corpus</p>
+                  <p className="text-sm font-medium leading-tight">Upload Skill</p>
                 </button>
                 <button
                   onClick={() => setShowBountyModal(true)}
-                  className="p-4 rounded-xl bg-neon-yellow/10 text-neon-yellow border border-neon-yellow/30 hover:bg-neon-yellow/20 transition-all text-center cursor-pointer"
+                  className="p-4 rounded-xl bg-neon-yellow/10 text-neon-yellow border border-neon-yellow/30 hover:bg-neon-yellow/20 transition-all text-center cursor-pointer flex flex-col items-center justify-center"
                 >
                   <p className="text-2xl mb-1">🎯</p>
                   <p className="text-sm font-medium">Post Bounty</p>
+                </button>
+                <button
+                  onClick={() => exportWallet()}
+                  className="p-4 rounded-xl bg-white/5 text-ghost-white border border-white/10 hover:bg-white/10 transition-all text-center cursor-pointer md:col-span-2 flex flex-col items-center justify-center"
+                >
+                  <p className="text-2xl mb-1">🔑</p>
+                  <p className="text-sm font-medium">Export Private Key</p>
                 </button>
               </div>
             </div>

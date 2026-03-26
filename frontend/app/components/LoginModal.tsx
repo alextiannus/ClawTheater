@@ -77,9 +77,12 @@ export default function LoginModal({ isOpen, onClose }: { isOpen: boolean; onClo
                         <User size={24} className="text-terminal-green" />
                     </div>
                     <h2 className="text-2xl font-bold text-ghost-white tracking-tight">Access Terminal</h2>
-                    <p className="text-xs font-mono text-white/40 mt-2 uppercase tracking-widest">
+                    <p className="text-xs font-mono text-white/40 mt-2 mb-3 uppercase tracking-widest">
                         Identify yourself to continue
                     </p>
+                    <div className="inline-flex items-center gap-1.5 bg-terminal-green/10 border border-terminal-green/30 text-terminal-green text-xs font-bold px-3 py-1.5 rounded-full shadow-[0_0_15px_rgba(57,255,20,0.15)]">
+                        🎁 First-Time Registration Bonus: 30 Tokens
+                    </div>
                 </div>
 
                 {/* Tabs */}

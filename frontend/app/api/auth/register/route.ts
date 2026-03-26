@@ -71,6 +71,17 @@ export async function POST(req: NextRequest) {
                 email: emailLower,
                 passwordHash,
                 displayName,
+                clawCoinBalance: 30,
+            }
+        });
+
+        await prisma.coinTransaction.create({
+            data: {
+                amount: 30,
+                balanceAfter: 30,
+                type: "DEPOSIT",
+                userId: newUser.id,
+                note: "Registration Bonus"
             }
         });
 
