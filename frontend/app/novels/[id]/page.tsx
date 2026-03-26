@@ -58,6 +58,7 @@ export default function NovelDetailPage({ params }: { params: Promise<{ id: stri
     const [showTipModal, setShowTipModal] = useState(false);
     const [tipAmount, setTipAmount] = useState<number>(200);
     const [actionLoading, setActionLoading] = useState(false);
+    const [checkoutLoading, setCheckoutLoading] = useState(false);
     const [toast, setToast] = useState<string | null>(null);
 
     const showToast = (msg: string) => {
@@ -99,6 +100,23 @@ export default function NovelDetailPage({ params }: { params: Promise<{ id: stri
             showToast("❌ Network error");
         }
         setActionLoading(false);
+    };
+
+    const handleDirectCheckout = async (usdAmount: number) => {
+        setCheckoutLoading(true);
+        try {
+            const res = await fetch("/api/stripe/checkout-session", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ amountUsd: usdAmount }),
+            });
+            const { url } = await res.json();
+            if (url) window.location.href = url;
+        } catch {
+            showToast("⚠️ Payment gateway error");
+        } finally {
+            setCheckoutLoading(false);
+        }
     };
 
     useEffect(() => {
@@ -429,22 +447,17 @@ export default function NovelDetailPage({ params }: { params: Promise<{ id: stri
                             </div>
 
                             <div className="space-y-3 mb-6">
-                                {isAuthenticated ? (
-                                    <>
-                                        <button
-                                            onClick={handleCoinTip}
-                                            disabled={actionLoading}
-                                            className="w-full py-3 flex items-center justify-center gap-2 bg-terminal-green text-black rounded-xl font-bold hover:bg-terminal-green/80 transition-all disabled:opacity-50 cursor-pointer"
-                                        >
-                                            <span className="text-lg leading-none">🦞</span> 打赏 {tipAmount} 🦞
-                                        </button>
-                                        {clawCoinBalance < tipAmount && (
-                                            <p className="text-xs text-neon-red flex items-center justify-center gap-1 mt-2">
-                                                <AlertCircle size={12} /> 余额 ({clawCoinBalance} 🦞) 不足
-                                            </p>
+                                {isAuthenticated && clawCoinBalance >= tipAmount ? (
+                                    <button
+                                        onClick={handleCoinTip}
+                                        disabled={actionLoading}
+                                        className="w-full py-4 bg-terminal-green text-obsidian rounded-xl font-bold flex flex-col items-center justify-center gap-1 hover:shadow-[0_0_20px_rgba(57,255,20,0.3)] transition-all disabled:opacity-50 cursor-pointer"
+                                    >
+                                        {actionLoading ? "打赏中..." : (
+                                            <><span>打赏 {tipAmount} 🦞</span><span className="text-xs font-normal">余额: {clawCoinBalance} 🦞</span></>
                                         )}
-                                    </>
-                                ) : (
+                                    </button>
+                                ) : !isAuthenticated ? (
                                     <button
                                         onClick={() => {
                                             sendGAEvent({ event: 'intent_login_triggered', method: 'tip_modal' });
@@ -456,6 +469,32 @@ export default function NovelDetailPage({ params }: { params: Promise<{ id: stri
                                         <span>邮箱验证以继续</span>
                                         <span className="text-xs mt-0.5 opacity-80">🎁 免费领取 30 Token 直接打赏</span>
                                     </button>
+                                ) : (
+                                    <div>
+                                        <div className="mb-5">
+                                            <p className="text-sm text-neon-red font-semibold mb-1">
+                                                余额不足 ({clawCoinBalance} 🦞)
+                                            </p>
+                                            <p className="text-xs text-ghost-muted">请选择充值金额，支付后即可打赏</p>
+                                        </div>
+                                        <div className="grid grid-cols-1 gap-3">
+                                            {[ {cc: 500, usd: 5}, {cc: 1000, usd: 10}, {cc: 5000, usd: 50} ].map(opt => (
+                                                <button
+                                                    key={opt.usd}
+                                                    onClick={() => handleDirectCheckout(opt.usd)}
+                                                    disabled={checkoutLoading}
+                                                    className="w-full py-3 bg-terminal-green/10 border border-terminal-green/30 hover:bg-terminal-green/20 text-terminal-green rounded-xl flex items-center justify-between px-5 transition-all focus:outline-none focus:ring-2 focus:ring-terminal-green/50 disabled:opacity-50 cursor-pointer"
+                                                >
+                                                    <span className="font-bold flex items-center gap-2">
+                                                        <span className="text-lg leading-none">🦞</span> {opt.cc}
+                                                    </span>
+                                                    <span className="text-sm bg-obsidian/50 px-2 py-1 rounded-md border border-terminal-green/20 font-mono">
+                                                        $ {opt.usd.toFixed(2)}
+                                                    </span>
+                                                </button>
+                                            ))}
+                                        </div>
+                                    </div>
                                 )}
                             </div>
                             <button onClick={() => setShowTipModal(false)} className="px-4 py-2 text-sm text-ghost-muted cursor-pointer hover:text-white transition-colors">取消</button>
