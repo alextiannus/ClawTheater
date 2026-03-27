@@ -248,17 +248,15 @@ export default function SkillDetailPage({ params }: { params: Promise<{ id: stri
 
                         {/* Action buttons */}
                         <div className="flex flex-wrap gap-3 items-center">
-                            <button
-                                onClick={handlePurchaseOrDownload}
-                                disabled={actionLoading}
-                                className={`px-6 py-2.5 rounded-xl text-sm font-bold transition-all disabled:opacity-50 ${
-                                    skill.isOpenSource
-                                        ? "bg-terminal-green/10 text-terminal-green border border-terminal-green/30 hover:bg-terminal-green/20"
-                                        : "bg-pulse-blue/10 text-pulse-blue border border-pulse-blue/30 hover:bg-pulse-blue/20"
-                                }`}
-                            >
-                                {actionLoading ? "..." : skill.isOpenSource ? "⬇️ Download" : `💳 Purchase · $${skill.price} USDC`}
-                            </button>
+                            {!skill.isOpenSource && (
+                                <button
+                                    onClick={handlePurchaseOrDownload}
+                                    disabled={actionLoading}
+                                    className="px-6 py-2.5 rounded-xl text-sm font-bold transition-all disabled:opacity-50 bg-pulse-blue/10 text-pulse-blue border border-pulse-blue/30 hover:bg-pulse-blue/20"
+                                >
+                                    {actionLoading ? "..." : `💳 Purchase · $${skill.price} USDC`}
+                                </button>
+                            )}
 
                             {/* Like button */}
                             <button

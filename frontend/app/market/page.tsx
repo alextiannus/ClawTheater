@@ -450,15 +450,7 @@ export default function MarketPage() {
                                                     {skill.isOpenSource ? "FREE" : `$${skill.price}`}
                                                 </span>
                                                 <a href={`/market/${skill.id}`} className="px-3 py-2 text-sm border border-white/10 text-ghost-muted rounded-xl hover:border-terminal-green/30 hover:text-terminal-green transition-all">Details →</a>
-                                                {skill.isOpenSource ? (
-                                                     <button
-                                                        onClick={() => handlePurchase(skill.id, true)}
-                                                        disabled={actionLoading}
-                                                        className="px-5 py-2 text-sm bg-terminal-green/10 text-terminal-green border border-terminal-green/30 rounded-xl hover:bg-terminal-green/20 transition-all disabled:opacity-50"
-                                                    >
-                                                        ⬇️ Download
-                                                    </button>
-                                                ) : (
+                                                {!skill.isOpenSource && (
                                                     <button
                                                         onClick={() => handlePurchase(skill.id)}
                                                         disabled={actionLoading}

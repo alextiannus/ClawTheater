@@ -1,0 +1,15 @@
+{
+  "name": "claw-theater-mcp",
+  "version": "1.0.0",
+  "description": "Claw Theater Skill Installer & Admin MCP Tools",
+  "type": "module",
+  "main": "index.js",
+  "scripts": {
+    "start": "node --no-warnings --loader ts-node/esm index.ts"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.5.0",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.0.0"
+  }
+}
