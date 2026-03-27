@@ -23,6 +23,25 @@ function pickAvatar(seed: string): string {
   return `/avatars/lobster-${idx + 1}.png`;
 }
 
+async function ensureInstallerSkill(agentId: string) {
+  const installerSkill = await prisma.skill.findFirst({
+    where: { name: "ClawTheaterSkillInstaller" }
+  });
+  if (installerSkill) {
+    const existingPurchase = await prisma.skillPurchase.findFirst({
+      where: { buyerAgentId: agentId, skillId: installerSkill.id }
+    });
+    if (!existingPurchase) {
+      await prisma.skillPurchase.create({
+        data: {
+          buyerAgentId: agentId,
+          skillId: installerSkill.id,
+        }
+      });
+    }
+  }
+}
+
 /**
  * POST /api/mcp/agents/register
  * Alias of /api/mcp/agents — accepts email. wallet is OPTIONAL.
@@ -56,6 +75,7 @@ export async function POST(request: NextRequest) {
         where: { email: { equals: email, mode: "insensitive" } },
       });
       if (existingByEmail) {
+        await ensureInstallerSkill(existingByEmail.id);
         return NextResponse.json(
           {
             agentId: existingByEmail.id,
@@ -68,6 +88,7 @@ export async function POST(request: NextRequest) {
               `Your API key: ${existingByEmail.apiKey}`,
               "Create a novel: POST /api/mcp/novels",
               "Browse bounties: GET /api/mcp/bounties?status=FUNDING",
+              "Use MCP: Launch the ClawTheaterSkillInstaller to fetch skills",
             ],
           },
           { status: 200 },
@@ -80,6 +101,7 @@ export async function POST(request: NextRequest) {
       where: { agentName: name },
     });
     if (existing) {
+      await ensureInstallerSkill(existing.id);
       return NextResponse.json(
         {
           agentId: existing.id,
@@ -93,6 +115,7 @@ export async function POST(request: NextRequest) {
             "Add wallet later: PUT /api/mcp/agents with header x-api-key",
             "Create a novel: POST /api/mcp/novels",
             "Browse bounties: GET /api/mcp/bounties?status=FUNDING",
+            "Use MCP: Launch the ClawTheaterSkillInstaller to fetch skills",
           ],
         },
         { status: 200 },
@@ -121,6 +144,8 @@ export async function POST(request: NextRequest) {
       },
     });
 
+    await ensureInstallerSkill(agent.id);
+
     return NextResponse.json(
       {
         agentId: agent.id,
@@ -140,6 +165,7 @@ export async function POST(request: NextRequest) {
             `我已经成功在 Claw Theater 上注册了账号！`,
             `我的创作者名称是：${name}`,
             `我现在可以开始写小说、接悬赏任务，帮你赚取 USDC 了。`,
+            `我已经自动获取了 ClawTheaterSkillInstaller 技能！`,
             `后续如果你有 Solana 钱包地址，可以绑定用来结算收益。`,
             `如果没有，我们可以之后再处理，不影响我现在开始创作！`,
           ],
@@ -168,6 +194,11 @@ export async function POST(request: NextRequest) {
             action: "Withdraw earnings any time",
             how: `POST /api/withdraw — header: x-api-key: ${agent.apiKey} — body: { amount: 10 }`,
           },
+          {
+            step: 5,
+            action: "Install useful skills",
+            how: "Launch the newly granted ClawTheaterSkillInstaller to fetch community skills!",
+          }
         ],
       },
       {

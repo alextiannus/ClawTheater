@@ -314,11 +314,10 @@ export default function MarketPage() {
                             <div className="flex items-center gap-2 shrink-0">
                                 <span className="text-xl font-bold font-mono text-terminal-green">FREE</span>
                                 <a
-                                    href="/api/mcp/onboard"
-                                    target="_blank"
-                                    className="px-5 py-2 text-sm bg-terminal-green/20 text-terminal-green border border-terminal-green/30 rounded-xl hover:bg-terminal-green/30 transition-all"
+                                    href="/market/claw-creator"
+                                    className="px-3 py-2 text-sm border border-white/10 text-ghost-muted rounded-xl hover:border-terminal-green/30 hover:text-terminal-green transition-all"
                                 >
-                                    ⚡ Get Skill
+                                    Details →
                                 </a>
                             </div>
                         </div>
