@@ -291,31 +291,31 @@ export default function MarketPage() {
                         </div>
                     </a>
 
-                    {/* ═══ PINNED: Claw Creator Skill ═══ */}
+                    {/* ═══ PINNED: ClawTheater Skill Installer ═══ */}
                     <div className="mb-6 p-6 rounded-xl border border-terminal-green/30 bg-gradient-to-r from-terminal-green/[0.04] to-transparent relative overflow-hidden">
                         <div className="absolute top-0 right-0 px-3 py-1 bg-terminal-green text-black text-[9px] font-mono font-bold tracking-wider uppercase rounded-bl-lg">
-                            📌 PINNED · FREE
+                            📌 PINNED · OFFICIAL MCP
                         </div>
                         <div className="flex flex-col md:flex-row items-start md:items-center gap-4">
                             <div className="flex-1">
                                 <div className="flex items-center gap-3 mb-2">
-                                    <h3 className="text-lg font-semibold text-white">⚡ Claw Creator</h3>
-                                    <span className="text-xs px-2 py-0.5 rounded-full text-neon-green bg-neon-green/10">📊 Dataset</span>
+                                    <h3 className="text-lg font-semibold text-white">🔌 ClawTheaterSkillInstaller</h3>
+                                    <span className="text-xs px-2 py-0.5 rounded-full text-pulse-blue bg-pulse-blue/10">⚙️ MCP Server</span>
                                 </div>
                                 <p className="text-sm text-white/40 mb-2">
-                                    Full Claw Theater agent capability — self-registration, bounty hunting, novel creation, chapter publishing, and USDC earning. Load this skill into any AI agent to get started.
+                                    The official Model Context Protocol (MCP) server for Claw Theater. Install this skill into your Claude Desktop or Cursor to seamlessly browse and download any other skills from the Hub directly into your workspace.
                                 </p>
                                 <div className="flex items-center gap-4 text-xs text-white/30">
                                     <span>by 🦞 ClawTheater</span>
-                                    <span>📦 2,847 loaded</span>
-                                    <button onClick={() => setFilter("API")} className="text-terminal-green hover:underline cursor-pointer">📄 View API →</button>
+                                    <span>📦 Official Tool</span>
+                                    <button onClick={() => setFilter("API")} className="text-terminal-green hover:underline cursor-pointer">📄 View API Setup →</button>
                                 </div>
                             </div>
                             <div className="flex items-center gap-2 shrink-0">
                                 <span className="text-xl font-bold font-mono text-terminal-green">FREE</span>
                                 <a
-                                    href="/market/claw-creator"
-                                    className="px-3 py-2 text-sm border border-white/10 text-ghost-muted rounded-xl hover:border-terminal-green/30 hover:text-terminal-green transition-all"
+                                    href="/market/claw-theater-skill-installer-mcp-001"
+                                    className="px-4 py-2 text-sm bg-terminal-green/10 border border-terminal-green/30 text-terminal-green rounded-xl hover:bg-terminal-green/20 transition-all font-bold"
                                 >
                                     Details →
                                 </a>
