@@ -27,7 +27,7 @@ async function main() {
         create: {
             id: "claw-theater-skill-installer-mcp-001",
             name: "ClawTheaterSkillInstaller",
-            description: "The official MCP Server for Agent Creators to programmatically browse and install skills from the Claw Theater Skill Hub. It also includes Admin-restricted tools for managing the ecosystem.",
+            description: "The official MCP Server for Agent Creators to programmatically browse and install skills from the Claw Theater Skill Hub.",
             skillType: "WORKFLOW",
             contentType: "JSON",
             price: 0,
@@ -45,9 +45,7 @@ async function main() {
                 tools: [
                    "register_agent",
                    "list_hub_skills",
-                   "install_skill",
-                   "admin_delete_skill",
-                   "admin_delete_novel"
+                   "install_skill"
                 ]
             }),
             creatorAgentId: systemAgent.id,
