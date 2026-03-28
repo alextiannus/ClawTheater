@@ -414,53 +414,92 @@ export default function MarketPage() {
                                     <p className="text-ghost-muted">No skills found</p>
                                 </div>
                             ) : (
-                                <div className="space-y-4">
-                                    {filtered.map((skill) => (
-                                        <div key={skill.id} className="glass-card p-6 flex flex-col md:flex-row items-start md:items-center gap-4 hover:scale-[1.005] transition-all duration-200">
-                                            <div className="flex-1">
-                                                <div className="flex items-center gap-3 mb-2 flex-wrap">
-                                                    <a href={`/market/${skill.id}`} className="text-lg font-semibold text-ghost-white hover:text-terminal-green transition-colors">{skill.name}</a>
-                                                    <span className={`text-xs px-2 py-0.5 rounded-full ${typeLabels[skill.type]?.style || "text-ghost-muted bg-white/10"}`}>
-                                                        {typeLabels[skill.type]?.label || skill.type}
-                                                    </span>
-                                                    {skill.contentType === "CORPUS" && (
-                                                        <span className="text-xs px-2 py-0.5 rounded-full text-neon-green bg-neon-green/10">📚 Corpus</span>
-                                                    )}
-                                                    {skill.isOpenSource !== undefined && (
-                                                        <span className={`text-xs px-2 py-0.5 rounded-full ${skill.isOpenSource ? "text-terminal-green bg-terminal-green/10" : "text-pulse-blue bg-pulse-blue/10"}`}>
-                                                            {skill.isOpenSource ? "🔓 Open" : "💰 Paid"}
+                                <div className="glass-card overflow-hidden">
+                                    {/* Table Header */}
+                                    <div className="hidden md:grid grid-cols-12 gap-4 p-4 border-b border-white/10 text-[11px] font-semibold text-ghost-muted uppercase tracking-wider bg-white/[0.02]">
+                                        <div className="col-span-3 pl-2">Skill</div>
+                                        <div className="col-span-5">Summary</div>
+                                        <div className="col-span-2">Author</div>
+                                        <div className="col-span-2 text-right pr-2">Stats</div>
+                                    </div>
+                                    
+                                    {/* Table Body */}
+                                    <div className="divide-y divide-white/10">
+                                        {filtered.map((skill) => (
+                                            <div key={skill.id} className="grid grid-cols-1 md:grid-cols-12 gap-4 p-4 items-start md:items-center hover:bg-white/[0.02] transition-colors group">
+                                                {/* Skill (Col 1) */}
+                                                <div className="md:col-span-3 md:pl-2">
+                                                    <a href={`/market/${skill.id}`} className="block text-base font-bold text-ghost-white group-hover:text-terminal-green transition-colors truncate">
+                                                        {skill.name}
+                                                    </a>
+                                                    <div className="flex items-center gap-1.5 mt-1.5 flex-wrap">
+                                                        {skill.fileName && (
+                                                            <span className="text-[10px] font-mono text-ghost-muted mr-1">{skill.fileName}</span>
+                                                        )}
+                                                        <span className={`text-[10px] px-1.5 py-0.5 rounded ${typeLabels[skill.type]?.style || "text-ghost-muted bg-white/10"}`}>
+                                                            {typeLabels[skill.type]?.label || skill.type}
                                                         </span>
-                                                    )}
+                                                        {skill.contentType === "CORPUS" && (
+                                                            <span className="text-[10px] px-1.5 py-0.5 rounded text-neon-green bg-neon-green/10">📚 Corpus</span>
+                                                        )}
+                                                        {skill.isOpenSource !== undefined && (
+                                                            <span className={`text-[10px] px-1.5 py-0.5 rounded ${skill.isOpenSource ? "text-terminal-green bg-terminal-green/10" : "text-pulse-blue bg-pulse-blue/10"}`}>
+                                                                {skill.isOpenSource ? "🔓 Open" : "💰 Paid"}
+                                                            </span>
+                                                        )}
+                                                    </div>
                                                 </div>
-                                                <p className="text-sm text-ghost-muted mb-2">{skill.description}</p>
-                                                <div className="flex items-center gap-4 text-xs text-ghost-muted">
-                                                    <span>by {skill.creatorType === "agent" ? "🦞" : "👤"} {skill.creator}</span>
-                                                    <span>📦 {skill.salesCount} sold</span>
-                                                    {(skill.downloadCount ?? 0) > 0 && (
-                                                        <span className="text-terminal-green">⬇️ {skill.downloadCount} downloads</span>
-                                                    )}
-                                                    {skill.fileName && (
-                                                        <span className="font-mono opacity-60">{skill.fileName}</span>
-                                                    )}
+
+                                                {/* Summary (Col 2) */}
+                                                <div className="md:col-span-5">
+                                                    <p className="text-sm text-ghost-muted line-clamp-2" title={skill.description}>
+                                                        {skill.description}
+                                                    </p>
+                                                </div>
+
+                                                {/* Author (Col 3) */}
+                                                <div className="md:col-span-2 flex items-center gap-2">
+                                                    <div className="w-6 h-6 rounded-full bg-white/5 flex items-center justify-center shrink-0 border border-white/10">
+                                                        <span className="text-[10px]">{skill.creatorType === "agent" ? "🦞" : "👤"}</span>
+                                                    </div>
+                                                    <span className="text-sm text-ghost-white truncate">@{skill.creator}</span>
+                                                </div>
+
+                                                {/* Stats & Actions (Col 4) */}
+                                                <div className="md:col-span-2 flex flex-row md:flex-col items-center md:items-end justify-between md:justify-center gap-2 md:pr-2">
+                                                    <div className="flex items-center gap-3 text-xs text-ghost-muted font-mono">
+                                                        <span className="flex items-center gap-1" title={`${skill.salesCount} sold`}>
+                                                            📦 <span className="text-ghost-white">{skill.salesCount >= 1000 ? (skill.salesCount / 1000).toFixed(1) + 'k' : skill.salesCount}</span>
+                                                        </span>
+                                                        <span className="flex items-center gap-1" title={`${skill.downloadCount || 0} downloads`}>
+                                                            <span className="text-terminal-green">★</span> <span className="text-ghost-white">{skill.downloadCount && skill.downloadCount >= 1000 ? (skill.downloadCount / 1000).toFixed(1) + 'k' : (skill.downloadCount || 0)}</span>
+                                                        </span>
+                                                    </div>
+                                                    <div className="flex items-center gap-2 mt-0 md:mt-1">
+                                                        <span className="text-xs font-bold font-mono text-terminal-green">
+                                                            {skill.isOpenSource ? "FREE" : `$${skill.price}`}
+                                                        </span>
+                                                        {!skill.isOpenSource ? (
+                                                            <button
+                                                                onClick={(e) => {
+                                                                    e.preventDefault();
+                                                                    handlePurchase(skill.id);
+                                                                }}
+                                                                disabled={actionLoading}
+                                                                className="px-2 py-1 text-[10px] bg-pulse-blue/10 text-pulse-blue border border-pulse-blue/30 rounded hover:bg-pulse-blue/20 transition-all disabled:opacity-50"
+                                                            >
+                                                                Buy
+                                                            </button>
+                                                        ) : (
+                                                            <a href={`/market/${skill.id}`} className="px-2 py-1 text-[10px] border border-white/10 text-ghost-muted rounded hover:border-terminal-green/30 hover:text-terminal-green transition-all">
+                                                                View
+                                                            </a>
+                                                        )}
+                                                    </div>
                                                 </div>
                                             </div>
-                                            <div className="flex items-center gap-2 shrink-0">
-                                                <span className="text-xl font-bold font-mono text-terminal-green">
-                                                    {skill.isOpenSource ? "FREE" : `$${skill.price}`}
-                                                </span>
-                                                <a href={`/market/${skill.id}`} className="px-3 py-2 text-sm border border-white/10 text-ghost-muted rounded-xl hover:border-terminal-green/30 hover:text-terminal-green transition-all">Details →</a>
-                                                {!skill.isOpenSource && (
-                                                    <button
-                                                        onClick={() => handlePurchase(skill.id)}
-                                                        disabled={actionLoading}
-                                                        className="px-5 py-2 text-sm bg-pulse-blue/10 text-pulse-blue border border-pulse-blue/30 rounded-xl hover:bg-pulse-blue/20 transition-all disabled:opacity-50"
-                                                    >
-                                                        💳 Purchase
-                                                    </button>
-                                                )}
-                                            </div>
-                                        </div>
-                                    ))}
+                                        ))}
+                                    </div>
                                 </div>
                             )}
                         </>
