@@ -6,6 +6,7 @@ import Footer from "@/app/components/Footer";
 import { useLanguageStore, SUPPORTED_LANGUAGES } from "@/app/lib/stores";
 import { getT } from "@/app/lib/i18n";
 import CopyButton from "@/app/components/CopyButton";
+import { useRouter } from "next/navigation";
 
 interface SkillItem {
     id: string;
@@ -84,6 +85,7 @@ const METHOD_COLORS: Record<string, string> = {
 };
 
 export default function MarketPage() {
+    const router = useRouter();
     const [skills, setSkills] = useState<SkillItem[]>([]);
     const [loading, setLoading] = useState(true);
     const [filter, setFilter] = useState("All");
@@ -426,12 +428,16 @@ export default function MarketPage() {
                                     {/* Table Body */}
                                     <div className="divide-y divide-white/10">
                                         {filtered.map((skill) => (
-                                            <div key={skill.id} className="grid grid-cols-1 md:grid-cols-12 gap-4 p-4 items-start md:items-center hover:bg-white/[0.02] transition-colors group">
+                                            <div 
+                                                key={skill.id} 
+                                                onClick={() => router.push(`/market/${skill.id}`)}
+                                                className="grid grid-cols-1 md:grid-cols-12 gap-4 p-4 items-start md:items-center hover:bg-white/[0.04] cursor-pointer transition-colors group"
+                                            >
                                                 {/* Skill (Col 1) */}
                                                 <div className="md:col-span-3 md:pl-2">
-                                                    <a href={`/market/${skill.id}`} className="block text-base font-bold text-ghost-white group-hover:text-terminal-green transition-colors truncate">
+                                                    <div className="block text-base font-bold text-ghost-white group-hover:text-terminal-green transition-colors truncate">
                                                         {skill.name}
-                                                    </a>
+                                                    </div>
                                                     <div className="flex items-center gap-1.5 mt-1.5 flex-wrap">
                                                         {skill.fileName && (
                                                             <span className="text-[10px] font-mono text-ghost-muted mr-1">{skill.fileName}</span>
@@ -479,21 +485,18 @@ export default function MarketPage() {
                                                         <span className="text-xs font-bold font-mono text-terminal-green">
                                                             {skill.isOpenSource ? "FREE" : `$${skill.price}`}
                                                         </span>
-                                                        {!skill.isOpenSource ? (
+                                                        {!skill.isOpenSource && (
                                                             <button
                                                                 onClick={(e) => {
                                                                     e.preventDefault();
+                                                                    e.stopPropagation();
                                                                     handlePurchase(skill.id);
                                                                 }}
                                                                 disabled={actionLoading}
-                                                                className="px-2 py-1 text-[10px] bg-pulse-blue/10 text-pulse-blue border border-pulse-blue/30 rounded hover:bg-pulse-blue/20 transition-all disabled:opacity-50"
+                                                                className="relative z-10 px-2 py-1 text-[10px] bg-pulse-blue/10 text-pulse-blue border border-pulse-blue/30 rounded hover:bg-pulse-blue/20 transition-all disabled:opacity-50"
                                                             >
                                                                 Buy
                                                             </button>
-                                                        ) : (
-                                                            <a href={`/market/${skill.id}`} className="px-2 py-1 text-[10px] border border-white/10 text-ghost-muted rounded hover:border-terminal-green/30 hover:text-terminal-green transition-all">
-                                                                View
-                                                            </a>
                                                         )}
                                                     </div>
                                                 </div>
