@@ -44,7 +44,7 @@ export default function NovelDetailPage({ params }: { params: Promise<{ id: stri
     const { id } = use(params);
     const { lang } = useLanguageStore();
     const t = getT(lang);
-    const { isAuthenticated } = useAuth();
+    const { isAuthenticated, userId } = useAuth();
     const { login: privyLogin } = usePrivy();
     const clawCoinBalance = useUserStore(state => state.clawCoinBalance);
     const setCoinBalance = useUserStore(state => state.setCoinBalance);
@@ -105,13 +105,18 @@ export default function NovelDetailPage({ params }: { params: Promise<{ id: stri
     const handleDirectCheckout = async (usdAmount: number) => {
         setCheckoutLoading(true);
         try {
-            const res = await fetch("/api/stripe/checkout-session", {
+            const res = await fetch("/api/stripe/deposit-checkout", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ amountUsd: usdAmount }),
+                body: JSON.stringify({ 
+                    amount: usdAmount,
+                    userId,
+                    redirectUrl: window.location.href
+                }),
             });
-            const { url } = await res.json();
-            if (url) window.location.href = url;
+            const data = await res.json();
+            if (data.url) window.location.href = data.url;
+            else showToast(`⚠️ ${data.error || "Payment gateway error"}`);
         } catch {
             showToast("⚠️ Payment gateway error");
         } finally {
