@@ -127,7 +127,13 @@ export function useAuth() {
         userId: store.userId,
         walletAddress: store.walletAddress,
         displayName: store.displayName,
-        isAdmin: store.isAdmin,
+        // Check admin from store (cookie-based) OR directly from Privy user email (instant, no cookie needed)
+        isAdmin: store.isAdmin || (() => {
+            const privyEmail = user?.email?.address?.toLowerCase() || "";
+            const adminEmails = (process.env.NEXT_PUBLIC_ADMIN_EMAILS || "")
+                .split(",").map(e => e.trim().toLowerCase()).filter(Boolean);
+            return !!privyEmail && adminEmails.includes(privyEmail);
+        })(),
         login: handleLogin,
         logout: handleLogout,
         syncAuth,

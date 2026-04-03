@@ -64,7 +64,6 @@ export default function DashboardPage() {
     | "overview"
     | "portfolio"
     | "pendingVotes"
-    | "apikeys"
     | "myArtists"
     | "myFavorites"
   >("overview");
@@ -263,9 +262,6 @@ export default function DashboardPage() {
   }, [activeTab, myFavorites]);
 
   useEffect(() => {
-    if (activeTab === "apikeys" && userId) {
-      fetchApiKeys(userId);
-    }
     if (activeTab === "pendingVotes") {
       fetchPendingVotes();
     }
@@ -503,7 +499,6 @@ export default function DashboardPage() {
               "myFavorites",
               "portfolio",
               "pendingVotes",
-              "apikeys",
             ] as const
           ).map((tab) => (
             <button
@@ -531,7 +526,7 @@ export default function DashboardPage() {
                   )}
                 </>
               )}
-              {tab === "apikeys" && "🔑 API Keys"}
+              {tab === "overview" && `📊 ${t.dashboard}`}
             </button>
           ))}
         </div>
@@ -542,7 +537,7 @@ export default function DashboardPage() {
             {/* Quick Actions */}
             <div className="glass-card p-6 flex flex-col h-full">
               <h3 className="text-lg font-semibold text-ghost-white mb-4">
-                Quick Actions
+                {lang === "zh" ? "快捷操作" : "Quick Actions"}
               </h3>
               <div className="grid grid-cols-2 md:grid-cols-3 gap-3 flex-1">
                 <button
@@ -550,35 +545,35 @@ export default function DashboardPage() {
                   className="p-4 rounded-xl bg-terminal-green/10 text-terminal-green border border-terminal-green/30 hover:bg-terminal-green/20 transition-all text-center cursor-pointer flex flex-col items-center justify-center"
                 >
                   <p className="text-2xl mb-1">🏦</p>
-                  <p className="text-sm font-medium">Deposit USDC</p>
+                  <p className="text-sm font-medium">{lang === "zh" ? "存入 USDC" : "Deposit USDC"}</p>
                 </button>
                 <button
                   onClick={() => setShowWithdraw(true)}
                   className="p-4 rounded-xl bg-pulse-blue/10 text-pulse-blue border border-pulse-blue/30 hover:bg-pulse-blue/20 transition-all text-center cursor-pointer flex flex-col items-center justify-center"
                 >
                   <p className="text-2xl mb-1">💸</p>
-                  <p className="text-sm font-medium">Withdraw</p>
+                  <p className="text-sm font-medium">{lang === "zh" ? "提现" : "Withdraw"}</p>
                 </button>
                 <button
                   onClick={() => setShowSkillModal(true)}
                   className="p-4 rounded-xl bg-neon-green/10 text-neon-green border border-neon-green/30 hover:bg-neon-green/20 transition-all text-center cursor-pointer flex flex-col items-center justify-center"
                 >
                   <p className="text-2xl mb-1">🧠</p>
-                  <p className="text-sm font-medium leading-tight">Upload Skill</p>
+                  <p className="text-sm font-medium leading-tight">{lang === "zh" ? "上传技能" : "Upload Skill"}</p>
                 </button>
                 <button
                   onClick={() => setShowBountyModal(true)}
                   className="p-4 rounded-xl bg-neon-yellow/10 text-neon-yellow border border-neon-yellow/30 hover:bg-neon-yellow/20 transition-all text-center cursor-pointer flex flex-col items-center justify-center"
                 >
                   <p className="text-2xl mb-1">🎯</p>
-                  <p className="text-sm font-medium">Post Bounty</p>
+                  <p className="text-sm font-medium">{t.postBounty}</p>
                 </button>
                 <button
                   onClick={() => exportWallet()}
                   className="p-4 rounded-xl bg-white/5 text-ghost-white border border-white/10 hover:bg-white/10 transition-all text-center cursor-pointer md:col-span-2 flex flex-col items-center justify-center"
                 >
                   <p className="text-2xl mb-1">🔑</p>
-                  <p className="text-sm font-medium">Export Private Key</p>
+                  <p className="text-sm font-medium">{lang === "zh" ? "导出私钥" : "Export Private Key"}</p>
                 </button>
               </div>
             </div>
@@ -1018,85 +1013,6 @@ export default function DashboardPage() {
           </div>
         )}
 
-        {activeTab === "apikeys" && (
-          <div className="glass-card p-6">
-            <h3 className="text-lg font-semibold text-ghost-white mb-1">
-              🔑 API Key Management
-            </h3>
-            <p className="text-sm text-ghost-muted mb-6">
-              Keys give AI agents access to the MCP protocol on your behalf.
-            </p>
-
-            {/* Newly generated key — show once */}
-            {newKeyFull && (
-              <div className="glass-light p-4 rounded-xl mb-4 border border-terminal-green/30">
-                <p className="text-xs text-terminal-green font-mono mb-1">
-                  ✅ New key generated — copy it now, it won't be shown again!
-                </p>
-                <div className="flex items-center gap-2">
-                  <code className="text-sm font-mono text-ghost-white break-all flex-1">
-                    {newKeyFull}
-                  </code>
-                  <button
-                    onClick={() => {
-                      handleCopy(newKeyFull, "new");
-                    }}
-                    className="px-3 py-1.5 text-xs bg-terminal-green/10 text-terminal-green rounded-lg shrink-0 cursor-pointer"
-                  >
-                    {copiedId === "new" ? "Copied!" : "Copy"}
-                  </button>
-                </div>
-              </div>
-            )}
-
-            {/* Key list */}
-            <div className="space-y-3 mb-4">
-              {apiKeys.length === 0 ? (
-                <p className="text-ghost-muted text-sm text-center py-6">
-                  No API keys yet. Generate one below.
-                </p>
-              ) : (
-                apiKeys.map((k) => (
-                  <div key={k.id} className="glass-light p-4 rounded-xl">
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <p className="text-sm text-ghost-white font-mono">
-                          {k.keyPreview}
-                        </p>
-                        <p className="text-xs text-ghost-muted mt-1">
-                          {k.label} · Created:{" "}
-                          {new Date(k.createdAt).toLocaleDateString()}
-                        </p>
-                      </div>
-                      <div className="flex gap-2">
-                        <button
-                          onClick={() => handleCopy(k.keyFull, k.id)}
-                          className="px-3 py-1.5 text-xs bg-white/5 text-ghost-muted rounded-lg hover:text-ghost-white transition-colors cursor-pointer"
-                        >
-                          {copiedId === k.id ? "Copied!" : "Copy"}
-                        </button>
-                        <button
-                          onClick={() => handleRevokeKey(k.id)}
-                          className="px-3 py-1.5 text-xs bg-neon-red/10 text-neon-red rounded-lg hover:bg-neon-red/20 transition-colors cursor-pointer"
-                        >
-                          Revoke
-                        </button>
-                      </div>
-                    </div>
-                  </div>
-                ))
-              )}
-            </div>
-
-            <button
-              onClick={handleGenerateKey}
-              disabled={keysLoading || !userId}
-              className="px-4 py-2.5 bg-terminal-green/10 text-terminal-green border border-terminal-green/30 rounded-xl text-sm hover:bg-terminal-green/20 transition-all disabled:opacity-50 cursor-pointer"
-            >
-              {keysLoading ? "Generating..." : "+ Generate New API Key"}
-            </button>
-          </div>
-        )}
         {/* Lore Upload Modal — removed, replaced by SkillUploadModal */}
 
         {/* Toast */}
