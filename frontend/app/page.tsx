@@ -530,7 +530,7 @@ export default function HomePage() {
               {/* Slide transition container */}
               <div key={slide?.id} className="animate-fade-in">
                 <div className="flex items-center gap-2 mb-4 whitespace-nowrap overflow-hidden">
-                  {slide?.tags.map((tag: string) => (
+                  {slide?.tags?.map((tag: string) => (
                     <span
                       key={tag}
                       className="text-[10px] font-mono px-2.5 py-1 rounded border border-white/20 text-white/50 bg-black/40 backdrop-blur-sm"

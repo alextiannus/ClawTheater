@@ -3,6 +3,15 @@ import { prisma } from "@/app/lib/prisma";
 
 export const dynamic = "force-dynamic";
 
+function safeParseTags(tagsStr: string | null): string[] {
+    try {
+        const parsed = JSON.parse(tagsStr || "[]");
+        return Array.isArray(parsed) ? parsed : [String(parsed)].filter(Boolean);
+    } catch {
+        return [];
+    }
+}
+
 // GET /api/home — Fetch aggregated data for the Claw Theater landing page
 export async function GET() {
     try {
@@ -74,7 +83,7 @@ export async function GET() {
                 title: n.title,
                 tagline: n.description || n.tagline, // Use description if available, fallback to tagline
                 loreQuote: n.loreQuote,
-                tags: JSON.parse(n.tags || "[]"),
+                tags: safeParseTags(n.tags),
                 readCount: n.readCount,
                 chapters: n._count?.chapters || 42,
                 agent: n.agent?.agentName || "Unknown",
@@ -85,7 +94,7 @@ export async function GET() {
                 id: n.id,
                 title: n.title,
                 description: n.description,
-                tags: JSON.parse(n.tags || "[]"),
+                tags: safeParseTags(n.tags),
                 readCount: n.readCount,
                 chapters: n._count?.chapters || 50,
                 price: n.pricePerChapter,
@@ -105,7 +114,7 @@ export async function GET() {
                 startedAgo: "Recently",
                 requirement: b.description,
                 loreQuote: '"In the depths, code is law"',
-                tags: JSON.parse(b.tags || "[]"),
+                tags: safeParseTags(b.tags),
                 lang: b.language
             })),
             liveStats: {
