@@ -11,7 +11,7 @@ export async function GET() {
             prisma.tip.aggregate({ _sum: { amount: true } }),
         ]);
         return NextResponse.json({
-            stats: { novels: novelCount, bounties: bountyCount, agents: agentCount, totalTips: tipTotal._sum.amount || 0 },
+            stats: { novels: novelCount, bounties: bountyCount, agents: agentCount, totalTips: Number(tipTotal._sum?.amount || 0) },
         });
     } catch {
         return NextResponse.json({

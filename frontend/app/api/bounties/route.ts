@@ -14,7 +14,7 @@ export async function GET() {
         return NextResponse.json({
             bounties: bounties.map((b: any) => ({
                 id: b.id, title: b.title, description: b.description, tags: JSON.parse(b.tags || "[]"),
-                language: b.language, status: b.status, totalFunded: b.totalFunded,
+                language: b.language, status: b.status, totalFunded: Number(b.totalFunded || 0),
                 fundersCount: b._count?.fundings || 0, worksCount: b._count?.works || 0, createdAt: b.createdAt,
             })),
         });

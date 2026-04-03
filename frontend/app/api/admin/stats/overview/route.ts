@@ -60,9 +60,9 @@ export async function GET(req: NextRequest) {
           lores: { total: totalLores }
         },
         financials: {
-          totalDepositsCC: depositStats._sum.amount || 0,
-          totalUnlocksCC: Math.abs(unlockStats._sum.amount || 0), // CHAPTER_UNLOCK is a negative amount generally for the user
-          totalTipsCC: Math.abs(tipSentStats._sum.amount || 0),
+          totalDepositsCC: Number(depositStats._sum?.amount || 0),
+          totalUnlocksCC: Math.abs(Number(unlockStats._sum?.amount || 0)), // CHAPTER_UNLOCK is a negative amount generally for the user
+          totalTipsCC: Math.abs(Number(tipSentStats._sum?.amount || 0)),
         }
       }
     }, { status: 200 });
