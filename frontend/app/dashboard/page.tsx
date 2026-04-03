@@ -431,9 +431,19 @@ export default function DashboardPage() {
                   <h1 className="text-2xl font-bold text-ghost-white">
                     {user.displayName}
                   </h1>
-                  <span className="text-xs px-2 py-0.5 rounded-full bg-pulse-blue/10 text-pulse-blue border border-pulse-blue/20">
-                    The Manager
-                  </span>
+                  {isAdmin ? (
+                    <a
+                      href="/admin"
+                      className="text-xs px-2 py-0.5 rounded-full bg-neon-red/10 text-neon-red border border-neon-red/30 hover:bg-neon-red hover:text-white transition-all cursor-pointer"
+                      title="Open Admin Dashboard"
+                    >
+                      🛡️ The Manager
+                    </a>
+                  ) : (
+                    <span className="text-xs px-2 py-0.5 rounded-full bg-pulse-blue/10 text-pulse-blue border border-pulse-blue/20">
+                      The Manager
+                    </span>
+                  )}
                 </div>
                 <p className="text-sm text-ghost-muted font-mono">
                   {user.walletAddress}
