@@ -4,6 +4,7 @@ import React, { useEffect, useState } from "react";
 import Header from "../components/Header";
 import Footer from "../components/Footer";
 import LoginModal from "../components/LoginModal";
+import { useAuth } from "@/app/hooks/useAuth";
 
 export default function AdminDashboardPage() {
   const [overview, setOverview] = useState<any>(null);
@@ -11,9 +12,17 @@ export default function AdminDashboardPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [showLogin, setShowLogin] = useState(false);
+  const { isAuthenticated, localAuthChecked } = useAuth();
+
+  // Used to manually re-trigger fetch
+  const [triggerCount, setTriggerCount] = useState(0);
 
   useEffect(() => {
+    if (!localAuthChecked) return; // Wait for initial auth check
+
     const fetchData = async () => {
+      setLoading(true);
+      setError(null);
       try {
         const [overviewRes, timeseriesRes] = await Promise.all([
           fetch("/api/admin/stats/overview"),
@@ -21,7 +30,7 @@ export default function AdminDashboardPage() {
         ]);
 
         if (overviewRes.status === 401 || overviewRes.status === 403) {
-          setError("Access Denied: You do not have admin privileges. Set your ADMIN_EMAILS env variable.");
+          setError("Access Denied: You do not have admin privileges. If you are an admin, please log in.");
           setLoading(false);
           return;
         }
@@ -39,9 +48,15 @@ export default function AdminDashboardPage() {
       }
     };
     fetchData();
-  }, []);
+  }, [isAuthenticated, localAuthChecked, triggerCount]);
 
-  if (loading) {
+  // Handle successful login or modal close gracefully
+  const handleModalClose = () => {
+    setShowLogin(false);
+    // If they closed the modal and they are now authenticated, the useEffect will automatically refetch!
+  };
+
+  if (!localAuthChecked || loading) {
     return (
       <div className="min-h-screen bg-[#0A0A0A] text-ghost flex items-center justify-center">
         <p className="text-terminal-green animate-pulse">Loading Admin Stats...</p>
@@ -64,7 +79,7 @@ export default function AdminDashboardPage() {
             Return Home
           </a>
         </div>
-        <LoginModal isOpen={showLogin} onClose={() => { setShowLogin(false); window.location.reload(); }} />
+        <LoginModal isOpen={showLogin} onClose={handleModalClose} />
       </div>
     );
   }
@@ -83,49 +98,49 @@ export default function AdminDashboardPage() {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
           <StatCard 
             title="Human Users" 
-            value={overview?.identities.users.total} 
-            delta={overview?.identities.users.delta24h} 
+            value={overview?.identities?.users?.total} 
+            delta={overview?.identities?.users?.delta24h} 
             suffix="" 
           />
           <StatCard 
             title="AI Agents" 
-            value={overview?.identities.agents.total} 
-            delta={overview?.identities.agents.delta24h} 
+            value={overview?.identities?.agents?.total} 
+            delta={overview?.identities?.agents?.delta24h} 
             suffix="" 
           />
           <StatCard 
             title="Novels" 
-            value={overview?.content.novels.total} 
-            delta={overview?.content.novels.delta24h} 
+            value={overview?.content?.novels?.total} 
+            delta={overview?.content?.novels?.delta24h} 
             suffix="" 
           />
           <StatCard 
             title="Chapters" 
-            value={overview?.content.chapters.total} 
+            value={overview?.content?.chapters?.total} 
             delta={null} 
             suffix="" 
           />
           <StatCard 
             title="Platform Deposits" 
-            value={overview?.financials.totalDepositsCC} 
+            value={overview?.financials?.totalDepositsCC} 
             delta={null} 
             suffix=" CC" 
           />
           <StatCard 
             title="Volume (Unlocks)" 
-            value={overview?.financials.totalUnlocksCC} 
+            value={overview?.financials?.totalUnlocksCC} 
             delta={null} 
             suffix=" CC" 
           />
           <StatCard 
             title="Volume (Tips)" 
-            value={overview?.financials.totalTipsCC} 
+            value={overview?.financials?.totalTipsCC} 
             delta={null} 
             suffix=" CC" 
           />
           <StatCard 
             title="Skills & Lores" 
-            value={(overview?.content.skills.total || 0) + (overview?.content.lores.total || 0)} 
+            value={(overview?.content?.skills?.total || 0) + (overview?.content?.lores?.total || 0)} 
             delta={null} 
             suffix="" 
           />
@@ -149,7 +164,7 @@ export default function AdminDashboardPage() {
                 </tr>
               </thead>
               <tbody className="divide-y divide-white/5">
-                {timeseries.map((day, idx) => (
+                {timeseries && timeseries.length > 0 ? timeseries.map((day, idx) => (
                   <tr key={day.date} className="hover:bg-white/5 transition-colors">
                     <td className="py-4 pl-2 text-white">{day.date}</td>
                     <td className="py-4 text-right text-terminal-green">{day.newUsers > 0 ? `+${day.newUsers}` : '-'}</td>
@@ -158,7 +173,7 @@ export default function AdminDashboardPage() {
                     <td className="py-4 text-right text-white">{day.depositsCC > 0 ? day.depositsCC : '-'}</td>
                     <td className="py-4 text-right pr-2 text-white">{day.tipsCC > 0 ? day.tipsCC : '-'}</td>
                   </tr>
-                ))}
+                )) : null}
               </tbody>
             </table>
           </div>
