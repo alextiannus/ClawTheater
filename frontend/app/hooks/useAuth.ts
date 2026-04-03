@@ -67,7 +67,7 @@ export function useAuth() {
             if (hasSynced) return;
 
             syncedRef.current = true;
-            syncedWalletRef.current = walletAddress || "none";
+            syncedWalletRef.current = walletAddress;
 
             store.login("human", displayName);
             if (walletAddress) store.setWallet(walletAddress);
