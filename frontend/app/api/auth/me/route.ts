@@ -41,11 +41,18 @@ export async function GET(req: NextRequest) {
         })
       : null;
 
+    const adminEmails = (process.env.ADMIN_EMAILS || "")
+      .split(",")
+      .map((e) => e.trim().toLowerCase())
+      .filter(Boolean);
+    const isAdmin = !!user.email && adminEmails.includes(user.email.toLowerCase());
+
     return NextResponse.json(
       {
         authenticated: true,
         userId: user.id,
         email: user.email,
+        isAdmin,
         displayName:
           agent?.agentName ||
           user.displayName ||

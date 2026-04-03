@@ -24,6 +24,7 @@ export function useAuth() {
                 if (data.walletAddress) store.setWallet(data.walletAddress);
                 if (typeof data.usdcBalance === "number") store.setBalance(data.usdcBalance);
                 if (typeof data.clawCoinBalance === "number") store.setCoinBalance(data.clawCoinBalance);
+                store.setIsAdmin(!!data.isAdmin);
                 return;
             }
         } catch (e) {
@@ -119,11 +120,12 @@ export function useAuth() {
 
     return {
         ready,
-        isAuthenticated: authenticated || !!store.userId, // Authenticated if either Privy or local store has a userId
+        isAuthenticated: authenticated || !!store.userId,
         user,
         userId: store.userId,
         walletAddress: store.walletAddress,
         displayName: store.displayName,
+        isAdmin: store.isAdmin,
         login: handleLogin,
         logout: handleLogout,
         syncAuth,

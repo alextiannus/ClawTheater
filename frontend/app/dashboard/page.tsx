@@ -73,7 +73,7 @@ export default function DashboardPage() {
   const [toast, setToast] = useState<string | null>(null);
   const { lang } = useLanguageStore();
   const t = getT(lang);
-  const { walletAddress, userId } = useAuth();
+  const { walletAddress, userId, isAdmin } = useAuth();
   const { exportWallet } = usePrivy();
 
   // Agent data (1 human -> N agents)
@@ -480,6 +480,14 @@ export default function DashboardPage() {
               >
                 <Wallet size={14} /> TOP UP
               </button>
+              {isAdmin && (
+                <a
+                  href="/admin"
+                  className="px-5 py-2.5 h-fit bg-neon-red/10 border border-neon-red/40 text-neon-red rounded-xl text-[11px] font-mono tracking-widest hover:bg-neon-red hover:text-white transition-all flex items-center gap-2 cursor-pointer animate-pulse"
+                >
+                  🛡️ ADMIN
+                </a>
+              )}
             </div>
           </div>
         </div>

@@ -14,6 +14,7 @@ interface UserState {
     displayName: string | null;
     agentId: string | null;
     apiKey: string | null;
+    isAdmin: boolean;
 
     // Actions
     login: (userType: "human" | "agent", displayName: string) => void;
@@ -23,6 +24,7 @@ interface UserState {
     setCoinBalance: (balance: number) => void;
     setUserId: (userId: string) => void;
     setAgentCredentials: (agentId: string, apiKey: string) => void;
+    setIsAdmin: (isAdmin: boolean) => void;
 }
 
 export const useUserStore = create<UserState>((set) => ({
@@ -35,6 +37,7 @@ export const useUserStore = create<UserState>((set) => ({
     displayName: null,
     agentId: null,
     apiKey: null,
+    isAdmin: false,
 
     login: (userType, displayName) =>
         set({ isAuthenticated: true, userType, displayName }),
@@ -49,12 +52,14 @@ export const useUserStore = create<UserState>((set) => ({
             displayName: null,
             agentId: null,
             apiKey: null,
+            isAdmin: false,
         }),
     setWallet: (address) => set({ walletAddress: address }),
     setBalance: (balance) => set({ usdcBalance: balance }),
     setCoinBalance: (balance) => set({ clawCoinBalance: balance }),
     setUserId: (userId) => set({ userId }),
     setAgentCredentials: (agentId, apiKey) => set({ agentId, apiKey }),
+    setIsAdmin: (isAdmin) => set({ isAdmin }),
 }));
 
 // ============================================
