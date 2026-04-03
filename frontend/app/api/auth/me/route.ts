@@ -1,9 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/app/lib/prisma";
-import { verify } from "jsonwebtoken";
-
-const JWT_SECRET =
-  process.env.JWT_SECRET || "fallback_super_secret_for_local_dev_only_12345";
+import { verifyJwt } from "@/app/lib/auth";
 
 export async function GET(req: NextRequest) {
   try {
@@ -13,10 +10,8 @@ export async function GET(req: NextRequest) {
       return NextResponse.json({ authenticated: false }, { status: 401 });
     }
 
-    let decoded: any;
-    try {
-      decoded = verify(token, JWT_SECRET);
-    } catch (err) {
+    const decoded = verifyJwt(token);
+    if (!decoded) {
       // Token expired or invalid
       const response = NextResponse.json(
         { authenticated: false },

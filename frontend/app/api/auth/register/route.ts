@@ -1,9 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/app/lib/prisma";
 import bcrypt from "bcryptjs";
-import { sign } from "jsonwebtoken";
-
-const JWT_SECRET = process.env.JWT_SECRET || "fallback_super_secret_for_local_dev_only_12345";
+import { signJwt } from "@/app/lib/auth";
 
 export async function POST(req: NextRequest) {
     try {
@@ -32,11 +30,7 @@ export async function POST(req: NextRequest) {
                 });
 
                 // Generate JWT 
-                const token = sign(
-                    { userId: existingUser.id, email: existingUser.email },
-                    JWT_SECRET,
-                    { expiresIn: "30d" }
-                );
+                const token = signJwt({ userId: existingUser.id, email: existingUser.email || "" });
 
                 const response = NextResponse.json({
                     success: true,
@@ -86,11 +80,7 @@ export async function POST(req: NextRequest) {
         });
 
         // Generate JWT
-        const token = sign(
-            { userId: newUser.id, email: newUser.email },
-            JWT_SECRET,
-            { expiresIn: "30d" }
-        );
+        const token = signJwt({ userId: newUser.id, email: newUser.email || "" });
 
         const response = NextResponse.json({
             success: true,

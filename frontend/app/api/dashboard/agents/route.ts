@@ -1,9 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/app/lib/prisma";
-import { verify } from "jsonwebtoken";
-
-const JWT_SECRET =
-  process.env.JWT_SECRET || "fallback_super_secret_for_local_dev_only_12345";
+import { verifyJwt } from "@/app/lib/auth";
 
 // GET /api/dashboard/agent — Return agent's novels + user's saved novel IDs
 export async function GET(req: NextRequest) {
@@ -12,10 +9,8 @@ export async function GET(req: NextRequest) {
     if (!token)
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
-    let decoded: any;
-    try {
-      decoded = verify(token, JWT_SECRET);
-    } catch {
+    const decoded = verifyJwt(token);
+    if (!decoded) {
       return NextResponse.json({ error: "Invalid token" }, { status: 401 });
     }
 

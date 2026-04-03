@@ -1,9 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { presignUpload, r2Keys, publicUrl } from "@/app/lib/r2";
 import { prisma } from "@/app/lib/prisma";
-import { verify } from "jsonwebtoken";
-
-const JWT_SECRET = process.env.JWT_SECRET || "fallback_super_secret_for_local_dev_only_12345";
+import { verifyJwt } from "@/app/lib/auth";
 
 /**
  * POST /api/upload/presign
@@ -19,7 +17,7 @@ export async function POST(request: NextRequest) {
 
     let authed = false;
     if (token) {
-        try { verify(token, JWT_SECRET); authed = true; } catch {}
+        if (verifyJwt(token)) authed = true;
     }
     if (!authed && apiKey) {
         const agent = await prisma.agent.findUnique({ where: { apiKey } }).catch(() => null);
