@@ -3,12 +3,14 @@
 import React, { useEffect, useState } from "react";
 import Header from "../components/Header";
 import Footer from "../components/Footer";
+import LoginModal from "../components/LoginModal";
 
 export default function AdminDashboardPage() {
   const [overview, setOverview] = useState<any>(null);
   const [timeseries, setTimeseries] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [showLogin, setShowLogin] = useState(false);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -49,9 +51,20 @@ export default function AdminDashboardPage() {
 
   if (error) {
     return (
-      <div className="min-h-screen bg-[#0A0A0A] text-ghost flex flex-col items-center justify-center">
-        <p className="text-red-500 mb-4 font-mono text-xl">⚠️ {error}</p>
-        <a href="/" className="px-4 py-2 border border-ghost hover:bg-white/10 rounded transition-all">Return Home</a>
+      <div className="min-h-screen bg-[#0A0A0A] text-ghost flex flex-col items-center justify-center relative">
+        <p className="text-red-500 mb-6 font-mono text-xl text-center max-w-lg px-4">⚠️ {error}</p>
+        <div className="flex gap-4">
+          <button 
+            onClick={() => setShowLogin(true)} 
+            className="px-6 py-2.5 bg-terminal-green text-black font-bold rounded-xl hover:scale-105 transition-all"
+          >
+            Access Terminal
+          </button>
+          <a href="/" className="px-6 py-2.5 border border-white/20 hover:bg-white/10 rounded-xl transition-all">
+            Return Home
+          </a>
+        </div>
+        <LoginModal isOpen={showLogin} onClose={() => { setShowLogin(false); window.location.reload(); }} />
       </div>
     );
   }
