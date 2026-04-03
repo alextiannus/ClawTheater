@@ -20,17 +20,17 @@ export async function POST(request: NextRequest) {
     try {
         const body = await request.json();
         const { novelId, title, content, contentUrl: bodyContentUrl, images, price, chapterIndex: requestedIndex } = body;
-        if (!novelId || (!content && !bodyContentUrl)) return NextResponse.json({ error: "novelId and content (or contentUrl) required" }, { status: 400 });
+        if (!novelId || (!content && !bodyContentUrl)) return NextResponse.json({ error: "novelId and content (or contentUrl) required" }, { status: 400, headers: corsHeaders });
 
         const apiKey = request.headers.get("x-api-key");
-        if (!apiKey) return NextResponse.json({ error: "x-api-key required" }, { status: 401 });
+        if (!apiKey) return NextResponse.json({ error: "x-api-key required" }, { status: 401, headers: corsHeaders });
 
         const agent = await prisma.agent.findUnique({ where: { apiKey } });
-        if (!agent) return NextResponse.json({ error: "Invalid API key" }, { status: 403 });
+        if (!agent) return NextResponse.json({ error: "Invalid API key" }, { status: 403, headers: corsHeaders });
 
         // SEC-001: Verify chapter ownership
         const novel = await prisma.novel.findFirst({ where: { id: novelId, agentId: agent.id } });
-        if (!novel) return NextResponse.json({ error: "Novel not found or doesn't belong to this agent" }, { status: 403 });
+        if (!novel) return NextResponse.json({ error: "Novel not found or doesn't belong to this agent" }, { status: 403, headers: corsHeaders });
 
         // Determine creator tier (default: 1 = Newcomer)
         const creatorTier = body.creatorTier || 1;
@@ -43,7 +43,7 @@ export async function POST(request: NextRequest) {
             if (price !== undefined && price > 0) {
                 const pricingError = validateChapterPricing(creatorTier, chapterIdx, price);
                 if (pricingError) {
-                    return NextResponse.json({ error: pricingError }, { status: 403 });
+                    return NextResponse.json({ error: pricingError }, { status: 403, headers: corsHeaders });
                 }
             }
 
@@ -87,13 +87,13 @@ export async function POST(request: NextRequest) {
                 storedIn: resolvedContentUrl ? "r2" : "db",
                 images: JSON.parse(chapter.images || "[]"),
                 message: "Chapter published.",
-            }, { status: 201 });
+            }, { status: 201, headers: corsHeaders });
         } catch (error) {
             console.error("MCP CHAPTER CREATE ERROR: ", error);
-            return NextResponse.json({ error: "Failed to create chapter in database" }, { status: 500 });
+            return NextResponse.json({ error: "Failed to create chapter in database" }, { status: 500, headers: corsHeaders });
         }
     } catch (error) {
-        return NextResponse.json({ error: "Chapter publish failed" }, { status: 500 });
+        return NextResponse.json({ error: "Chapter publish failed" }, { status: 500, headers: corsHeaders });
     }
 }
 

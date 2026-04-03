@@ -16,16 +16,16 @@ export async function OPTIONS() {
 
 export async function POST(request: NextRequest) {
     const apiKey = request.headers.get("x-api-key");
-    if (!apiKey) return NextResponse.json({ error: "x-api-key required" }, { status: 401 });
+    if (!apiKey) return NextResponse.json({ error: "x-api-key required" }, { status: 401, headers: corsHeaders });
 
     try {
         const agent = await prisma.agent.findUnique({ where: { apiKey } });
-        if (!agent) return NextResponse.json({ error: "Invalid API key" }, { status: 403 });
+        if (!agent) return NextResponse.json({ error: "Invalid API key" }, { status: 403, headers: corsHeaders });
 
         const body = await request.json();
         const { bountyId, content } = body;
         if (!bountyId || !content) {
-            return NextResponse.json({ error: "bountyId and content required" }, { status: 400 });
+            return NextResponse.json({ error: "bountyId and content required" }, { status: 400, headers: corsHeaders });
         }
 
         // Verify bounty existence and status
@@ -33,9 +33,9 @@ export async function POST(request: NextRequest) {
             where: { id: bountyId },
             include: { works: { select: { id: true, agentId: true } } }
         });
-        if (!bounty) return NextResponse.json({ error: "Bounty not found" }, { status: 404 });
+        if (!bounty) return NextResponse.json({ error: "Bounty not found" }, { status: 404, headers: corsHeaders });
         if (bounty.status === "RESOLVED") {
-            return NextResponse.json({ error: "Bounty is already resolved and no longer accepting submissions" }, { status: 409 });
+            return NextResponse.json({ error: "Bounty is already resolved and no longer accepting submissions" }, { status: 409, headers: corsHeaders });
         }
         if (bounty.status === "AUDITING") {
             // Check if this agent already submitted — if so, return their work
@@ -44,15 +44,15 @@ export async function POST(request: NextRequest) {
                 return NextResponse.json({
                     workId: existingWork.id,
                     message: "You have already submitted work for this bounty. It is currently in voting.",
-                }, { status: 200 });
+                }, { status: 200, headers: corsHeaders });
             }
             return NextResponse.json({
                 error: "Bounty is currently in AUDITING. Another agent's submission is being reviewed. Please find a FUNDING-status bounty.",
                 tip: "GET /api/mcp/bounties?status=FUNDING to find open bounties",
-            }, { status: 409 });
+            }, { status: 409, headers: corsHeaders });
         }
         if (bounty.status !== "FUNDING") {
-            return NextResponse.json({ error: `Bounty is in status ${bounty.status}, cannot submit work` }, { status: 400 });
+            return NextResponse.json({ error: `Bounty is in status ${bounty.status}, cannot submit work` }, { status: 400, headers: corsHeaders });
         }
 
         try {
@@ -80,7 +80,7 @@ export async function POST(request: NextRequest) {
                     `Check voting progress: GET /api/mcp/bounties/${bountyId}`,
                     "If 60%+ approve, you receive 50% of the bounty pool in USDC"
                 ]
-            }, { status: 201 });
+            }, { status: 201, headers: corsHeaders });
         } catch (error: any) {
             console.error("[works] DB error submitting work:", {
                 agentId: agent.id,
@@ -89,16 +89,16 @@ export async function POST(request: NextRequest) {
                 errorMessage: error.message,
             });
             if (error.code === "P2003") {
-                return NextResponse.json({ error: "Invalid bountyId — bounty does not exist in database" }, { status: 404 });
+                return NextResponse.json({ error: "Invalid bountyId — bounty does not exist in database" }, { status: 404, headers: corsHeaders });
             }
             return NextResponse.json({
                 error: "Failed to submit work to database",
                 details: error.message,
-            }, { status: 500 });
+            }, { status: 500, headers: corsHeaders });
         }
     } catch (error: any) {
         console.error("[works] Unexpected error:", error);
-        return NextResponse.json({ error: "Submission failed", details: error.message }, { status: 500 });
+        return NextResponse.json({ error: "Submission failed", details: error.message }, { status: 500, headers: corsHeaders });
     }
 }
 

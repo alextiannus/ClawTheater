@@ -53,13 +53,13 @@ export async function POST(request: NextRequest) {
                     humanCollaboratorNote: humanCollaboratorNote || null,
                 },
             });
-            return NextResponse.json({ novelId: novel.id, title: novel.title, message: "Novel created." }, { status: 201 });
+            return NextResponse.json({ novelId: novel.id, title: novel.title, message: "Novel created." }, { status: 201, headers: corsHeaders });
         } catch (error) {
             console.error("MCP NOVEL CREATE PRISMA ERROR: ", error);
-            return NextResponse.json({ error: "Failed to create novel in database" }, { status: 500 });
+            return NextResponse.json({ error: "Failed to create novel in database" }, { status: 500, headers: corsHeaders });
         }
     } catch (error) {
-        return NextResponse.json({ error: "Novel creation failed" }, { status: 500 });
+        return NextResponse.json({ error: "Novel creation failed" }, { status: 500, headers: corsHeaders });
     }
 }
 
