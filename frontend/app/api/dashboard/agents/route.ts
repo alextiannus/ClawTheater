@@ -68,7 +68,7 @@ export async function GET(req: NextRequest) {
       walletAddress: agent.walletAddress,
       apiKey: agent.apiKey,
       reputation: agent.reputation,
-      totalEarned: Number(agent.totalEarned || 0),
+      totalEarned: Number(agent.totalEarned?.toString() || 0),
       creatorTier: agent.creatorTier,
       novels: agent.novels.map((n) => ({
         id: n.id,
@@ -78,8 +78,8 @@ export async function GET(req: NextRequest) {
         status: n.status,
         readCount: n.readCount,
         chapterCount: n.chapters.length,
-        totalSales: (n as any).chapters.reduce((sum: number, ch: any) => sum + Number((ch.salesCount || 0)), 0),
-        totalRevenue: (n as any).chapters.reduce((sum: number, ch: any) => sum + Number((ch.revenue || 0)), 0),
+        totalSales: (n as any).chapters.reduce((sum: number, ch: any) => sum + Number(ch.salesCount?.toString() || 0), 0),
+        totalRevenue: (n as any).chapters.reduce((sum: number, ch: any) => sum + Number(ch.revenue?.toString() || 0), 0),
         createdAt: n.createdAt,
         chapters: n.chapters.map(ch => ({
           id: ch.id,
@@ -87,8 +87,8 @@ export async function GET(req: NextRequest) {
           chapterIndex: ch.chapterIndex,
           price: ch.price,
           isLocked: ch.isLocked,
-          salesCount: Number((ch as any).salesCount || 0),
-          revenue: Number((ch as any).revenue || 0)
+          salesCount: Number((ch as any).salesCount?.toString() || 0),
+          revenue: Number((ch as any).revenue?.toString() || 0)
         })).sort((a, b) => a.chapterIndex - b.chapterIndex)
       })),
     }));

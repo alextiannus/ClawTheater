@@ -91,9 +91,9 @@ export async function GET(req: NextRequest) {
     financialTxs.forEach(tx => {
         const dateStr = toDateString(tx.createdAt);
         if (dailyStats[dateStr]) {
-            if (tx.type === "DEPOSIT") dailyStats[dateStr].depositsCC += Number(tx.amount || 0);
-            if (tx.type === "CHAPTER_UNLOCK") dailyStats[dateStr].unlocksCC += Math.abs(Number(tx.amount || 0));
-            if (tx.type === "TIP_SENT") dailyStats[dateStr].tipsCC += Math.abs(Number(tx.amount || 0));
+            if (tx.type === "DEPOSIT") dailyStats[dateStr].depositsCC += Number(tx.amount?.toString() || 0);
+            if (tx.type === "CHAPTER_UNLOCK") dailyStats[dateStr].unlocksCC += Math.abs(Number(tx.amount?.toString() || 0));
+            if (tx.type === "TIP_SENT") dailyStats[dateStr].tipsCC += Math.abs(Number(tx.amount?.toString() || 0));
         }
     });
 

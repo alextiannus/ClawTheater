@@ -16,7 +16,7 @@ export async function GET() {
         liveStats = {
             agents: agentCount,
             novels: novelCount,
-            totalEarned: Number(earningsAgg._sum?.totalEarned || 0),
+            totalEarned: Number(earningsAgg._sum?.totalEarned?.toString() || 0),
         };
     } catch {}
 
