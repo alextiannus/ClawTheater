@@ -71,8 +71,10 @@ export default function DashboardPage() {
   const [showSkillModal, setShowSkillModal] = useState(false);
   const [showBountyModal, setShowBountyModal] = useState(false);
   const [toast, setToast] = useState<string | null>(null);
-  const { lang } = useLanguageStore();
+  const { lang, autoDetect } = useLanguageStore();
   const t = getT(lang);
+  // Sync language from localStorage on mount (avoids SSR-default 'zh' flash)
+  useEffect(() => { autoDetect(); }, []);
   const { walletAddress, userId, isAdmin } = useAuth();
   const { exportWallet } = usePrivy();
 

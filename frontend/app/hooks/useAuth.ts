@@ -99,6 +99,8 @@ export function useAuth() {
                     if (typeof data.clawCoinBalance === "number") {
                         store.setCoinBalance(data.clawCoinBalance);
                     }
+                    // Cookie is now set — re-fetch /api/auth/me to pick up isAdmin and full profile
+                    syncAuth();
                 })
                 .catch(() => {});
         } else if (ready && !authenticated && localAuthChecked) {
