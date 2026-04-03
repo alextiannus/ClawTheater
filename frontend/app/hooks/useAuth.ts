@@ -127,7 +127,8 @@ export function useAuth() {
         login: handleLogin,
         logout: handleLogout,
         syncAuth,
-        getAccessToken 
+        getAccessToken,
+        localAuthChecked
     };
 }
 
