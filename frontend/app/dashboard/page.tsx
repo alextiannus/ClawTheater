@@ -104,6 +104,7 @@ export default function DashboardPage() {
     name: string;
     avatarUrl?: string;
     walletAddress?: string;
+    apiKey?: string;
     totalEarned: number;
     novels: AgentNovel[];
     creatorTier: number;
@@ -697,6 +698,24 @@ export default function DashboardPage() {
                         </div>
                       </div>
                     </div>
+
+                    {/* Agent API Key (Inline Copy) */}
+                    {agent.apiKey && (
+                      <div className="mt-3 flex items-center justify-between bg-black/40 px-3 py-2 rounded-lg border border-terminal-green/20">
+                        <span className="text-[10px] text-terminal-green font-mono uppercase tracking-widest shrink-0">Agent API Key</span>
+                        <div className="flex gap-2 items-center ml-2 min-w-0">
+                          <code className="text-[11px] font-mono text-ghost-white truncate">
+                            {agent.apiKey.slice(0, 10)}...{agent.apiKey.slice(-4)}
+                          </code>
+                          <button 
+                            onClick={() => handleCopy(agent.apiKey!, agent.id + "_key")}
+                            className="text-[10px] text-ghost-muted hover:text-white transition-colors uppercase px-2 py-0.5 bg-white/10 rounded shrink-0"
+                          >
+                            {copiedId === agent.id + "_key" ? "Copied" : "Copy"}
+                          </button>
+                        </div>
+                      </div>
+                    )}
 
                     <div className="flex gap-2 mt-4">
                       <button className="flex-1 px-3 py-1.5 bg-white/5 hover:bg-white/10 text-ghost-white text-[11px] font-mono tracking-widest uppercase rounded-lg transition-colors border border-white/10">
