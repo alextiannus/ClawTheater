@@ -128,10 +128,19 @@ export default function MarketPage() {
         API: "API",
     };
 
+    // Deduplicate by name and remove the PINNED installer
+    const uniqueSkills = skills.reduce((acc, skill) => {
+        if (skill.name === "ClawTheaterSkillInstaller") return acc;
+        if (!acc.find(s => s.name === skill.name)) {
+            acc.push(skill);
+        }
+        return acc;
+    }, [] as SkillItem[]);
+
     // Skills Hub — skills-only marketplace. Datasets are shared via Discord community.
     const filtered = filter === "All"
-        ? skills.filter((s) => s.type !== "DATASET")
-        : skills.filter((s) => s.type === typeMap[filter]);
+        ? uniqueSkills.filter((s) => s.type !== "DATASET")
+        : uniqueSkills.filter((s) => s.type === typeMap[filter]);
 
     const triggerDownload = (name: string, content: any, fileName?: string) => {
         const text = typeof content === "string"

@@ -206,9 +206,12 @@ function ChapterReader() {
     // ── Data fetching ─────────────────────────────────────────────
     useEffect(() => {
         if (!novelId) return;
+        let isMounted = true;
+        
         fetch(`/api/novels/${novelId}/chapters`)
             .then(r => r.json())
             .then(data => {
+                if (!isMounted) return;
                 setNovel(data.novel);
                 const chs: Chapter[] = (data.chapters || []).map((c: any) => ({
                     id: c.id,
@@ -219,18 +222,28 @@ function ChapterReader() {
                     price: c.price || 0,
                 }));
                 setChapters(chs);
-                const targetIdx = chs.findIndex(c => c.chapterIndex === chapterParam);
-                setCurrentIndex(targetIdx >= 0 ? targetIdx : 0);
                 setLoading(false);
             })
-            .catch(() => setLoading(false));
-    }, [novelId, chapterParam]);
+            .catch(() => { if (isMounted) setLoading(false); });
+            
+        return () => { isMounted = false; };
+    }, [novelId]);
+
+    // Sync URL parameter changes to the state (e.g. Browser Back/Forward buttons)
+    useEffect(() => {
+        if (chapters.length === 0) return;
+        const targetIdx = chapters.findIndex(c => c.chapterIndex === chapterParam);
+        if (targetIdx >= 0 && targetIdx !== currentIndex) {
+            setCurrentIndex(targetIdx);
+        }
+    }, [chapterParam, chapters, currentIndex]);
+
+    const currentChapterId = chapters[currentIndex]?.id;
 
     // Load comments when chapter changes
     useEffect(() => {
-        const chapter = chapters[currentIndex];
-        if (!chapter) return;
-        fetch(`/api/comments?chapterId=${chapter.id}`)
+        if (!currentChapterId) return;
+        fetch(`/api/comments?chapterId=${currentChapterId}`)
             .then(r => r.json())
             .then(data => {
                 setComments(data.comments || []);
@@ -240,7 +253,7 @@ function ChapterReader() {
         setShowComments(false);
         setNewComment("");
         setSelectionPopup(null);
-    }, [currentIndex, chapters]);
+    }, [currentChapterId]);
 
     const showToast = (msg: string) => {
         setToast(msg);
