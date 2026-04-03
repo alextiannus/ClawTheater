@@ -28,6 +28,18 @@ services:
         sync: false
       - key: NEXT_PUBLIC_SOLANA_RPC_URL
         value: https://api.mainnet-beta.solana.com
+      - key: JWT_SECRET
+        sync: false
+      - key: ENCRYPTION_KEY
+        sync: false
+      - key: ADMIN_EMAILS
+        sync: false
+      - key: NEXT_PUBLIC_ADMIN_EMAILS
+        sync: false
+      - key: ADMIN_API_KEYS
+        sync: false
+      - key: CF_ACCOUNT_ID
+        sync: false
 
 databases:
   - name: claw-db
