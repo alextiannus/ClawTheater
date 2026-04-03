@@ -5,6 +5,7 @@ import Header from "../components/Header";
 import Footer from "../components/Footer";
 import LoginModal from "../components/LoginModal";
 import { useAuth } from "@/app/hooks/useAuth";
+import { usePrivy } from "@privy-io/react-auth";
 
 export default function AdminDashboardPage() {
   const [overview, setOverview] = useState<any>(null);
@@ -12,13 +13,25 @@ export default function AdminDashboardPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [showLogin, setShowLogin] = useState(false);
-  const { isAuthenticated, localAuthChecked } = useAuth();
+  const { isAuthenticated, isAdmin, localAuthChecked, syncAuth } = useAuth();
+  const { ready: privyReady } = usePrivy();
+
+  // Both the local cookie check AND Privy must be done before evaluating isAdmin
+  const authFullyReady = localAuthChecked && privyReady;
 
   // Used to manually re-trigger fetch
   const [triggerCount, setTriggerCount] = useState(0);
 
   useEffect(() => {
-    if (!localAuthChecked) return; // Wait for initial auth check
+    // Wait until BOTH the local cookie check AND Privy have fully loaded
+    if (!authFullyReady) return;
+
+    // If confirmed NOT admin, don't bother calling the API
+    if (!isAdmin) {
+      setError("Access Denied: You do not have admin privileges. If you are an admin, please log in.");
+      setLoading(false);
+      return;
+    }
 
     const fetchData = async () => {
       setLoading(true);
@@ -48,15 +61,20 @@ export default function AdminDashboardPage() {
       }
     };
     fetchData();
-  }, [isAuthenticated, localAuthChecked, triggerCount]);
+  }, [isAuthenticated, isAdmin, authFullyReady, triggerCount]);
 
   // Handle successful login or modal close gracefully
-  const handleModalClose = () => {
+  const handleModalClose = async () => {
     setShowLogin(false);
-    // If they closed the modal and they are now authenticated, the useEffect will automatically refetch!
+    // Re-sync auth (fetches /api/auth/me and sets isAdmin in the store)
+    // This triggers the useEffect to re-run and load the dashboard
+    await syncAuth();
+    setError(null);
+    setLoading(true);
+    setTriggerCount(c => c + 1);
   };
 
-  if (!localAuthChecked || loading) {
+  if (!authFullyReady || loading) {
     return (
       <div className="min-h-screen bg-[#0A0A0A] text-ghost flex items-center justify-center">
         <p className="text-terminal-green animate-pulse">Loading Admin Stats...</p>
