@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/app/lib/prisma";
+import { signJwt } from "@/app/lib/auth";
 
 // POST /api/auth/sync — Upsert User record after Privy login
 export async function POST(request: NextRequest) {
@@ -28,13 +29,29 @@ export async function POST(request: NextRequest) {
                 },
             });
 
-            return NextResponse.json({
+            const token = signJwt({
+                userId: user.id,
+                email: user.email || "",
+                walletAddress: user.walletAddress || undefined,
+            });
+
+            const response = NextResponse.json({
                 userId: user.id,
                 isNew: user.createdAt.getTime() > Date.now() - 5000,
                 usdcBalance: user.usdcBalance,
                 clawCoinBalance: user.clawCoinBalance,
                 displayName: user.displayName,
             });
+
+            response.cookies.set("ct_auth_token", token, {
+                httpOnly: true,
+                secure: process.env.NODE_ENV === "production",
+                sameSite: "lax",
+                maxAge: 30 * 24 * 60 * 60, // 30 days
+                path: "/",
+            });
+
+            return response;
         } catch (dbError) {
             // DB fallback
             return NextResponse.json({
