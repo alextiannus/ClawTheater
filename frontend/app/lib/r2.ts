@@ -3,26 +3,26 @@
  * Cloudflare R2 client — S3-compatible via @aws-sdk/client-s3
  *
  * Env vars (set in Render):
- *   CLOUDFLARE_ACCOUNT_ID
- *   R2_ACCESS_KEY_ID
- *   R2_SECRET_ACCESS_KEY
- *   R2_BUCKET_NAME
- *   R2_PUBLIC_URL  — e.g. https://pub-xxxx.r2.dev or your custom domain
+ *   CF_ACCOUNT_ID
+ *   CF_R2_ACCESS_KEY_ID
+ *   CF_R2_SECRET_ACCESS_KEY
+ *   CF_R2_BUCKET_NAME
+ *   CF_R2_PUBLIC_URL  — e.g. https://pub-xxxx.r2.dev or your custom domain
  */
 
 import { S3Client, PutObjectCommand, DeleteObjectCommand, GetObjectCommand } from "@aws-sdk/client-s3";
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 
-const accountId = process.env.CLOUDFLARE_ACCOUNT_ID!;
-export const BUCKET = process.env.R2_BUCKET_NAME || "clawtheater";
-export const R2_PUBLIC_URL = (process.env.R2_PUBLIC_URL || "").replace(/\/$/, "");
+const accountId = process.env.CF_ACCOUNT_ID!;
+export const BUCKET = process.env.CF_R2_BUCKET_NAME || "clawtheater";
+export const R2_PUBLIC_URL = (process.env.CF_R2_PUBLIC_URL || "").replace(/\/$/, "");
 
 export const r2 = new S3Client({
     region: "auto",
     endpoint: `https://${accountId}.r2.cloudflarestorage.com`,
     credentials: {
-        accessKeyId: process.env.R2_ACCESS_KEY_ID!,
-        secretAccessKey: process.env.R2_SECRET_ACCESS_KEY!,
+        accessKeyId: process.env.CF_R2_ACCESS_KEY_ID!,
+        secretAccessKey: process.env.CF_R2_SECRET_ACCESS_KEY!,
     },
 });
 
@@ -61,8 +61,9 @@ export async function deleteObject(key: string): Promise<void> {
 
 // ─── Key helpers ─────────────────────────────────────────────────────
 export const r2Keys = {
-    cover: (novelId: string, ext = "jpg") => `covers/${novelId}.${ext}`,
-    hero: (novelId: string, ext = "jpg") => `heroes/${novelId}.${ext}`,
-    chapter: (novelId: string, chapterIndex: number) => `chapters/${novelId}/${chapterIndex}.txt`,
-    avatar: (agentId: string, ext = "png") => `avatars/${agentId}.${ext}`,
+    cover:      (novelId: string, ext = "jpg")  => `covers/${novelId}.${ext}`,
+    hero:       (novelId: string, ext = "jpg")  => `heroes/${novelId}.${ext}`,
+    chapter:    (novelId: string, chapterIndex: number) => `chapters/${novelId}/${chapterIndex}.txt`,
+    avatar:     (agentId: string, ext = "png")  => `avatars/agents/${agentId}.${ext}`,
+    userAvatar: (userId: string,  ext = "jpg")  => `avatars/users/${userId}.${ext}`,
 };

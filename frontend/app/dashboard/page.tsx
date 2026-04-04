@@ -7,6 +7,7 @@ import DepositModal from "@/app/components/DepositModal";
 import WithdrawModal from "@/app/components/WithdrawModal";
 import SkillUploadModal from "@/app/components/SkillUploadModal";
 import PostBountyModal from "@/app/components/PostBountyModal";
+import EditProfileModal from "@/app/components/EditProfileModal";
 import Link from "next/link";
 import Image from "next/image";
 import { Wallet } from "lucide-react";
@@ -69,13 +70,23 @@ export default function DashboardPage() {
   >("overview");
   const [showSkillModal, setShowSkillModal] = useState(false);
   const [showBountyModal, setShowBountyModal] = useState(false);
+  const [showEditProfile, setShowEditProfile] = useState(false);
   const [toast, setToast] = useState<string | null>(null);
+  const [profileAvatarUrl, setProfileAvatarUrl] = useState<string | null>(null);
   const { lang, autoDetect } = useLanguageStore();
   const t = getT(lang);
   // Sync language from localStorage on mount (avoids SSR-default 'zh' flash)
   useEffect(() => { autoDetect(); }, []);
-  const { walletAddress, userId, isAdmin } = useAuth();
+  const { walletAddress, userId, isAdmin, syncAuth, displayName: authDisplayName } = useAuth();
   const { exportWallet } = usePrivy();
+
+  // Fetch full profile (including avatarUrl) once we have a userId
+  useEffect(() => {
+    fetch("/api/profile")
+      .then((r) => r.ok ? r.json() : null)
+      .then((d) => { if (d?.avatarUrl) setProfileAvatarUrl(d.avatarUrl); })
+      .catch(() => {});
+  }, [userId]);
 
   // Agent data (1 human -> N agents)
   interface AgentChapter {
@@ -420,12 +431,25 @@ export default function DashboardPage() {
           {/* Profile Header */}
           <div className="glass-card p-6 mb-8">
             <div className="flex flex-col md:flex-row items-start md:items-center gap-6">
-              {/* Avatar */}
-              <div className="w-16 h-16 rounded-2xl overflow-hidden border border-white/10 flex-shrink-0 flex items-center justify-center bg-white/5">
-                <span className="text-3xl text-ghost-muted">
-                  {user.displayName?.charAt(0)?.toUpperCase() || "U"}
-                </span>
-              </div>
+              {/* Avatar — clickable, opens edit modal */}
+              <button
+                onClick={() => setShowEditProfile(true)}
+                className="relative w-16 h-16 rounded-2xl overflow-hidden border border-white/10 flex-shrink-0 flex items-center justify-center bg-white/5 group cursor-pointer hover:border-terminal-green/40 transition-all"
+                title={lang === "zh" ? "编辑资料" : "Edit profile"}
+              >
+                {profileAvatarUrl ? (
+                  <Image src={profileAvatarUrl} alt="avatar" fill className="object-cover" />
+                ) : (
+                  <span className="text-3xl text-ghost-muted">
+                    {user.displayName?.charAt(0)?.toUpperCase() || "U"}
+                  </span>
+                )}
+                {/* Hover overlay */}
+                <div className="absolute inset-0 bg-black/50 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                  <span className="text-white text-lg">✏️</span>
+                </div>
+              </button>
+
               <div className="flex-1">
                 <div className="flex items-center gap-2 mb-0.5">
                   <h1 className="text-2xl font-bold text-ghost-white">
@@ -444,11 +468,18 @@ export default function DashboardPage() {
                       The Manager
                     </span>
                   )}
+                  <button
+                    onClick={() => setShowEditProfile(true)}
+                    className="text-[10px] px-2 py-0.5 rounded-full bg-white/5 text-ghost-muted border border-white/10 hover:border-terminal-green/30 hover:text-terminal-green transition-all cursor-pointer"
+                  >
+                    ✏️ {lang === "zh" ? "编辑资料" : "Edit"}
+                  </button>
                 </div>
                 <p className="text-sm text-ghost-muted font-mono">
                   {user.walletAddress}
                 </p>
               </div>
+
               {/* Creator Tier Badge */}
               {(() => {
                 const tier = getCreatorTier((data as any)?.creatorTier || 1);
@@ -1050,6 +1081,21 @@ export default function DashboardPage() {
         <PostBountyModal
           isOpen={showBountyModal}
           onClose={() => setShowBountyModal(false)}
+        />
+        <EditProfileModal
+          isOpen={showEditProfile}
+          currentDisplayName={user.displayName}
+          currentAvatarUrl={profileAvatarUrl}
+          onClose={() => setShowEditProfile(false)}
+          onSaved={async () => {
+            // Re-sync auth store (updates displayName in header/dashboard)
+            await syncAuth();
+            // Re-fetch avatarUrl from profile API to update avatar display
+            fetch("/api/profile")
+              .then((r) => r.ok ? r.json() : null)
+              .then((d) => { if (d?.avatarUrl) setProfileAvatarUrl(d.avatarUrl); })
+              .catch(() => {});
+          }}
         />
       </main>
       <Footer />

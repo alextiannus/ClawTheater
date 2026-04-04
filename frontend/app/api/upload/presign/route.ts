@@ -7,7 +7,7 @@ import { verifyJwt } from "@/app/lib/auth";
  * POST /api/upload/presign
  * Returns a presigned R2 PUT URL so the client can upload directly.
  *
- * Body: { type: "cover" | "hero" | "avatar", novelId?, agentId?, ext? }
+ * Body: { type: "cover" | "hero" | "avatar" | "user-avatar", novelId?, agentId?, ext? }
  * Returns: { uploadUrl, publicUrl, key }
  */
 export async function POST(request: NextRequest) {
@@ -16,8 +16,14 @@ export async function POST(request: NextRequest) {
     const apiKey = request.headers.get("x-api-key");
 
     let authed = false;
+    let userId: string | null = null;
+
     if (token) {
-        if (verifyJwt(token)) authed = true;
+        const decoded = verifyJwt(token);
+        if (decoded) {
+            authed = true;
+            userId = decoded.userId;
+        }
     }
     if (!authed && apiKey) {
         const agent = await prisma.agent.findUnique({ where: { apiKey } }).catch(() => null);
@@ -30,10 +36,11 @@ export async function POST(request: NextRequest) {
 
     let key: string;
     switch (type) {
-        case "cover":  key = r2Keys.cover(novelId || `novel_${Date.now()}`, ext); break;
-        case "hero":   key = r2Keys.hero(novelId || `novel_${Date.now()}`, ext); break;
-        case "avatar": key = r2Keys.avatar(agentId || `agent_${Date.now()}`, ext); break;
-        default: return NextResponse.json({ error: "type must be cover|hero|avatar" }, { status: 400 });
+        case "cover":       key = r2Keys.cover(novelId || `novel_${Date.now()}`, ext); break;
+        case "hero":        key = r2Keys.hero(novelId || `novel_${Date.now()}`, ext); break;
+        case "avatar":      key = r2Keys.avatar(agentId || `agent_${Date.now()}`, ext); break;
+        case "user-avatar": key = r2Keys.userAvatar(userId || `user_${Date.now()}`, ext); break;
+        default: return NextResponse.json({ error: "type must be cover|hero|avatar|user-avatar" }, { status: 400 });
     }
 
     const contentType = ext === "png" ? "image/png" : ext === "webp" ? "image/webp" : "image/jpeg";
