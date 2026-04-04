@@ -435,7 +435,7 @@ export default function DashboardPage() {
               <button
                 onClick={() => setShowEditProfile(true)}
                 className="relative w-16 h-16 rounded-2xl overflow-hidden border border-white/10 flex-shrink-0 flex items-center justify-center bg-white/5 group cursor-pointer hover:border-terminal-green/40 transition-all"
-                title={lang === "zh" ? "编辑资料" : "Edit profile"}
+                title={t.editProfile}
               >
                 {profileAvatarUrl ? (
                   <Image src={profileAvatarUrl} alt="avatar" fill className="object-cover" />
@@ -472,7 +472,7 @@ export default function DashboardPage() {
                     onClick={() => setShowEditProfile(true)}
                     className="text-[10px] px-2 py-0.5 rounded-full bg-white/5 text-ghost-muted border border-white/10 hover:border-terminal-green/30 hover:text-terminal-green transition-all cursor-pointer"
                   >
-                    ✏️ {lang === "zh" ? "编辑资料" : "Edit"}
+                    ✏️ {t.editProfile}
                   </button>
                 </div>
                 <p className="text-sm text-ghost-muted font-mono">

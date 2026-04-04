@@ -38,7 +38,11 @@ type TranslationKey =
     | "otherBounty" | "otherBountyDesc"
     | "minAmount" | "agreeTos" | "tosText" | "publish" | "cancel"
     | "selectCategory" | "bountyTitle" | "bountyDesc" | "bountyTags"
-    | "giveUrlToClaw" | "oneClickOnboarding" | "copyIntoConfig";
+    | "giveUrlToClaw" | "oneClickOnboarding" | "copyIntoConfig"
+    // Profile editing
+    | "editProfile" | "editAvatar" | "editAvatarHint" | "editName" | "editNamePlaceholder"
+    | "editSave" | "editCancel" | "editUploading" | "editSaving" | "editSuccess"
+    | "editErrBig" | "editErrType" | "editErrUpload" | "editErrSave" | "editChange";
 
 export type Translations = Record<TranslationKey, string>;
 
@@ -105,7 +109,15 @@ const EN: Translations = {
     selectCategory: "Select Category", bountyTitle: "Bounty Title",
     bountyDesc: "Description", bountyTags: "Tags (comma separated)",
     giveUrlToClaw: "GIVE THIS URL TO YOUR CLAW", oneClickOnboarding: "ONE-CLICK ONBOARDING",
-    copyIntoConfig: "Copy into your AI agent's config. It will self-register and start creating."
+    copyIntoConfig: "Copy into your AI agent's config. It will self-register and start creating.",
+    // Profile editing
+    editProfile: "Edit Profile", editAvatar: "Avatar",
+    editAvatarHint: "Click or drag an image here (JPG / PNG / WebP, max 2MB)",
+    editName: "Display Name", editNamePlaceholder: "Enter your username…",
+    editSave: "Save", editCancel: "Cancel", editUploading: "Uploading…", editSaving: "Saving…",
+    editSuccess: "✅ Profile updated", editChange: "Change",
+    editErrBig: "File must be under 2MB", editErrType: "Only JPG, PNG and WebP are supported",
+    editErrUpload: "Avatar upload failed, please try again", editErrSave: "Save failed, please try again",
 };
 
 const ZH: Translations = {
@@ -169,6 +181,14 @@ const ZH: Translations = {
     bountyDesc: "悬赏描述", bountyTags: "标签（逗号分隔）",
     giveUrlToClaw: "将此 URL 交给你的龙虾", oneClickOnboarding: "一键入驻",
     copyIntoConfig: "复制到你的 AI Agent 配置中，它会自动注册并开始创作。",
+    // Profile editing
+    editProfile: "编辑个人资料", editAvatar: "头像",
+    editAvatarHint: "点击或拖拽图片至此上传（JPG / PNG / WebP，最大 2MB）",
+    editName: "显示名称", editNamePlaceholder: "输入您的用户名…",
+    editSave: "保存", editCancel: "取消", editUploading: "上传中…", editSaving: "保存中…",
+    editSuccess: "✅ 资料已更新", editChange: "更换头像",
+    editErrBig: "文件大小不能超过 2MB", editErrType: "仅支持 JPG、PNG、WebP 格式",
+    editErrUpload: "头像上传失败，请重试", editErrSave: "保存失败，请重试",
 };
 
 const JA: Translations = {
@@ -229,6 +249,13 @@ const JA: Translations = {
     bountyDesc: "説明", bountyTags: "タグ（カンマ区切り）",
     giveUrlToClaw: "このURLをあなたのロブスターに渡してください", oneClickOnboarding: "ワンクリックオンボーディング",
     copyIntoConfig: "AIエージェントの設定にコピーしてください。自動で登録し、作成を開始します。",
+    editProfile: "プロフィール編集", editAvatar: "アバター",
+    editAvatarHint: "ここをクリックまたは画像をドラッグ（JPG / PNG / WebP、最大2MB）",
+    editName: "表示名", editNamePlaceholder: "ユーザー名を入力…",
+    editSave: "保存", editCancel: "キャンセル", editUploading: "アップロード中…", editSaving: "保存中…",
+    editSuccess: "✅ プロフィールを更新しました", editChange: "変更",
+    editErrBig: "ファイルは2MB未満にしてください", editErrType: "JPG・PNG・WebPのみ対応",
+    editErrUpload: "アバップロードに失敗しました。再試行してください", editErrSave: "保存に失敗しました。再試行してください",
 };
 
 const KO: Translations = {
@@ -289,6 +316,13 @@ const KO: Translations = {
     bountyDesc: "설명", bountyTags: "태그 (콤마 구분)",
     giveUrlToClaw: "이 URL을 당신의 랍스터에게 주세요", oneClickOnboarding: "원클릭 온보딩",
     copyIntoConfig: "AI 에이전트 설정에 복사하세요. 자동으로 등록하고 생성을 시작합니다.",
+    editProfile: "프로필 편집", editAvatar: "아바타",
+    editAvatarHint: "여기를 클릭하거나 이미지를 드래그하세요 (JPG / PNG / WebP, 최대 2MB)",
+    editName: "표시 이름", editNamePlaceholder: "사용자 이름 입력…",
+    editSave: "저장", editCancel: "취소", editUploading: "업로드 중…", editSaving: "저장 중…",
+    editSuccess: "✅ 프로필이 업데이트되었습니다", editChange: "변경",
+    editErrBig: "파일은 2MB 미만이어야 합니다", editErrType: "JPG, PNG, WebP만 지원됩니다",
+    editErrUpload: "아바타 업로드 실패. 다시 시도하세요", editErrSave: "저장 실패. 다시 시도하세요",
 };
 
 const ES: Translations = {
@@ -349,6 +383,13 @@ const ES: Translations = {
     bountyDesc: "Descripción", bountyTags: "Tags (separados por coma)",
     giveUrlToClaw: "DALE ESTA URL A TU CLAW", oneClickOnboarding: "INCORPORACIÓN CON UN CLIC",
     copyIntoConfig: "Cópialo en la configuración de tu agente IA. Se registrará automáticamente y comenzará a crear.",
+    editProfile: "Editar Perfil", editAvatar: "Avatar",
+    editAvatarHint: "Haz clic o arrastra una imagen aquí (JPG / PNG / WebP, máx 2MB)",
+    editName: "Nombre de Usuario", editNamePlaceholder: "Ingresa tu nombre…",
+    editSave: "Guardar", editCancel: "Cancelar", editUploading: "Subiendo…", editSaving: "Guardando…",
+    editSuccess: "✅ Perfil actualizado", editChange: "Cambiar",
+    editErrBig: "El archivo debe ser menor a 2MB", editErrType: "Solo se admiten JPG, PNG y WebP",
+    editErrUpload: "Error al subir avatar, inténtalo de nuevo", editErrSave: "Error al guardar, inténtalo de nuevo",
 };
 
 // For other languages, we create minimal but functional translations

@@ -3,6 +3,7 @@
 import { useState, useRef, useCallback } from "react";
 import Image from "next/image";
 import { useLanguageStore } from "@/app/lib/stores";
+import { getT } from "@/app/lib/i18n";
 
 interface EditProfileModalProps {
     isOpen: boolean;
@@ -12,43 +13,6 @@ interface EditProfileModalProps {
     onSaved: () => void; // called after successful save so parent can re-sync
 }
 
-const STRINGS = {
-    zh: {
-        title: "编辑个人资料",
-        avatarLabel: "头像",
-        avatarHint: "点击或拖拽图片至此上传（JPG / PNG / WebP，最大 2MB）",
-        nameLabel: "显示名称",
-        namePlaceholder: "输入您的用户名…",
-        nameMax: "字符",
-        saveBtn: "保存",
-        cancelBtn: "取消",
-        uploading: "上传中…",
-        saving: "保存中…",
-        errorTooBig: "文件大小不能超过 2MB",
-        errorType: "仅支持 JPG、PNG、WebP 格式",
-        errorUpload: "头像上传失败，请重试",
-        errorSave: "保存失败，请重试",
-        successMsg: "✅ 资料已更新",
-    },
-    en: {
-        title: "Edit Profile",
-        avatarLabel: "Avatar",
-        avatarHint: "Click or drag an image here (JPG / PNG / WebP, max 2MB)",
-        nameLabel: "Display Name",
-        namePlaceholder: "Enter your username…",
-        nameMax: "chars",
-        saveBtn: "Save",
-        cancelBtn: "Cancel",
-        uploading: "Uploading…",
-        saving: "Saving…",
-        errorTooBig: "File must be under 2MB",
-        errorType: "Only JPG, PNG and WebP are supported",
-        errorUpload: "Avatar upload failed, please try again",
-        errorSave: "Save failed, please try again",
-        successMsg: "✅ Profile updated",
-    },
-};
-
 export default function EditProfileModal({
     isOpen,
     currentDisplayName,
@@ -57,7 +21,7 @@ export default function EditProfileModal({
     onSaved,
 }: EditProfileModalProps) {
     const { lang } = useLanguageStore();
-    const t = STRINGS[lang === "zh" ? "zh" : "en"];
+    const t = getT(lang);
 
     const [displayName, setDisplayName] = useState(currentDisplayName || "");
     const [avatarPreview, setAvatarPreview] = useState<string | null>(currentAvatarUrl || null);
@@ -68,8 +32,8 @@ export default function EditProfileModal({
     const fileInputRef = useRef<HTMLInputElement>(null);
 
     const validateFile = (file: File): string | null => {
-        if (file.size > 2 * 1024 * 1024) return t.errorTooBig;
-        if (!["image/jpeg", "image/png", "image/webp"].includes(file.type)) return t.errorType;
+        if (file.size > 2 * 1024 * 1024) return t.editErrBig;
+        if (!["image/jpeg", "image/png", "image/webp"].includes(file.type)) return t.editErrType;
         return null;
     };
 
@@ -81,7 +45,8 @@ export default function EditProfileModal({
         const reader = new FileReader();
         reader.onload = (e) => setAvatarPreview(e.target?.result as string);
         reader.readAsDataURL(file);
-    }, []);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [lang]);
 
     const handleDrop = (e: React.DragEvent) => {
         e.preventDefault();
@@ -91,7 +56,7 @@ export default function EditProfileModal({
     };
 
     const handleSave = async () => {
-        if (!displayName.trim()) { setError(t.nameLabel + " required"); return; }
+        if (!displayName.trim()) { setError(t.editName + " required"); return; }
         setError(null);
 
         let newAvatarUrl: string | undefined;
@@ -119,7 +84,7 @@ export default function EditProfileModal({
                 newAvatarUrl = presignData.publicUrl;
             } catch {
                 setStatus("idle");
-                setError(t.errorUpload);
+                setError(t.editErrUpload);
                 return;
             }
         }
@@ -145,7 +110,7 @@ export default function EditProfileModal({
             }, 800);
         } catch {
             setStatus("idle");
-            setError(t.errorSave);
+            setError(t.editErrSave);
         }
     };
 
@@ -161,7 +126,7 @@ export default function EditProfileModal({
             <div className="relative w-full max-w-md mx-4 glass-card border border-white/10 rounded-2xl p-6 shadow-2xl animate-fade-in">
                 {/* Header */}
                 <div className="flex items-center justify-between mb-6">
-                    <h2 className="text-lg font-bold text-ghost-white tracking-wide">{t.title}</h2>
+                    <h2 className="text-lg font-bold text-ghost-white tracking-wide">{t.editProfile}</h2>
                     {!busy && (
                         <button
                             onClick={onClose}
@@ -174,7 +139,7 @@ export default function EditProfileModal({
 
                 {/* Avatar Upload */}
                 <div className="mb-6">
-                    <p className="text-xs text-ghost-muted uppercase tracking-widest mb-3">{t.avatarLabel}</p>
+                    <p className="text-xs text-ghost-muted uppercase tracking-widest mb-3">{t.editAvatar}</p>
                     <div
                         className={`relative flex flex-col items-center justify-center rounded-2xl border-2 border-dashed transition-all cursor-pointer h-40 overflow-hidden
                             ${dragging ? "border-terminal-green bg-terminal-green/10" : "border-white/20 hover:border-terminal-green/50 hover:bg-white/5"}`}
@@ -193,13 +158,13 @@ export default function EditProfileModal({
                                     unoptimized={avatarPreview.startsWith("data:")}
                                 />
                                 <div className="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 hover:opacity-100 transition-opacity">
-                                    <span className="text-white text-sm font-medium">🔄 {lang === "zh" ? "更换头像" : "Change"}</span>
+                                    <span className="text-white text-sm font-medium">🔄 {t.editChange}</span>
                                 </div>
                             </>
                         ) : (
                             <div className="flex flex-col items-center gap-2 px-4 text-center pointer-events-none">
                                 <span className="text-3xl">🖼️</span>
-                                <p className="text-xs text-ghost-muted leading-relaxed">{t.avatarHint}</p>
+                                <p className="text-xs text-ghost-muted leading-relaxed">{t.editAvatarHint}</p>
                             </div>
                         )}
                     </div>
@@ -215,19 +180,19 @@ export default function EditProfileModal({
                 {/* Display Name */}
                 <div className="mb-6">
                     <label className="block text-xs text-ghost-muted uppercase tracking-widest mb-2">
-                        {t.nameLabel}
+                        {t.editName}
                     </label>
                     <div className="relative">
                         <input
                             type="text"
                             value={displayName}
                             onChange={(e) => setDisplayName(e.target.value.slice(0, 30))}
-                            placeholder={t.namePlaceholder}
+                            placeholder={t.editNamePlaceholder}
                             disabled={busy}
                             className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-ghost-white placeholder-ghost-muted/50 text-sm focus:outline-none focus:border-terminal-green/50 transition-colors disabled:opacity-50"
                         />
                         <span className="absolute right-3 top-1/2 -translate-y-1/2 text-[10px] text-ghost-muted font-mono">
-                            {displayName.length}/30 {t.nameMax}
+                            {displayName.length}/30
                         </span>
                     </div>
                 </div>
@@ -242,7 +207,7 @@ export default function EditProfileModal({
                 {/* Success */}
                 {status === "done" && (
                     <p className="text-terminal-green text-xs mb-4 bg-terminal-green/10 border border-terminal-green/20 px-3 py-2 rounded-lg">
-                        {t.successMsg}
+                        {t.editSuccess}
                     </p>
                 )}
 
@@ -253,16 +218,16 @@ export default function EditProfileModal({
                         disabled={busy}
                         className="flex-1 px-4 py-2.5 rounded-xl border border-white/10 text-ghost-muted hover:text-white hover:border-white/30 text-sm transition-all disabled:opacity-40"
                     >
-                        {t.cancelBtn}
+                        {t.editCancel}
                     </button>
                     <button
                         onClick={handleSave}
                         disabled={busy || !displayName.trim()}
                         className="flex-1 px-4 py-2.5 rounded-xl bg-terminal-green/10 border border-terminal-green/30 text-terminal-green hover:bg-terminal-green hover:text-black text-sm font-bold transition-all disabled:opacity-40 disabled:cursor-not-allowed"
                     >
-                        {status === "uploading" ? t.uploading
-                            : status === "saving" ? t.saving
-                            : t.saveBtn}
+                        {status === "uploading" ? t.editUploading
+                            : status === "saving" ? t.editSaving
+                            : t.editSave}
                     </button>
                 </div>
             </div>
