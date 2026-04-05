@@ -12,11 +12,40 @@ export async function GET(req: NextRequest) {
     }
 
     const { searchParams } = new URL(req.url);
-    const daysParam = parseInt(searchParams.get("days") || "30", 10);
-    const days = isNaN(daysParam) || daysParam <= 0 ? 30 : Math.min(daysParam, 365);
 
-    const now = new Date();
-    const startDate = new Date(now.getTime() - days * 24 * 60 * 60 * 1000);
+    // Support both legacy ?days=N and new ?start=YYYY-MM-DD&end=YYYY-MM-DD
+    const tzParam = searchParams.get("tz") || "UTC";
+    // Clamp tz offset to sane range
+    const tzOffsetHours = (() => {
+      const known: Record<string, number> = {
+        "UTC": 0, "Asia/Shanghai": 8, "Asia/Tokyo": 9, "America/New_York": -4,
+        "America/Los_Angeles": -7, "Europe/London": 0, "Europe/Berlin": 2,
+      };
+      return known[tzParam] ?? 0;
+    })();
+    const tzOffsetMs = tzOffsetHours * 60 * 60 * 1000;
+
+    const nowUtc = new Date();
+    const nowLocal = new Date(nowUtc.getTime() + tzOffsetMs);
+
+    let startDate: Date;
+    let endDate: Date;
+
+    if (searchParams.get("start") && searchParams.get("end")) {
+      // Explicit date range — treat as local (tz) midnight → midnight
+      startDate = new Date(new Date(searchParams.get("start")! + "T00:00:00Z").getTime() - tzOffsetMs);
+      endDate   = new Date(new Date(searchParams.get("end")!   + "T23:59:59Z").getTime() - tzOffsetMs);
+    } else {
+      const daysParam = parseInt(searchParams.get("days") || "30", 10);
+      const days = isNaN(daysParam) || daysParam <= 0 ? 30 : Math.min(daysParam, 365);
+      startDate = new Date(nowUtc.getTime() - days * 24 * 60 * 60 * 1000);
+      endDate   = nowUtc;
+    }
+
+    // How many days in range
+    const msPerDay = 24 * 60 * 60 * 1000;
+    const days = Math.ceil((endDate.getTime() - startDate.getTime()) / msPerDay);
+    const clampedDays = Math.min(Math.max(days, 1), 365);
 
     // Fetch data created since startDate
     const newUsers = await prisma.user.findMany({
@@ -48,48 +77,54 @@ export async function GET(req: NextRequest) {
       select: { createdAt: true, type: true, amount: true }
     });
 
-    // Helper to format Date -> YYYY-MM-DD string
-    const toDateString = (d: Date) => d.toISOString().split("T")[0];
+    // Helper: format UTC Date → local YYYY-MM-DD string
+    const toLocalDateString = (d: Date) => {
+      const local = new Date(d.getTime() + tzOffsetMs);
+      return local.toISOString().split("T")[0];
+    };
 
-    // Initialize daily map
+    // Initialize daily map for range
     const dailyStats: Record<string, any> = {};
-    for (let i = 0; i < days; i++) {
-        const d = new Date(now.getTime() - i * 24 * 60 * 60 * 1000);
-        dailyStats[toDateString(d)] = {
-            date: toDateString(d),
-            newUsers: 0,
-            newAgents: 0,
-            newNovels: 0,
-            newChapters: 0,
-            depositsCC: 0,
-            unlocksCC: 0,
-            tipsCC: 0
-        };
+    for (let i = 0; i < clampedDays; i++) {
+        const d = new Date(startDate.getTime() + i * msPerDay);
+        const dateStr = toLocalDateString(d);
+        if (!dailyStats[dateStr]) {
+          dailyStats[dateStr] = {
+              date: dateStr,
+              newUsers: 0,
+              newAgents: 0,
+              newNovels: 0,
+              newChapters: 0,
+              depositsCC: 0,
+              unlocksCC: 0,
+              tipsCC: 0
+          };
+        }
     }
 
     // Populate the data map
     newUsers.forEach(u => {
-        const dateStr = toDateString(u.createdAt);
+        const dateStr = toLocalDateString(u.createdAt);
         if (dailyStats[dateStr]) dailyStats[dateStr].newUsers += 1;
     });
 
     newAgents.forEach(a => {
-        const dateStr = toDateString(a.createdAt);
+        const dateStr = toLocalDateString(a.createdAt);
         if (dailyStats[dateStr]) dailyStats[dateStr].newAgents += 1;
     });
 
     newNovels.forEach(n => {
-        const dateStr = toDateString(n.createdAt);
+        const dateStr = toLocalDateString(n.createdAt);
         if (dailyStats[dateStr]) dailyStats[dateStr].newNovels += 1;
     });
 
     newChapters.forEach(c => {
-        const dateStr = toDateString(c.createdAt);
+        const dateStr = toLocalDateString(c.createdAt);
         if (dailyStats[dateStr]) dailyStats[dateStr].newChapters += 1;
     });
 
     financialTxs.forEach(tx => {
-        const dateStr = toDateString(tx.createdAt);
+        const dateStr = toLocalDateString(tx.createdAt);
         if (dailyStats[dateStr]) {
             if (tx.type === "DEPOSIT") dailyStats[dateStr].depositsCC += Number(tx.amount?.toString() || 0);
             if (tx.type === "CHAPTER_UNLOCK") dailyStats[dateStr].unlocksCC += Math.abs(Number(tx.amount?.toString() || 0));
@@ -97,11 +132,12 @@ export async function GET(req: NextRequest) {
         }
     });
 
-    // Convert map to sorted array
+    // Convert map to sorted array (ascending date)
     const sortedData = Object.values(dailyStats).sort((a: any, b: any) => a.date.localeCompare(b.date));
 
     return NextResponse.json({
       success: true,
+      meta: { start: toLocalDateString(startDate), end: toLocalDateString(endDate), tz: tzParam, days: clampedDays },
       data: sortedData
     }, { status: 200 });
   } catch (error) {

@@ -212,7 +212,7 @@ export default function AdminDashboardPage() {
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
             {/* cURL Example */}
             <div className="bg-[#111111] border border-white/5 rounded-xl p-5">
-              <h3 className="text-white text-sm font-bold uppercase tracking-widest border-b border-white/5 pb-3 mb-4">cURL Test</h3>
+              <h3 className="text-white text-sm font-bold uppercase tracking-widest border-b border-white/5 pb-3 mb-4">cURL Test — Overview</h3>
               <pre className="text-xs font-mono text-emerald-400 whitespace-pre-wrap leading-relaxed">
 {`curl -X GET https://claw.theater/api/admin/stats/overview \\
   -H "Authorization: Bearer sk-admin-yourkey"`}</pre>
@@ -231,6 +231,29 @@ export default function AdminDashboardPage() {
     "Authorization": "Bearer sk-admin-yourkey"
   }
 }`}</pre>
+            </div>
+
+            {/* Top Novels */}
+            <div className="bg-[#111111] border border-white/5 rounded-xl p-5">
+              <h3 className="text-white text-sm font-bold uppercase tracking-widest border-b border-white/5 pb-3 mb-4">Top Novels by Revenue</h3>
+              <pre className="text-xs font-mono text-emerald-400 whitespace-pre-wrap leading-relaxed">
+{`curl "https://claw.theater/api/admin/stats/top/novels?by=unlock_revenue&limit=20&start=2025-01-01&end=2025-12-31&tz=Asia/Shanghai" \\
+  -H "Authorization: Bearer sk-admin-yourkey"`}</pre>
+              <p className="text-[10px] text-white/30 mt-3 font-mono">by: unlock_revenue | tip_revenue | unlocks | tips</p>
+            </div>
+
+            {/* Ledger */}
+            <div className="bg-[#111111] border border-white/5 rounded-xl p-5">
+              <h3 className="text-white text-sm font-bold uppercase tracking-widest border-b border-white/5 pb-3 mb-4">Financial Ledger (Paginated)</h3>
+              <pre className="text-xs font-mono text-[#F4BE49] whitespace-pre-wrap leading-relaxed overflow-x-auto">
+{`curl "https://claw.theater/api/admin/ledger?\
+start=2025-01-01&end=2025-01-31\
+&tz=Asia/Shanghai&limit=50" \\
+  -H "Authorization: Bearer sk-admin-yourkey"
+
+# Next page:
+# &cursor=<last_transaction_id>`}</pre>
+              <p className="text-[10px] text-white/30 mt-3 font-mono">type filter: DEPOSIT | CHAPTER_UNLOCK | TIP_SENT | SKILL_PURCHASE</p>
             </div>
           </div>
         </section>
