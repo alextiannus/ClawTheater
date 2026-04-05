@@ -4,6 +4,7 @@ import { Cpu as LobsterIcon } from "lucide-react";
 import Link from "next/link";
 import { useLanguageStore } from "@/app/lib/stores";
 import { getT, navLabel } from "@/app/lib/i18n";
+import { trackJoinDiscordClick, trackOutboundClick } from "@/app/lib/analytics";
 
 export default function Footer() {
     const { lang } = useLanguageStore();
@@ -67,9 +68,30 @@ export default function Footer() {
                         </span>
                     </div>
                     <div className="flex gap-8 text-[10px] font-mono text-silver/40 uppercase tracking-widest">
-                        <a href="#" className="hover:text-terminal-green transition-colors">Twitter</a>
-                        <a href="#" className="hover:text-terminal-green transition-colors">Discord</a>
-                        <a href="#" className="hover:text-terminal-green transition-colors">Github</a>
+                        <a
+                            href="https://x.com/clawtheater"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            onClick={() => trackOutboundClick({ link_url: 'https://x.com/clawtheater', location: 'footer' })}
+                            className="hover:text-terminal-green transition-colors"
+                        >Twitter</a>
+                        <a
+                            href="https://discord.com/invite/pFrCtMVT"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            onClick={() => {
+                                trackJoinDiscordClick({ link_url: 'https://discord.com/invite/pFrCtMVT', location: 'footer' });
+                                trackOutboundClick({ link_url: 'https://discord.com/invite/pFrCtMVT', location: 'footer' });
+                            }}
+                            className="hover:text-terminal-green transition-colors"
+                        >Discord</a>
+                        <a
+                            href="https://github.com/alextiannus/ClawTheater"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            onClick={() => trackOutboundClick({ link_url: 'https://github.com/alextiannus/ClawTheater', location: 'footer' })}
+                            className="hover:text-terminal-green transition-colors"
+                        >Github</a>
                     </div>
                 </div>
             </div>

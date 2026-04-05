@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useLanguageStore } from "@/app/lib/stores";
+import { trackShare, trackOutboundClick } from "@/app/lib/analytics";
 
 export type ShareContext =
     | { type: "novel"; title: string; description?: string; author: string; readCount: number; chapters: number; tags: string[]; coverUrl?: string }
@@ -14,6 +15,8 @@ interface SaveShareButtonsProps {
     itemId: string;
     context: ShareContext;
     className?: string;
+    novelId?: string;
+    chapterId?: string;
 }
 
 function buildSharePayload(ctx: ShareContext, _lang: string, _url: string): { title: string; text: string } {
@@ -44,7 +47,7 @@ function buildSharePayload(ctx: ShareContext, _lang: string, _url: string): { ti
     }
 }
 
-export default function SaveShareButtons({ itemId, context, className = "" }: SaveShareButtonsProps) {
+export default function SaveShareButtons({ itemId, context, className = "", novelId, chapterId }: SaveShareButtonsProps) {
     const { lang } = useLanguageStore();
     const storageKey = `claw_saved_${itemId}`;
     const [isSaved, setIsSaved] = useState(() => {
@@ -86,23 +89,33 @@ export default function SaveShareButtons({ itemId, context, className = "" }: Sa
 
     const copyLink = async () => {
         if (navigator.clipboard) await navigator.clipboard.writeText(url);
+        trackShare({ method: 'copy_link', content_type: context.type as any, novel_id: novelId, chapter_id: chapterId });
         showToast(lang === "zh" ? "🔗 链接已复制" : "🔗 Link copied!");
         setShowFallback(false);
     };
 
     const openX = () => {
         const encoded = encodeURIComponent(`${text}\n\n${url}`);
-        window.open(`https://twitter.com/intent/tweet?text=${encoded}`, "_blank");
+        const link = `https://twitter.com/intent/tweet?text=${encoded}`;
+        trackShare({ method: 'x', content_type: context.type as any, novel_id: novelId, chapter_id: chapterId });
+        trackOutboundClick({ link_url: link, location: 'share_menu' });
+        window.open(link, "_blank");
         setShowFallback(false);
     };
 
     const openWhatsApp = () => {
-        window.open(`https://wa.me/?text=${encodeURIComponent(`${text}\n\n${url}`)}`, "_blank");
+        const link = `https://wa.me/?text=${encodeURIComponent(`${text}\n\n${url}`)}`;
+        trackShare({ method: 'whatsapp', content_type: context.type as any, novel_id: novelId, chapter_id: chapterId });
+        trackOutboundClick({ link_url: link, location: 'share_menu' });
+        window.open(link, "_blank");
         setShowFallback(false);
     };
 
     const openTelegram = () => {
-        window.open(`https://t.me/share/url?url=${encodeURIComponent(url)}&text=${encodeURIComponent(text)}`, "_blank");
+        const link = `https://t.me/share/url?url=${encodeURIComponent(url)}&text=${encodeURIComponent(text)}`;
+        trackShare({ method: 'telegram', content_type: context.type as any, novel_id: novelId, chapter_id: chapterId });
+        trackOutboundClick({ link_url: link, location: 'share_menu' });
+        window.open(link, "_blank");
         setShowFallback(false);
     };
 

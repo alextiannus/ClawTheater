@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, use } from "react";
+import { useState, useEffect, use, useRef } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import Header from "@/app/components/Header";
@@ -11,6 +11,7 @@ import { getT } from "@/app/lib/i18n";
 import { Wallet, CreditCard, AlertCircle } from "lucide-react";
 import { useAuth } from "@/app/hooks/useAuth";
 import { usePrivy } from "@privy-io/react-auth";
+import { trackViewItem, trackBeginCheckout, trackDonate, trackPurchase, trackJoinDiscordClick } from '@/app/lib/analytics';
 import { sendGAEvent } from '@next/third-parties/google';
 
 interface NovelDetail {
@@ -89,7 +90,7 @@ export default function NovelDetailPage({ params }: { params: Promise<{ id: stri
             });
             const data = await res.json();
             if (data.success) {
-                sendGAEvent({ event: 'tip_completed', value: tipAmount, novelId: novel.id });
+                trackDonate({ novel_id: novel.id, value: tipAmount, currency: 'CC' });
                 showToast(`⚡ 打赏成功！消耗 ${tipAmount} 🦞`);
                 setCoinBalance(data.balanceAfter);
                 setShowTipModal(false);
@@ -104,6 +105,12 @@ export default function NovelDetailPage({ params }: { params: Promise<{ id: stri
 
     const handleDirectCheckout = async (usdAmount: number) => {
         setCheckoutLoading(true);
+        trackBeginCheckout({
+            currency: 'USD',
+            value: usdAmount,
+            location: 'novel_tip',
+            items: novel ? [{ item_id: novel.id, item_name: novel.title, price: usdAmount, quantity: 1 }] : undefined,
+        });
         try {
             const res = await fetch("/api/stripe/deposit-checkout", {
                 method: "POST",
@@ -123,6 +130,23 @@ export default function NovelDetailPage({ params }: { params: Promise<{ id: stri
             setCheckoutLoading(false);
         }
     };
+
+    // Track purchase when Stripe redirects back with depositSuccess param
+    const hasTrackedPurchase = useRef(false);
+    useEffect(() => {
+        if (typeof window === 'undefined' || hasTrackedPurchase.current) return;
+        const params = new URLSearchParams(window.location.search);
+        if (params.get('depositSuccess') === '1' && novel) {
+            hasTrackedPurchase.current = true;
+            const amount = Number(params.get('amount') || 0);
+            trackPurchase({
+                transaction_id: params.get('session_id') || `dep_${Date.now()}`,
+                currency: 'USD',
+                value: amount,
+                items: [{ item_id: `deposit_${novel.id}`, item_name: `Deposit – ${novel.title}`, price: amount, quantity: 1 }],
+            });
+        }
+    }, [novel]);
 
     useEffect(() => {
         fetch(`/api/novels/${id}`)
@@ -147,7 +171,13 @@ export default function NovelDetailPage({ params }: { params: Promise<{ id: stri
                         originFrom: data.originFrom || null,
                     });
                     setChapters(data.chapters || []);
-                    sendGAEvent({ event: 'novel_viewed', novelId: data.id });
+                    // C1 – view_item: novel detail viewed
+                    trackViewItem({
+                        item_id: data.id,
+                        item_name: data.title,
+                        item_category: data.genre || undefined,
+                        author: data.agent?.agentName || undefined,
+                    });
                 }
                 setLoading(false);
             })
@@ -275,7 +305,7 @@ export default function NovelDetailPage({ params }: { params: Promise<{ id: stri
                                     <button
                                         onClick={() => {
                                             setShowTipModal(true);
-                                            sendGAEvent({ event: 'intent_tip_clicked', novelId: novel.id });
+                                            sendGAEvent({ event: 'intent_tip_clicked', novelId: novel.id, location: 'novel_hero' });
                                         }}
                                         className="px-6 py-3.5 bg-terminal-green/10 text-terminal-green border border-terminal-green/30 font-bold rounded-xl text-sm tracking-wider uppercase hover:bg-terminal-green/20 transition-all cursor-pointer"
                                     >
@@ -465,7 +495,7 @@ export default function NovelDetailPage({ params }: { params: Promise<{ id: stri
                                 ) : !isAuthenticated ? (
                                     <button
                                         onClick={() => {
-                                            sendGAEvent({ event: 'intent_login_triggered', method: 'tip_modal' });
+                                            sendGAEvent({ event: 'intent_login_triggered', method: 'tip_modal', location: 'tip_modal' });
                                             setShowTipModal(false);
                                             privyLogin();
                                         }}

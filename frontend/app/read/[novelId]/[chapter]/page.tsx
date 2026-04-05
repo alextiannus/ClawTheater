@@ -11,6 +11,7 @@ import { usePrivy } from "@privy-io/react-auth";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import DepositModal from "@/app/components/DepositModal";
+import { trackViewContent, trackReadComplete, trackNextChapterClick, trackPaywallView, trackBeginCheckout, trackPurchase } from '@/app/lib/analytics';
 import { sendGAEvent } from '@next/third-parties/google';
 
 interface Chapter {
@@ -96,6 +97,8 @@ function ChapterReader() {
         return localStorage.getItem("claw_autoUnlock") === "true";
     });
     const [depositOpen, setDepositOpen] = useState(false);
+    // Track if read_complete has already fired for the current chapter (avoid re-firing on re-scroll)
+    const readCompletedRef = useRef<Set<string>>(new Set());
 
     useEffect(() => {
         if (typeof localStorage !== "undefined") {
@@ -124,16 +127,49 @@ function ChapterReader() {
         if (savedTheme === "sepia" || savedTheme === "dark") setTheme(savedTheme);
     }, []);
 
-    // ── Scroll progress ───────────────────────────────────────────
+    // ── Scroll progress + read_complete ──────────────────────────────────────
     useEffect(() => {
+        // Timer ref for 1.5s dwell-time guard (per ga4_plan §3.3)
+        let dwellTimer: ReturnType<typeof setTimeout> | null = null;
+
         const onScroll = () => {
             const scrollTop = window.scrollY;
             const docHeight = document.documentElement.scrollHeight - window.innerHeight;
-            setScrollProgress(docHeight > 0 ? Math.min(100, (scrollTop / docHeight) * 100) : 0);
+            const pct = docHeight > 0 ? Math.min(100, (scrollTop / docHeight) * 100) : 0;
+            setScrollProgress(pct);
+
+            // C3 – read_complete: fire once per chapter after 1.5s dwell at 90%+
+            const ch = chapters[currentIndex];
+            if (ch && !ch.isLocked && pct >= 90 && !readCompletedRef.current.has(ch.id)) {
+                if (!dwellTimer) {
+                    dwellTimer = setTimeout(() => {
+                        // Re-check progress hasn't already been tracked (e.g. fast scroll away)
+                        if (!readCompletedRef.current.has(ch.id)) {
+                            readCompletedRef.current.add(ch.id);
+                            trackReadComplete({
+                                novel_id: novelId,
+                                chapter_id: ch.id,
+                                chapter_no: ch.chapterIndex,
+                                progress: Math.round(pct),
+                            });
+                        }
+                        dwellTimer = null;
+                    }, 1500);
+                }
+            } else {
+                // User scrolled back up or chapter changed — cancel pending timer
+                if (dwellTimer) {
+                    clearTimeout(dwellTimer);
+                    dwellTimer = null;
+                }
+            }
         };
         window.addEventListener("scroll", onScroll, { passive: true });
-        return () => window.removeEventListener("scroll", onScroll);
-    }, []);
+        return () => {
+            window.removeEventListener("scroll", onScroll);
+            if (dwellTimer) clearTimeout(dwellTimer);
+        };
+    }, [chapters, currentIndex, novelId]);
 
     // ── Text selection share popup ────────────────────────────────
     useEffect(() => {
@@ -171,11 +207,12 @@ function ChapterReader() {
         const ch = chapters[currentIndex];
         if (ch && ch.isLocked) {
              setShowUnlockModal(true);
-             sendGAEvent({ event: 'intent_unlock_chapter', value: ch.chapterIndex, novelId: novel?.id });
+             // D1 – paywall_view
+             trackPaywallView({ novel_id: novelId, chapter_id: ch.id, reason: 'locked_chapter', location: 'chapter_page' });
         } else {
              setShowUnlockModal(false);
         }
-    }, [currentIndex, chapters, novel?.id]);
+    }, [currentIndex, chapters, novelId]);
 
     const handleDirectCheckout = async (amount: number) => {
         if (!isAuthenticated || !userId) {
@@ -183,6 +220,14 @@ function ChapterReader() {
             return;
         }
         setCheckoutLoading(true);
+        // D2 – begin_checkout
+        const ch = chapters[currentIndex];
+        trackBeginCheckout({
+            currency: 'USD',
+            value: amount,
+            location: 'chapter_unlock',
+            items: ch ? [{ item_id: ch.id, item_name: ch.title, price: amount, quantity: 1 }] : undefined,
+        });
         try {
             const redirectUrl = window.location.href; // Returns back to the chapter page!
             const res = await fetch("/api/stripe/deposit-checkout", {
@@ -229,6 +274,38 @@ function ChapterReader() {
         return () => { isMounted = false; };
     }, [novelId]);
 
+    // C2 – view_content: fire when chapter changes and content is loaded
+    const lastViewedChapterRef = useRef<string | null>(null);
+    useEffect(() => {
+        const ch = chapters[currentIndex];
+        if (!ch || ch.isLocked || !novel) return;
+        if (lastViewedChapterRef.current === ch.id) return;
+        lastViewedChapterRef.current = ch.id;
+        trackViewContent({
+            novel_id: novel.id,
+            chapter_id: ch.id,
+            chapter_no: ch.chapterIndex,
+            title: ch.title,
+        });
+    }, [chapters, currentIndex, novel]);
+
+    // Purchase tracking: Stripe redirects back with unlockSuccess=1
+    const hasTrackedPurchaseRef = useRef(false);
+    useEffect(() => {
+        if (typeof window === 'undefined' || hasTrackedPurchaseRef.current) return;
+        const params = new URLSearchParams(window.location.search);
+        if (params.get('unlockSuccess') === '1' && novel) {
+            hasTrackedPurchaseRef.current = true;
+            const value = Number(params.get('amount') || 0);
+            trackPurchase({
+                transaction_id: params.get('session_id') || `unlock_${Date.now()}`,
+                currency: 'USD',
+                value,
+                items: [{ item_id: `chapter_${novelId}`, item_name: novel.title, price: value, quantity: 1 }],
+            });
+        }
+    }, [novel, novelId]);
+
     // Sync URL parameter changes to the state (e.g. Browser Back/Forward buttons)
     useEffect(() => {
         if (chapters.length === 0) return;
@@ -273,15 +350,29 @@ function ChapterReader() {
         localStorage.setItem("claw_theme", next);
     };
 
-    const goToChapter = useCallback((arrayIdx: number) => {
+    const goToChapter = useCallback((arrayIdx: number, clickLocation?: 'chapter_end' | 'floating_button' | 'toc') => {
         const ch = chapters[arrayIdx];
         if (!ch) return;
+        // C4 – next_chapter_click: only when moving forward
+        if (arrayIdx > currentIndex) {
+            const fromCh = chapters[currentIndex];
+            if (fromCh && novel) {
+                trackNextChapterClick({
+                    novel_id: novel.id,
+                    from_chapter_id: fromCh.id,
+                    to_chapter_id: ch.id,
+                    from_chapter_no: fromCh.chapterIndex,
+                    to_chapter_no: ch.chapterIndex,
+                    location: clickLocation,
+                });
+            }
+        }
         setCurrentIndex(arrayIdx);
         setShowTOC(false);
         setShowUnlock(ch.isLocked);
         router.replace(`/read/${novelId}/${ch.chapterIndex}`, { scroll: true });
         window.scrollTo({ top: 0, behavior: "smooth" });
-    }, [chapters, novelId, router]);
+    }, [chapters, currentIndex, novelId, router, novel]);
 
     useEffect(() => {
         const handler = (e: KeyboardEvent) => {
@@ -575,7 +666,7 @@ function ChapterReader() {
                                 — 下一章 —
                             </p>
                             <button
-                                onClick={() => goToChapter(currentIndex + 1)}
+                                onClick={() => goToChapter(currentIndex + 1, 'chapter_end')}
                                 className="w-full text-left group cursor-pointer"
                             >
                                 <p className={`text-sm font-semibold mb-3 group-hover:text-terminal-green transition-colors ${theme === "sepia" ? "text-[#3d2b1f]/70" : "text-ghost-muted"}`}>
@@ -676,7 +767,7 @@ function ChapterReader() {
                     </span>
 
                     <button
-                        onClick={() => nextChapter && goToChapter(currentIndex + 1)}
+                        onClick={() => nextChapter && goToChapter(currentIndex + 1, 'floating_button')}
                         disabled={!nextChapter}
                         className={`flex items-center gap-1.5 px-4 py-2 rounded-lg text-sm font-medium transition-all ${!nextChapter
                             ? "text-ghost-muted/30 cursor-not-allowed"

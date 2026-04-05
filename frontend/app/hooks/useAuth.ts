@@ -3,7 +3,19 @@
 import { usePrivy, useWallets } from "@privy-io/react-auth";
 import { useUserStore } from "../lib/stores";
 import { useEffect, useRef, useState } from "react";
-import { sendGAEvent } from '@next/third-parties/google';
+import { setGAUserId, trackSignUp, trackLogin } from '@/app/lib/analytics';
+
+// Detect the actual auth method from a Privy user object
+function detectPrivyMethod(user: any): 'email' | 'google' | 'wallet' | 'privy_sync' {
+    if (!user) return 'privy_sync';
+    if (user.google?.email) return 'google';
+    if (user.email?.address) return 'email';
+    const hasWallet = user.linkedAccounts?.some(
+        (a: any) => a.type === 'wallet' && a.address
+    );
+    if (hasWallet) return 'wallet';
+    return 'privy_sync';
+}
 
 export function useAuth() {
     const { ready, authenticated, user, login, logout: privyLogout, getAccessToken } = usePrivy();
@@ -85,13 +97,16 @@ export function useAuth() {
             })
                 .then((r) => r.json())
                 .then((data) => {
+                    const authMethod = detectPrivyMethod(user);
                     if (data.isNew) {
-                        sendGAEvent({ event: 'registration_success', method: 'privy_sync' });
+                        trackSignUp({ method: authMethod, location: 'modal' });
                     } else if (data.userId) {
-                        sendGAEvent({ event: 'login_success', method: 'privy_sync' });
+                        trackLogin({ method: authMethod });
                     }
                     if (data.userId) {
                         store.setUserId(data.userId);
+                        // A1 – Set User ID for cross-session identity stitching
+                        setGAUserId(data.userId);
                     }
                     if (typeof data.usdcBalance === "number") {
                         store.setBalance(data.usdcBalance);

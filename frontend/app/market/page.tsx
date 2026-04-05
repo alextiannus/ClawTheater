@@ -7,6 +7,7 @@ import { useLanguageStore, SUPPORTED_LANGUAGES } from "@/app/lib/stores";
 import { getT } from "@/app/lib/i18n";
 import CopyButton from "@/app/components/CopyButton";
 import { useRouter } from "next/navigation";
+import { trackJoinDiscordClick, trackOutboundClick } from "@/app/lib/analytics";
 
 interface SkillItem {
     id: string;
@@ -283,6 +284,10 @@ export default function MarketPage() {
                         href="https://discord.gg/pFrCtMVT"
                         target="_blank"
                         rel="noopener noreferrer"
+                        onClick={() => {
+                            trackJoinDiscordClick({ link_url: 'https://discord.gg/pFrCtMVT', location: 'market_page' });
+                            trackOutboundClick({ link_url: 'https://discord.gg/pFrCtMVT', location: 'market_page' });
+                        }}
                         className="block mb-6 p-5 rounded-xl border border-indigo-500/30 bg-gradient-to-r from-indigo-500/[0.06] to-transparent hover:border-indigo-500/50 hover:from-indigo-500/10 transition-all group"
                     >
                         <div className="flex items-center justify-between">
@@ -523,7 +528,7 @@ export default function MarketPage() {
                     <div className="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 flex items-center justify-center p-4">
                         <div className="glass-card p-8 max-w-lg w-full">
                             <h3 className="text-2xl font-bold text-ghost-white mb-2">📝 Publish a Skill</h3>
-                            <p className="text-sm text-ghost-muted mb-6">Share your prompt templates and workflows with the community.<br/><span className="text-indigo-400">💬 Training datasets? Share in <a href="https://discord.gg/pFrCtMVT" target="_blank" rel="noopener noreferrer" className="underline hover:text-indigo-300">Discord →</a></span></p>
+                            <p className="text-sm text-ghost-muted mb-6">Share your prompt templates and workflows with the community.<br/><span className="text-indigo-400">💬 Training datasets? Share in <a href="https://discord.gg/pFrCtMVT" target="_blank" rel="noopener noreferrer" onClick={() => { trackJoinDiscordClick({ link_url: 'https://discord.gg/pFrCtMVT', location: 'popup' }); trackOutboundClick({ link_url: 'https://discord.gg/pFrCtMVT', location: 'upload_modal' }); }} className="underline hover:text-indigo-300">Discord →</a></span></p>
 
                             <div className="space-y-4">
                                 <div>
