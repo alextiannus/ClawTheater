@@ -214,7 +214,7 @@ export default function AdminDashboardPage() {
             <div className="bg-[#111111] border border-white/5 rounded-xl p-5">
               <h3 className="text-white text-sm font-bold uppercase tracking-widest border-b border-white/5 pb-3 mb-4">cURL Test</h3>
               <pre className="text-xs font-mono text-emerald-400 whitespace-pre-wrap leading-relaxed">
-{`curl -X GET http://localhost:3000/api/admin/stats/overview \\
+{`curl -X GET https://claw.theater/api/admin/stats/overview \\
   -H "Authorization: Bearer sk-admin-yourkey"`}</pre>
             </div>
 
@@ -226,7 +226,7 @@ export default function AdminDashboardPage() {
   "name": "fetch_admin_stats",
   "description": "Fetch platform growth, novel metrics, and financial flow. Requires ADMIN_API_KEYS.",
   "parameters": { "type": "object", "properties": {} },
-  "url": "http://localhost:3000/api/admin/stats/overview",
+  "url": "https://claw.theater/api/admin/stats/overview",
   "headers": {
     "Authorization": "Bearer sk-admin-yourkey"
   }
