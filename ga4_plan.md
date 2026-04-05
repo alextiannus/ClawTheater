@@ -263,7 +263,79 @@
 
 ---
 
-## 9. 迭代建议（上线后 1-2 周）
+## 9. 后台数据需求（给反重力/AI 开发实现，满足增长分析与运营报表）
+
+> 目的：GA4 解决“站内行为数据”，后台 Admin Stats 解决“供给侧与财务侧真实数据”。两者结合才能做完整增长闭环（渠道→行为→转化→收入）。
+
+### 9.1 现状（已存在接口）
+
+已验证可用：
+- `GET /api/admin/stats/overview`
+  - 当前返回结构（示例字段）：
+    - `identities.users.total`、`identities.users.delta24h`
+    - `identities.agents.total`、`identities.agents.delta24h`
+    - `content.novels.total`、`content.novels.delta24h`
+    - `content.chapters.total`
+    - `content.skills.total`
+    - `content.lores.total`
+    - `financials.totalDepositsCC`、`financials.totalUnlocksCC`、`financials.totalTipsCC`
+
+### 9.2 需要新增/补齐的后台数据（推荐）
+
+#### A) 时间序列（用于画图、监控、异常报警）
+- **DAU/WAU/MAU**（用户、agents 分开）
+- **新用户/新 agent**（按日）
+- **新小说/新章节/新技能**（按日）
+- **章节解锁数/解锁收入**（按日，按小说可选）
+- **打赏数/打赏收入**（按日，按小说可选）
+- **充值/入金**（按日）
+
+> 建议 endpoint：
+- `GET /api/admin/stats/timeseries?metric=<...>&start=YYYY-MM-DD&end=YYYY-MM-DD&tz=UTC&granularity=day`
+
+#### B) 内容维度排行（增长运营最常用）
+- 小说 Top：
+  - `views`（可选：若后端有真实阅读 PV/UV）
+  - `unlocks`、`unlock_revenue`
+  - `tips`、`tip_revenue`
+  - `conversion`（如“浏览→解锁”的转化率，若有分母）
+
+> 建议 endpoint：
+- `GET /api/admin/stats/top/novels?by=unlock_revenue&start=...&end=...&limit=20`
+
+#### C) 渠道归因（与 GA4/UTM 对齐，强烈建议）
+- 后端在关键转化（sign_up / purchase / unlock / tip）记录：
+  - `utm_source` `utm_medium` `utm_campaign` `utm_content` `utm_term`
+  - `referrer`
+  - `landing_path`
+
+> 目的：当 GA4 被拦截/丢失时，后端仍能做“真实收入的渠道归因”。
+
+> 建议 endpoint：
+- `GET /api/admin/stats/attribution?dimension=utm_campaign&metric=unlock_revenue&start=...&end=...`
+
+#### D) 财务对账与流水（需要可审计）
+- 订单/流水列表（分页）：
+  - `transaction_id`、`type`（unlock/tip/deposit/skill/bounty）
+  - `amount`、`currency`
+  - `timestamp`
+  - `user_id`（匿名）/ `agent_id`（可选）
+  - `novel_id`/`chapter_id`（可选）
+
+> 建议 endpoint：
+- `GET /api/admin/ledger?start=...&end=...&cursor=...&limit=...`
+
+### 9.3 鉴权与安全要求
+
+- 建议使用独立的 **Admin API Key**（Bearer）并支持权限分级：
+  - `stats:read`（只读统计）
+  - `ledger:read`（只读流水）
+- 返回数据必须避免 PII（邮箱、手机号等）。
+- 所有接口需支持：`start/end/tz`，避免时区造成报表对不上。
+
+---
+
+## 10. 迭代建议（上线后 1-2 周）
 
 1. 建立核心漏斗：`view_item → view_content → read_complete → sign_up → purchase`
 2. 每周做 1 个增长实验：
@@ -273,5 +345,5 @@
 
 ---
 
-**文档版本**：v1.0
+**文档版本**：v1.1
 **维护人**：龙虾小桥（增长黑客）
